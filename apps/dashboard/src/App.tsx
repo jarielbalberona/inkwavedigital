@@ -1,21 +1,79 @@
+import React, { useState } from "react";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "./lib/api";
-import type { HealthCheckResponse } from "@inkwave/types";
+import { KDSPage } from "./features/kds/components/KDSPage";
+import { MenuManagementPage } from "./features/menu-management/components/MenuManagementPage";
+import { QRManagementPage } from "./features/qr-management/components/QRManagementPage";
+import { 
+  QueueListIcon, 
+  Cog6ToothIcon, 
+  QrCodeIcon,
+} from "@heroicons/react/24/outline";
+
+type DashboardPage = "kds" | "menu" | "qr";
 
 function App() {
-  const { data, isLoading, error } = useQuery<HealthCheckResponse>({
-    queryKey: ["health"],
-    queryFn: () => api.get("/health"),
-  });
+  // For demo purposes, use the demo venue ID
+  const venueId = "9662b039-7056-436d-b336-63fa662412e3";
+  const [currentPage, setCurrentPage] = useState<DashboardPage>("kds");
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case "kds":
+        return <KDSPage venueId={venueId} />;
+      case "menu":
+        return <MenuManagementPage venueId={venueId} />;
+      case "qr":
+        return <QRManagementPage venueId={venueId} />;
+      default:
+        return <KDSPage venueId={venueId} />;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100">
+    <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
+            <div className="flex items-center space-x-8">
               <h1 className="text-xl font-bold text-gray-900">Ink Wave Dashboard</h1>
+              
+              <SignedIn>
+                <div className="flex space-x-1">
+                  <button
+                    onClick={() => setCurrentPage("kds")}
+                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      currentPage === "kds"
+                        ? "bg-blue-100 text-blue-700"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                    }`}
+                  >
+                    <QueueListIcon className="w-4 h-4 mr-2" />
+                    KDS
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage("menu")}
+                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      currentPage === "menu"
+                        ? "bg-blue-100 text-blue-700"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                    }`}
+                  >
+                    <Cog6ToothIcon className="w-4 h-4 mr-2" />
+                    Menu
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage("qr")}
+                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      currentPage === "qr"
+                        ? "bg-blue-100 text-blue-700"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                    }`}
+                  >
+                    <QrCodeIcon className="w-4 h-4 mr-2" />
+                    QR Codes
+                  </button>
+                </div>
+              </SignedIn>
             </div>
             <div>
               <SignedOut>
@@ -33,60 +91,23 @@ function App() {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Merchant Dashboard</h2>
-            <p className="text-gray-600">Manage your café orders and menu</p>
-          </div>
-
-          <div className="bg-gray-50 rounded-lg p-6 mb-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">API Health Check</h3>
-            
-            {isLoading && (
-              <div className="text-purple-600">Checking API connection...</div>
-            )}
-
-            {error && (
-              <div className="text-red-600">
-                ❌ Failed to connect to API
-                <div className="text-sm mt-2 text-gray-600">
-                  {error instanceof Error ? error.message : "Unknown error"}
-                </div>
-              </div>
-            )}
-
-            {data && (
-              <div className="text-green-600">
-                ✅ API is {data.status.toUpperCase()}
-                <div className="text-sm mt-2 text-gray-600">
-                  Last checked: {new Date(data.timestamp).toLocaleTimeString()}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <SignedOut>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
-              <p className="text-yellow-800">
-                ⚠️ Please sign in to access dashboard features
-              </p>
-            </div>
-          </SignedOut>
-
-          <SignedIn>
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-              <p className="text-green-800">
-                ✅ You are signed in! Dashboard features coming soon...
-              </p>
-            </div>
-          </SignedIn>
-
-          <div className="text-sm text-gray-500 text-center mt-6">
-            Skeleton setup complete. Ready for features! 🚀
+      <SignedOut>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Ink Wave Dashboard</h2>
+            <p className="text-gray-600 mb-6">Please sign in to access the dashboard features</p>
+            <SignInButton mode="modal">
+              <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition">
+                Sign In
+              </button>
+            </SignInButton>
           </div>
         </div>
-      </main>
+      </SignedOut>
+
+      <SignedIn>
+        {renderPage()}
+      </SignedIn>
     </div>
   );
 }

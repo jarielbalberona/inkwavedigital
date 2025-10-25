@@ -8,7 +8,7 @@
     "dev": "pnpm -r --workspace-concurrency=1 dev",
     "typecheck": "pnpm -r typecheck",
     "dev:api": "pnpm --filter api dev",
-    "dev:pwa": "pnpm --filter customer-pwa dev",
+    "dev:pwa": "pnpm --filter customer dev",
     "dev:dashboard": "pnpm --filter dashboard dev",
     "lint": "pnpm -r lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""

@@ -46,24 +46,24 @@ services:
       - inkwave-network
     restart: unless-stopped
 
-  # Customer PWA
-  customer-pwa:
+  # Customer App
+  customer:
     build:
       context: .
-      dockerfile: apps/customer-pwa/Dockerfile
+      dockerfile: apps/customer/Dockerfile
       target: development
-    container_name: inkwave-customer-pwa
+    container_name: inkwave-customer
     environment:
       - VITE_API_BASE_URL=http://localhost:3000
     ports:
       - '5173:5173'
     volumes:
-      - ./apps/customer-pwa/src:/app/apps/customer-pwa/src
-      - ./apps/customer-pwa/index.html:/app/apps/customer-pwa/index.html
-      - ./apps/customer-pwa/vite.config.ts:/app/apps/customer-pwa/vite.config.ts
+      - ./apps/customer/src:/app/apps/customer/src
+      - ./apps/customer/index.html:/app/apps/customer/index.html
+      - ./apps/customer/vite.config.ts:/app/apps/customer/vite.config.ts
       - ./packages:/app/packages
       - /app/node_modules
-      - /app/apps/customer-pwa/node_modules
+      - /app/apps/customer/node_modules
     networks:
       - inkwave-network
     restart: unless-stopped

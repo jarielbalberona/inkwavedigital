@@ -1,7 +1,7 @@
 import { injectable, inject } from "tsyringe";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import type { Database } from "@inkwave/db";
-import { menuItems, itemOptions, itemOptionValues } from "@inkwave/db";
+import { menuItems, itemOptions, itemOptionValues, menus, menuCategories } from "@inkwave/db";
 import type { IMenuRepository } from "../../domain/repositories/IMenuRepository.js";
 import { MenuItem } from "../../domain/entities/MenuItem.js";
 import type { MenuItemOption, MenuItemOptionValue } from "../../domain/entities/MenuItem.js";
@@ -99,9 +99,46 @@ export class DrizzleMenuRepository implements IMenuRepository {
     venueId: string,
     options?: { availableOnly?: boolean }
   ): Promise<MenuItem[]> {
-    // This would require joining through menus and categories
-    // For now, return empty array - would need proper implementation
-    return [];
+    // First, get all menu items for the venue
+    // We need to find the menu for this venue, then get all categories, then all items
+    const venueMenus = await this.db.query.menus.findMany({
+      where: eq(menus.venueId, venueId),
+    });
+
+    if (venueMenus.length === 0) {
+      return [];
+    }
+
+    const menuIds = venueMenus.map(menu => menu.id);
+    
+    // Get all categories for these menus
+    const categories = await this.db.query.menuCategories.findMany({
+      where: (cats, { inArray }) => inArray(cats.menuId, menuIds),
+    });
+
+    if (categories.length === 0) {
+      return [];
+    }
+
+    const categoryIds = categories.map(cat => cat.id);
+
+    // Get all menu items for these categories
+    const results = await this.db.query.menuItems.findMany({
+      where: (items, { inArray, and, eq }) => {
+        const conditions = [inArray(items.categoryId, categoryIds)];
+        if (options?.availableOnly) {
+          conditions.push(eq(items.isAvailable, true));
+        }
+        return and(...conditions);
+      },
+    });
+
+    return Promise.all(
+      results.map(async (item) => {
+        const itemOptions = await this.fetchItemOptions(item.id);
+        return this.mapToEntity(item, itemOptions);
+      })
+    );
   }
 
   async delete(id: string): Promise<void> {

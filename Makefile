@@ -30,8 +30,8 @@ logs: ## Follow logs from all services
 logs-api: ## Follow API logs
 	docker-compose logs -f api
 
-logs-pwa: ## Follow Customer PWA logs
-	docker-compose logs -f customer-pwa
+logs-customer: ## Follow Customer PWA logs
+	docker-compose logs -f customer
 
 logs-dashboard: ## Follow Dashboard logs
 	docker-compose logs -f dashboard
