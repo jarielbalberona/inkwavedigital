@@ -1,0 +1,100 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: inkwave-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: inkwave
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - inkwave-network
+
+  # API Service
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: development
+    container_name: inkwave-api
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/inkwave
+      - JWT_SECRET=dev-secret-key-change-in-production
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:5174
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./apps/api/src:/app/apps/api/src
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/api/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - inkwave-network
+    restart: unless-stopped
+
+  # Customer PWA
+  customer-pwa:
+    build:
+      context: .
+      dockerfile: apps/customer-pwa/Dockerfile
+      target: development
+    container_name: inkwave-customer-pwa
+    environment:
+      - VITE_API_BASE_URL=http://localhost:3000
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./apps/customer-pwa/src:/app/apps/customer-pwa/src
+      - ./apps/customer-pwa/index.html:/app/apps/customer-pwa/index.html
+      - ./apps/customer-pwa/vite.config.ts:/app/apps/customer-pwa/vite.config.ts
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/customer-pwa/node_modules
+    networks:
+      - inkwave-network
+    restart: unless-stopped
+
+  # Dashboard
+  dashboard:
+    build:
+      context: .
+      dockerfile: apps/dashboard/Dockerfile
+      target: development
+    container_name: inkwave-dashboard
+    environment:
+      - VITE_API_BASE_URL=http://localhost:3000
+      - VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY:-}
+    ports:
+      - '5174:5174'
+    volumes:
+      - ./apps/dashboard/src:/app/apps/dashboard/src
+      - ./apps/dashboard/index.html:/app/apps/dashboard/index.html
+      - ./apps/dashboard/vite.config.ts:/app/apps/dashboard/vite.config.ts
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/dashboard/node_modules
+    networks:
+      - inkwave-network
+    restart: unless-stopped
+
+networks:
+  inkwave-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+

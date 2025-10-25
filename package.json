@@ -1,0 +1,30 @@
+{
+  "name": "inkwavedigital",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ink Wave Digital - QR-based café ordering platform",
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r --workspace-concurrency=1 dev",
+    "typecheck": "pnpm -r typecheck",
+    "dev:api": "pnpm --filter api dev",
+    "dev:pwa": "pnpm --filter customer-pwa dev",
+    "dev:dashboard": "pnpm --filter dashboard dev",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
+
