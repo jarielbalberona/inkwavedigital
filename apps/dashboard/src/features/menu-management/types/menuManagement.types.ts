@@ -73,7 +73,12 @@ export interface UpdateMenuItemInput {
   isAvailable?: boolean;
 }
 
-export interface MenuManagementResponse {
+export interface ApiResponse<T> {
   success: boolean;
-  data: any;
+  data: T;
+}
+
+export interface MenuManagementResponse<T = unknown> {
+  success: boolean;
+  data: T;
 }

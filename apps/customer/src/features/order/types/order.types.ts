@@ -10,17 +10,19 @@ export interface OrderItemInput {
   quantity: number;
   unitPrice: number;
   notes?: string;
-  options?: Record<string, any>;
+  options?: Record<string, string[]>;
+}
+
+export interface CreateOrderData {
+  orderId: string;
+  status: string;
+  total: number;
+  createdAt: string;
 }
 
 export interface CreateOrderResponse {
   success: boolean;
-  data: {
-    orderId: string;
-    status: string;
-    total: number;
-    createdAt: string;
-  };
+  data: CreateOrderData;
 }
 
 export interface OrderConfirmation {

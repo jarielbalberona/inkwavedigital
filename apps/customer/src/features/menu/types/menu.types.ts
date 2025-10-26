@@ -36,6 +36,11 @@ export interface MenuResponse {
   items: MenuItem[];
 }
 
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+}
+
 export interface MenuQueryParams {
   venueId: string;
   availableOnly?: boolean;

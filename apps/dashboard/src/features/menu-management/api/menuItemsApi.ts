@@ -1,24 +1,28 @@
 import { api } from "../../../lib/api";
-import type { CreateMenuItemInput, UpdateMenuItemInput, MenuManagementResponse } from "../types/menuManagement.types";
+import type { MenuItem, CreateMenuItemInput, UpdateMenuItemInput, ApiResponse } from "../types/menuManagement.types";
 
 export const menuItemsApi = {
-  getMenuItems: async (categoryId: string): Promise<MenuManagementResponse> => {
-    return api.get(`/api/v1/categories/${categoryId}/items`);
+  getMenuItems: async (categoryId: string): Promise<MenuItem[]> => {
+    const response = await api.get<ApiResponse<MenuItem[]>>(`/api/v1/categories/${categoryId}/items`);
+    return response.data;
   },
   
-  createMenuItem: async (input: CreateMenuItemInput): Promise<MenuManagementResponse> => {
-    return api.post("/api/v1/menu-items", input);
+  createMenuItem: async (input: CreateMenuItemInput): Promise<MenuItem> => {
+    const response = await api.post<ApiResponse<MenuItem>>("/api/v1/menu-items", input);
+    return response.data;
   },
   
-  updateMenuItem: async (input: UpdateMenuItemInput): Promise<MenuManagementResponse> => {
-    return api.patch(`/api/v1/menu-items/${input.id}`, input);
+  updateMenuItem: async (input: UpdateMenuItemInput): Promise<MenuItem> => {
+    const response = await api.patch<ApiResponse<MenuItem>>(`/api/v1/menu-items/${input.id}`, input);
+    return response.data;
   },
   
-  deleteMenuItem: async (id: string): Promise<MenuManagementResponse> => {
-    return api.delete(`/api/v1/menu-items/${id}`);
+  deleteMenuItem: async (id: string): Promise<void> => {
+    await api.delete<ApiResponse<void>>(`/api/v1/menu-items/${id}`);
   },
   
-  updateAvailability: async (id: string, isAvailable: boolean): Promise<MenuManagementResponse> => {
-    return api.patch(`/api/v1/menu-items/${id}/availability`, { isAvailable });
+  updateAvailability: async (id: string, isAvailable: boolean): Promise<MenuItem> => {
+    const response = await api.patch<ApiResponse<MenuItem>>(`/api/v1/menu-items/${id}/availability`, { isAvailable });
+    return response.data;
   },
 };

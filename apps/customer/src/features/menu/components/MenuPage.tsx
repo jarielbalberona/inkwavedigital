@@ -103,7 +103,7 @@ export const MenuPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="flex h-screen">
         {/* Sidebar */}
-        <div className={`${isSidebarCollapsed ? "w-16" : "w-64"} transition-all duration-300`}>
+        <div className={`${isSidebarCollapsed ? "w-20 md:w-20" : "w-20 md:w-64"} transition-all duration-300`}>
           <CategorySidebar
             categories={categories}
             activeCategoryId={activeCategoryId}
@@ -116,9 +116,9 @@ export const MenuPage: React.FC = () => {
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <div className="bg-white border-b border-gray-200 p-4">
-            <h1 className="text-2xl font-bold text-gray-900">Menu</h1>
-            <p className="text-gray-600">Choose your favorite items</p>
+          <div className="bg-white border-b border-gray-200 p-3 md:p-4">
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Menu</h1>
+            <p className="text-sm md:text-base text-gray-600">Choose your favorite items</p>
           </div>
 
           {/* Menu Grid */}

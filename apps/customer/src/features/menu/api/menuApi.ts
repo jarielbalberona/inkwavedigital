@@ -1,5 +1,5 @@
 import { api } from "../../../lib/api";
-import type { MenuResponse, MenuQueryParams } from "../types/menu.types";
+import type { MenuResponse, MenuQueryParams, ApiResponse } from "../types/menu.types";
 
 export const menuApi = {
   getMenu: async (params: MenuQueryParams): Promise<MenuResponse> => {
@@ -10,6 +10,7 @@ export const menuApi = {
     }
     
     const url = `/api/v1/menu/${venueId}${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
-    return api.get(url);
+    const response = await api.get<ApiResponse<MenuResponse>>(url);
+    return response.data;
   },
 };
