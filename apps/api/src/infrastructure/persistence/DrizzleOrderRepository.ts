@@ -1,7 +1,7 @@
 import { injectable, inject } from "tsyringe";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, inArray, sql } from "drizzle-orm";
 import type { Database } from "@inkwave/db";
-import { orders, orderItems, orderEvents } from "@inkwave/db";
+import { orders, orderItems, orderEvents, menuItems } from "@inkwave/db";
 import type { IOrderRepository } from "../../domain/repositories/IOrderRepository.js";
 import { Order } from "../../domain/entities/Order.js";
 import type { OrderItem } from "../../domain/entities/Order.js";
@@ -20,22 +20,14 @@ export class DrizzleOrderRepository implements IOrderRepository {
       status: order.status.toString(),
       total: order.total.toNumber().toString(),
       deviceId: order.deviceId,
+      pax: order.pax,
+      notes: order.notes,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
     };
 
-    // Upsert order
-    await this.db
-      .insert(orders)
-      .values(orderData)
-      .onConflictDoUpdate({
-        target: orders.id,
-        set: {
-          status: orderData.status,
-          total: orderData.total,
-          updatedAt: orderData.updatedAt,
-        },
-      });
+    // Insert order with pax and notes
+    await this.db.insert(orders).values(orderData);
 
     // Delete existing order items and re-insert
     await this.db.delete(orderItems).where(eq(orderItems.orderId, order.id));
@@ -68,10 +60,21 @@ export class DrizzleOrderRepository implements IOrderRepository {
       return null;
     }
 
-    // Fetch order items separately
-    const items = await this.db.query.orderItems.findMany({
-      where: eq(orderItems.orderId, id),
-    });
+    // Fetch order items with menu item names
+    const items = await this.db
+      .select({
+        id: orderItems.id,
+        orderId: orderItems.orderId,
+        itemId: orderItems.itemId,
+        quantity: orderItems.quantity,
+        unitPrice: orderItems.unitPrice,
+        notes: orderItems.notes,
+        optionsJson: orderItems.optionsJson,
+        itemName: menuItems.name,
+      })
+      .from(orderItems)
+      .leftJoin(menuItems, eq(orderItems.itemId, menuItems.id))
+      .where(eq(orderItems.orderId, id));
 
     return this.mapToEntity(result, items);
   }
@@ -86,23 +89,34 @@ export class DrizzleOrderRepository implements IOrderRepository {
       conditions.push(eq(orders.status, options.status));
     }
 
-    const results = await this.db.query.orders.findMany({
+    const orderResults = await this.db.query.orders.findMany({
       where: and(...conditions),
       limit: options?.limit ?? 50,
       offset: options?.offset ?? 0,
       orderBy: [desc(orders.createdAt)],
     });
 
-    // Fetch all order items for these orders
-    const orderIds = results.map((o) => o.id);
+    // Fetch all order items for these orders with menu item names
+    const orderIds = orderResults.map((o) => o.id);
     const allItems = orderIds.length > 0
-      ? await this.db.query.orderItems.findMany({
-          where: eq(orderItems.orderId, orderIds[0]), // This is simplified, ideally use IN
-        })
+      ? await this.db
+          .select({
+            id: orderItems.id,
+            orderId: orderItems.orderId,
+            itemId: orderItems.itemId,
+            quantity: orderItems.quantity,
+            unitPrice: orderItems.unitPrice,
+            notes: orderItems.notes,
+            optionsJson: orderItems.optionsJson,
+            itemName: menuItems.name,
+          })
+          .from(orderItems)
+          .leftJoin(menuItems, eq(orderItems.itemId, menuItems.id))
+          .where(inArray(orderItems.orderId, orderIds))
       : [];
 
     return Promise.all(
-      results.map((order) => {
+      orderResults.map((order) => {
         const items = allItems.filter((item) => item.orderId === order.id);
         return Promise.resolve(this.mapToEntity(order, items));
       })
@@ -117,9 +131,20 @@ export class DrizzleOrderRepository implements IOrderRepository {
 
     return Promise.all(
       results.map(async (order) => {
-        const items = await this.db.query.orderItems.findMany({
-          where: eq(orderItems.orderId, order.id),
-        });
+        const items = await this.db
+          .select({
+            id: orderItems.id,
+            orderId: orderItems.orderId,
+            itemId: orderItems.itemId,
+            quantity: orderItems.quantity,
+            unitPrice: orderItems.unitPrice,
+            notes: orderItems.notes,
+            optionsJson: orderItems.optionsJson,
+            itemName: menuItems.name,
+          })
+          .from(orderItems)
+          .leftJoin(menuItems, eq(orderItems.itemId, menuItems.id))
+          .where(eq(orderItems.orderId, order.id));
         return this.mapToEntity(order, items);
       })
     );
@@ -133,9 +158,20 @@ export class DrizzleOrderRepository implements IOrderRepository {
 
     return Promise.all(
       results.map(async (order) => {
-        const items = await this.db.query.orderItems.findMany({
-          where: eq(orderItems.orderId, order.id),
-        });
+        const items = await this.db
+          .select({
+            id: orderItems.id,
+            orderId: orderItems.orderId,
+            itemId: orderItems.itemId,
+            quantity: orderItems.quantity,
+            unitPrice: orderItems.unitPrice,
+            notes: orderItems.notes,
+            optionsJson: orderItems.optionsJson,
+            itemName: menuItems.name,
+          })
+          .from(orderItems)
+          .leftJoin(menuItems, eq(orderItems.itemId, menuItems.id))
+          .where(eq(orderItems.orderId, order.id));
         return this.mapToEntity(order, items);
       })
     );
@@ -166,7 +202,7 @@ export class DrizzleOrderRepository implements IOrderRepository {
     const items: OrderItem[] = itemsData.map((item) => ({
       id: item.id,
       itemId: item.itemId || "",
-      itemName: "Item", // Would need to join with menu_items in production
+      itemName: item.itemName || "Unknown Item",
       quantity: item.quantity,
       unitPrice: Money.fromAmount(parseFloat(item.unitPrice)),
       notes: item.notes || undefined,
@@ -180,6 +216,8 @@ export class DrizzleOrderRepository implements IOrderRepository {
       status: OrderStatus.fromString(orderData.status),
       items,
       deviceId: orderData.deviceId || undefined,
+      pax: orderData.pax || undefined,
+      notes: orderData.notes || undefined,
       createdAt: new Date(orderData.createdAt),
       updatedAt: new Date(orderData.updatedAt),
     });

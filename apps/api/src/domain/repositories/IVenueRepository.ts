@@ -1,4 +1,5 @@
 import { Venue } from "../entities/Venue.js";
+import { Table } from "../entities/Table.js";
 
 export interface IVenueRepository {
   /**
@@ -20,6 +21,11 @@ export interface IVenueRepository {
    * Find all venues for a tenant
    */
   findByTenantId(tenantId: string): Promise<Venue[]>;
+
+  /**
+   * Find all tables for a venue
+   */
+  findTablesByVenueId(venueId: string): Promise<Table[]>;
 
   /**
    * Delete a venue

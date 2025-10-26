@@ -8,6 +8,7 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      orderNotes: "",
       
       addItem: (item: MenuItem, selectedOptions: Record<string, string[]> = {}) => {
         const totalPrice = getItemTotalPrice(item, selectedOptions);
@@ -63,8 +64,12 @@ export const useCartStore = create<CartStore>()(
         }));
       },
       
+      setOrderNotes: (notes: string) => {
+        set({ orderNotes: notes });
+      },
+      
       clearCart: () => {
-        set({ items: [] });
+        set({ items: [], orderNotes: "" });
       },
       
       getTotal: () => {

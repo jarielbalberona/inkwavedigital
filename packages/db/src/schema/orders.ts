@@ -11,6 +11,8 @@ export const orders = pgTable("orders", {
   status: text("status").notNull().default("NEW"), // NEW, PREPARING, READY, SERVED, CANCELLED
   total: numeric("total", { precision: 10, scale: 2 }).notNull(),
   deviceId: text("device_id"),
+  pax: integer("pax"), // number of people
+  notes: text("notes"), // order notes
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

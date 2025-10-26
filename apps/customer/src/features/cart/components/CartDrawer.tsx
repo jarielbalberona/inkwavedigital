@@ -12,8 +12,8 @@ interface CartDrawerProps {
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheckout }) => {
-  const { items, updateQuantity, removeItem, getTotal, clearCart } = useCartStore();
-  const { venueId, tableId, deviceId } = useSessionStore();
+  const { items, orderNotes, updateQuantity, removeItem, getTotal, clearCart, setOrderNotes } = useCartStore();
+  const { venueId, tableId, deviceId, pax } = useSessionStore();
   const createOrderMutation = useCreateOrder();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const total = getTotal();
@@ -28,6 +28,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
         venueId,
         tableId,
         deviceId,
+        pax,
+        notes: orderNotes,
         items: items.map(item => ({
           itemId: item.itemId,
           quantity: item.quantity,
@@ -105,6 +107,32 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
               </div>
             )}
           </div>
+
+          {/* Order Notes */}
+          {items.length > 0 && (
+            <div className="border-t border-gray-200 p-4">
+              <label htmlFor="order-notes" className="block text-sm font-medium text-gray-700 mb-2">
+                Order Notes (Optional)
+              </label>
+              <textarea
+                id="order-notes"
+                value={orderNotes}
+                onChange={(e) => setOrderNotes(e.target.value)}
+                placeholder="Any special requests or notes for your order..."
+                className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={3}
+                maxLength={500}
+              />
+              <div className="flex justify-between items-center mt-2">
+                <div className="text-sm text-gray-500">
+                  {pax && `${pax} ${pax === 1 ? 'person' : 'people'}`}
+                </div>
+                <div className="text-xs text-gray-400">
+                  {orderNotes.length}/500 characters
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Footer */}
           {items.length > 0 && (

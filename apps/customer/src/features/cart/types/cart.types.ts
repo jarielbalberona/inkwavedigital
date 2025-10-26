@@ -13,9 +13,11 @@ export interface CartItem {
 
 export interface CartStore {
   items: CartItem[];
+  orderNotes: string;
   addItem: (item: MenuItem, selectedOptions?: Record<string, string[]>) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
+  setOrderNotes: (notes: string) => void;
   clearCart: () => void;
   getTotal: () => number;
   getItemCount: () => number;

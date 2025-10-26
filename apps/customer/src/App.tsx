@@ -1,17 +1,60 @@
-import React from "react";
+import React, { useState } from "react";
 import { MenuPage } from "./features/menu/components/MenuPage";
+import { QRScannerComponent } from "./features/qr/components/QRScanner";
 import { useSessionStore } from "./features/menu/hooks/stores/useSessionStore";
 
 function App() {
-  const { venueId } = useSessionStore();
+  const { venueId, tableId } = useSessionStore();
+  const [showQRScanner, setShowQRScanner] = useState(false);
 
-  // For demo purposes, set a default venue ID
-  React.useEffect(() => {
-    if (!venueId) {
-      // Use the demo venue ID from our seed data
-      useSessionStore.getState().setSession("9662b039-7056-436d-b336-63fa662412e3");
-    }
-  }, [venueId]);
+  // If no session, show QR scanner landing page
+  if (!venueId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div className="mb-6">
+            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Ink Wave</h1>
+            <p className="text-gray-600">Scan the QR code on your table to start ordering</p>
+          </div>
+
+          <button
+            onClick={() => setShowQRScanner(true)}
+            className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors mb-4"
+          >
+            Scan QR Code
+          </button>
+
+          <button
+            onClick={() => {
+              // Demo mode - set demo session
+              useSessionStore.getState().setSession(
+                "9662b039-7056-436d-b336-63fa662412e3",
+                "1054b851-61e8-4bf0-9032-c46036167c7d",
+                `demo-device-${Date.now()}`
+              );
+            }}
+            className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+          >
+            Demo Mode
+          </button>
+        </div>
+
+        {showQRScanner && (
+          <QRScannerComponent
+            onScanSuccess={() => {
+              setShowQRScanner(false);
+            }}
+            onClose={() => setShowQRScanner(false)}
+          />
+        )}
+      </div>
+    );
+  }
 
   return <MenuPage />;
 }

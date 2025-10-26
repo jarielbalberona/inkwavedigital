@@ -8,11 +8,14 @@ import { Money } from "../../domain/value-objects/Money.js";
 import { OrderStatus } from "../../domain/value-objects/OrderStatus.js";
 import { NotFoundError, ValidationError } from "../../shared/errors/domain-error.js";
 import type { Logger } from "@inkwave/utils";
+// import type { WebSocketManager } from "../../infrastructure/websocket/WebSocketManager.js";
 
 export interface CreateOrderInput {
   venueId: string;
   tableId?: string;
   deviceId?: string;
+  pax?: number;
+  notes?: string;
   items: Array<{
     itemId: string;
     quantity: number;
@@ -33,10 +36,21 @@ export class CreateOrderUseCase {
     @inject("IMenuRepository") private menuRepository: IMenuRepository,
     @inject("IVenueRepository") private venueRepository: IVenueRepository,
     @inject("Logger") private logger: Logger
+    // @inject("WebSocketManager") private wsManager: WebSocketManager
   ) {}
 
   async execute(input: CreateOrderInput): Promise<CreateOrderOutput> {
-    this.logger.info({ venueId: input.venueId }, "Creating new order");
+    this.logger.info(
+      { 
+        venueId: input.venueId, 
+        tableId: input.tableId,
+        deviceId: input.deviceId,
+        pax: input.pax,
+        notes: input.notes,
+        itemCount: input.items.length 
+      }, 
+      "Creating new order"
+    );
 
     // Validate venue exists
     const venue = await this.venueRepository.findById(input.venueId);
@@ -72,12 +86,17 @@ export class CreateOrderUseCase {
       venueId: input.venueId,
       tableId: input.tableId,
       deviceId: input.deviceId,
+      pax: input.pax,
+      notes: input.notes,
       status: OrderStatus.new(),
       items: orderItems,
     });
 
     // Save order
     await this.orderRepository.save(order);
+
+    // Broadcast order created event (temporarily disabled)
+    // this.wsManager.broadcastOrderCreated(input.venueId, order.toJSON());
 
     this.logger.info({ orderId: order.id, total: order.total.toNumber() }, "Order created successfully");
 

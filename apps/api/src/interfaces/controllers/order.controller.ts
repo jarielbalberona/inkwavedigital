@@ -15,7 +15,7 @@ export class OrderController {
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { venueId, tableId, deviceId, items } = req.body;
+      const { venueId, tableId, deviceId, pax, notes, items } = req.body;
 
       if (!venueId || !items || !Array.isArray(items) || items.length === 0) {
         throw new ValidationError("Invalid order data");
@@ -25,6 +25,8 @@ export class OrderController {
         venueId,
         tableId,
         deviceId,
+        pax,
+        notes,
         items,
       });
 

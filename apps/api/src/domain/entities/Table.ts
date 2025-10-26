@@ -1,0 +1,102 @@
+import { ValidationError } from "../../shared/errors/domain-error.js";
+
+export interface TableProps {
+  id: string;
+  venueId: string;
+  label: string;
+  qrCode?: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export class Table {
+  private constructor(private props: TableProps) {
+    this.validate();
+  }
+
+  static create(data: Omit<TableProps, "id" | "createdAt" | "updatedAt">): Table {
+    return new Table({
+      id: crypto.randomUUID(),
+      ...data,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  static restore(props: TableProps): Table {
+    return new Table(props);
+  }
+
+  private validate(): void {
+    if (!this.props.venueId) {
+      throw new ValidationError("Table must have a venue");
+    }
+    if (!this.props.label || this.props.label.trim().length === 0) {
+      throw new ValidationError("Table must have a label");
+    }
+  }
+
+  get id(): string {
+    return this.props.id;
+  }
+
+  get venueId(): string {
+    return this.props.venueId;
+  }
+
+  get label(): string {
+    return this.props.label;
+  }
+
+  get qrCode(): string | undefined {
+    return this.props.qrCode;
+  }
+
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
+
+  updateLabel(label: string): void {
+    if (!label || label.trim().length === 0) {
+      throw new ValidationError("Table label cannot be empty");
+    }
+    this.props.label = label.trim();
+    this.props.updatedAt = new Date();
+  }
+
+  updateQRCode(qrCode: string): void {
+    this.props.qrCode = qrCode;
+    this.props.updatedAt = new Date();
+  }
+
+  activate(): void {
+    this.props.isActive = true;
+    this.props.updatedAt = new Date();
+  }
+
+  deactivate(): void {
+    this.props.isActive = false;
+    this.props.updatedAt = new Date();
+  }
+
+  toJSON() {
+    return {
+      id: this.props.id,
+      venueId: this.props.venueId,
+      label: this.props.label,
+      qrCode: this.props.qrCode,
+      isActive: this.props.isActive,
+      createdAt: this.props.createdAt.toISOString(),
+      updatedAt: this.props.updatedAt.toISOString(),
+    };
+  }
+}

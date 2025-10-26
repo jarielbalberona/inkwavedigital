@@ -1,9 +1,10 @@
 import { injectable, inject } from "tsyringe";
 import { eq, and } from "drizzle-orm";
 import type { Database } from "@inkwave/db";
-import { venues } from "@inkwave/db";
+import { venues, tables } from "@inkwave/db";
 import type { IVenueRepository } from "../../domain/repositories/IVenueRepository.js";
 import { Venue } from "../../domain/entities/Venue.js";
+import { Table } from "../../domain/entities/Table.js";
 
 @injectable()
 export class DrizzleVenueRepository implements IVenueRepository {
@@ -79,6 +80,14 @@ export class DrizzleVenueRepository implements IVenueRepository {
     return result !== undefined;
   }
 
+  async findTablesByVenueId(venueId: string): Promise<Table[]> {
+    const results = await this.db.query.tables.findMany({
+      where: eq(tables.venueId, venueId),
+    });
+
+    return results.map((table) => this.mapTableToEntity(table));
+  }
+
   private mapToEntity(venueData: any): Venue {
     return Venue.restore({
       id: venueData.id,
@@ -89,6 +98,18 @@ export class DrizzleVenueRepository implements IVenueRepository {
       timezone: venueData.timezone,
       createdAt: new Date(venueData.createdAt),
       updatedAt: new Date(venueData.updatedAt),
+    });
+  }
+
+  private mapTableToEntity(tableData: any): Table {
+    return Table.restore({
+      id: tableData.id,
+      venueId: tableData.venueId,
+      label: tableData.label,
+      qrCode: tableData.qrCode || undefined,
+      isActive: tableData.isActive,
+      createdAt: new Date(tableData.createdAt),
+      updatedAt: new Date(tableData.updatedAt),
     });
   }
 }

@@ -6,6 +6,7 @@ import { CartDrawer } from "../../cart/components/CartDrawer";
 import { OrderConfirmation } from "../../order/components/OrderConfirmation";
 import { useMenuQuery } from "../hooks/queries/useMenuQuery";
 import { useSessionStore } from "../hooks/stores/useSessionStore";
+import { useCartStore } from "../../cart/hooks/stores/useCartStore";
 import { getCategoriesFromItems } from "../hooks/helpers/menuHelpers";
 import type { OrderConfirmation as OrderConfirmationType } from "../../order/types/order.types";
 
@@ -15,7 +16,7 @@ export const MenuPage: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [orderConfirmation, setOrderConfirmation] = useState<OrderConfirmationType | null>(null);
   
-  const { venueId } = useSessionStore();
+  const { venueId, tableId, pax, clearSession } = useSessionStore();
   
   const { data: menuData, isLoading, error } = useMenuQuery({
     venueId: venueId || "",
@@ -117,8 +118,27 @@ export const MenuPage: React.FC = () => {
         <div className="flex-1 flex flex-col">
           {/* Header */}
           <div className="bg-white border-b border-gray-200 p-3 md:p-4">
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900">Menu</h1>
-            <p className="text-sm md:text-base text-gray-600">Choose your favorite items</p>
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900">Menu</h1>
+                <p className="text-sm md:text-base text-gray-600">
+                  {tableId ? `Table ${tableId.slice(-1)}${pax ? ` • ${pax} ${pax === 1 ? 'person' : 'people'}` : ''}` : "Choose your favorite items"}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  clearSession();
+                  // Clear cart as well
+                  useCartStore.getState().clearCart();
+                }}
+                className="text-gray-500 hover:text-gray-700 p-2"
+                title="Logout"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Menu Grid */}

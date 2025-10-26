@@ -19,6 +19,8 @@ export interface OrderProps {
   status: OrderStatus;
   items: OrderItem[];
   deviceId?: string;
+  pax?: number;
+  notes?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -77,6 +79,14 @@ export class Order {
 
   get deviceId(): string | undefined {
     return this.props.deviceId;
+  }
+
+  get pax(): number | undefined {
+    return this.props.pax;
+  }
+
+  get notes(): string | undefined {
+    return this.props.notes;
   }
 
   get createdAt(): Date {
@@ -149,6 +159,8 @@ export class Order {
         unitPrice: item.unitPrice.toNumber(),
       })),
       deviceId: this.props.deviceId,
+      pax: this.props.pax,
+      notes: this.props.notes,
       total: this.total.toNumber(),
       createdAt: this.props.createdAt.toISOString(),
       updatedAt: this.props.updatedAt.toISOString(),
