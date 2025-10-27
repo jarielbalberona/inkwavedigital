@@ -42,9 +42,8 @@ export interface MenuItemOptionValue {
 }
 
 export interface CreateCategoryInput {
-  menuId: string;
   name: string;
-  sortIndex: number;
+  sortIndex?: number;
   iconUrl?: string;
 }
 

@@ -3,13 +3,13 @@ import type { MenuItem, CreateMenuItemInput, UpdateMenuItemInput, ApiResponse } 
 
 export const menuItemsApi = {
   getMenuItems: async (categoryId: string): Promise<MenuItem[]> => {
-    const response = await api.get<ApiResponse<MenuItem[]>>(`/api/v1/categories/${categoryId}/items`);
-    return response.data;
+    const response = await api.get<ApiResponse<{ items: MenuItem[] }>>(`/api/v1/menu/categories/${categoryId}/items`);
+    return response.data.items;
   },
   
   createMenuItem: async (input: CreateMenuItemInput): Promise<MenuItem> => {
-    const response = await api.post<ApiResponse<MenuItem>>("/api/v1/menu-items", input);
-    return response.data;
+    const response = await api.post<ApiResponse<{ item: MenuItem }>>("/api/v1/menu/items", input);
+    return response.data.item;
   },
   
   updateMenuItem: async (input: UpdateMenuItemInput): Promise<MenuItem> => {

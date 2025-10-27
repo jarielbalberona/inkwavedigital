@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosRequestConfig } from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
@@ -10,8 +10,8 @@ const apiClient = axios.create({
 });
 
 export const api = {
-  get: async <T>(url: string): Promise<T> => {
-    const response = await apiClient.get<T>(url);
+  get: async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
+    const response = await apiClient.get<T>(url, config);
     return response.data;
   },
   post: async <T>(url: string, data: unknown): Promise<T> => {

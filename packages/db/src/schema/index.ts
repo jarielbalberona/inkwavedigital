@@ -15,4 +15,6 @@ export * from "./orders.js";
 export * from "./users.js";
 export * from "./points.js";
 export * from "./wifi.js";
+export * from "./superAdmins.js";
+export * from "./auditLogs.js";
 

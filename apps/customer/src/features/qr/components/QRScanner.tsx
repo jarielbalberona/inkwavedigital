@@ -131,8 +131,8 @@ export const QRScannerComponent: React.FC<QRScannerProps> = ({
             onClick={() => {
               // For demo purposes, simulate a QR scan
               const demoData = {
-                venueId: "9662b039-7056-436d-b336-63fa662412e3",
-                tableId: "1054b851-61e8-4bf0-9032-c46036167c7d",
+                venueId: "e9aa1151-05e2-488b-a18b-d50ac42909e5",
+                tableId: "fa6d4b4d-5a89-42ab-b990-74cf2f4907d6",
                 deviceId: `demo-device-${Date.now()}`,
               };
               setSession(demoData.venueId, demoData.tableId, demoData.deviceId);

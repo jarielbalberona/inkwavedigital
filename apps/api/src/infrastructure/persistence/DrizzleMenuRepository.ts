@@ -4,6 +4,7 @@ import type { Database } from "@inkwave/db";
 import { menuItems, itemOptions, itemOptionValues, menus, menuCategories } from "@inkwave/db";
 import type { IMenuRepository } from "../../domain/repositories/IMenuRepository.js";
 import { MenuItem } from "../../domain/entities/MenuItem.js";
+import { MenuCategory } from "../../domain/entities/MenuCategory.js";
 import type { MenuItemOption, MenuItemOptionValue } from "../../domain/entities/MenuItem.js";
 import { Money } from "../../domain/value-objects/Money.js";
 
@@ -190,6 +191,79 @@ export class DrizzleMenuRepository implements IMenuRepository {
       options,
       createdAt: new Date(itemData.createdAt),
       updatedAt: new Date(itemData.updatedAt),
+    });
+  }
+
+  // Category management methods
+  async findCategoriesByVenueId(venueId: string): Promise<MenuCategory[]> {
+    // First, get all menus for this venue
+    const venueMenus = await this.db.query.menus.findMany({
+      where: eq(menus.venueId, venueId),
+    });
+
+    if (venueMenus.length === 0) {
+      return [];
+    }
+
+    const menuIds = venueMenus.map(menu => menu.id);
+    
+    // Get all categories for these menus
+    const categories = await this.db.query.menuCategories.findMany({
+      where: (cats, { inArray }) => inArray(cats.menuId, menuIds),
+      orderBy: (cats, { asc }) => asc(cats.sortIndex),
+    });
+
+    return categories.map(category => this.mapCategoryToEntity(category));
+  }
+
+  async saveCategory(category: MenuCategory): Promise<void> {
+    const categoryData = {
+      id: category.id,
+      menuId: category.menuId,
+      name: category.name,
+      sortIndex: category.sortIndex,
+      createdAt: category.createdAt,
+      updatedAt: category.updatedAt,
+    };
+
+    await this.db
+      .insert(menuCategories)
+      .values(categoryData)
+      .onConflictDoUpdate({
+        target: menuCategories.id,
+        set: {
+          name: categoryData.name,
+          sortIndex: categoryData.sortIndex,
+          updatedAt: categoryData.updatedAt,
+        },
+      });
+  }
+
+  async findCategoryById(id: string): Promise<MenuCategory | null> {
+    const result = await this.db.query.menuCategories.findFirst({
+      where: eq(menuCategories.id, id),
+    });
+
+    if (!result) {
+      return null;
+    }
+
+    return this.mapCategoryToEntity(result);
+  }
+
+  async deleteCategory(id: string): Promise<void> {
+    await this.db.delete(menuCategories).where(eq(menuCategories.id, id));
+  }
+
+  private mapCategoryToEntity(categoryData: any): MenuCategory {
+    return MenuCategory.restore({
+      id: categoryData.id,
+      menuId: categoryData.menuId,
+      name: categoryData.name,
+      sortIndex: categoryData.sortIndex,
+      iconUrl: categoryData.iconUrl || undefined,
+      createdAt: new Date(categoryData.createdAt),
+      updatedAt: new Date(categoryData.updatedAt),
     });
   }
 }

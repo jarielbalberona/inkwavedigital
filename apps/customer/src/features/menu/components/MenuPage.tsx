@@ -5,6 +5,7 @@ import { FloatingCartButton } from "../../cart/components/FloatingCartButton";
 import { CartDrawer } from "../../cart/components/CartDrawer";
 import { OrderConfirmation } from "../../order/components/OrderConfirmation";
 import { useMenuQuery } from "../hooks/queries/useMenuQuery";
+import { useCategoriesQuery } from "../hooks/queries/useCategoriesQuery";
 import { useSessionStore } from "../hooks/stores/useSessionStore";
 import { useCartStore } from "../../cart/hooks/stores/useCartStore";
 import { getCategoriesFromItems } from "../hooks/helpers/menuHelpers";
@@ -18,13 +19,17 @@ export const MenuPage: React.FC = () => {
   
   const { venueId, tableId, pax, clearSession } = useSessionStore();
   
-  const { data: menuData, isLoading, error } = useMenuQuery({
+  const { data: menuData, isLoading: isMenuLoading, error } = useMenuQuery({
     venueId: venueId || "",
     availableOnly: true,
   });
 
+  const { data: categoriesData, isLoading: isCategoriesLoading } = useCategoriesQuery(venueId || "");
+
   const items = menuData?.items || [];
-  const categories = getCategoriesFromItems(items);
+  // Use API categories if available, otherwise fall back to generating from items
+  const categories = categoriesData || getCategoriesFromItems(items);
+  const isLoading = isMenuLoading || isCategoriesLoading;
 
   // Set first category as active when data loads
   useEffect(() => {
@@ -63,7 +68,7 @@ export const MenuPage: React.FC = () => {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || !categories.length) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -111,6 +116,7 @@ export const MenuPage: React.FC = () => {
             onCategorySelect={handleCategorySelect}
             isCollapsed={isSidebarCollapsed}
             onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            venueId={venueId || ""}
           />
         </div>
 

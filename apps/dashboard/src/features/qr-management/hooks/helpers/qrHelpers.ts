@@ -1,8 +1,9 @@
 import type { QRCode } from "../types/qr.types";
 
 export const generateQRData = (venueId: string, tableId: string): string => {
-  const baseUrl = window.location.origin;
-  return `${baseUrl}/menu?venue=${venueId}&table=${tableId}`;
+  // Customer app runs on port 5173
+  const customerAppUrl = process.env.VITE_CUSTOMER_APP_URL || 'http://localhost:5173';
+  return `${customerAppUrl}/menu?venue=${venueId}&table=${tableId}`;
 };
 
 export const generateQRCode = (venueId: string, tableId: string, tableLabel: string): QRCode => {

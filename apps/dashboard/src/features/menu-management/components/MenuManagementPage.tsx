@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { CategoryForm } from "./CategoryForm";
 import { MenuItemForm } from "./MenuItemForm";
+import { CategoryCard } from "./CategoryCard";
 import { useCategoriesQuery } from "../hooks/queries/useCategoriesQuery";
 import { useDeleteCategory } from "../hooks/mutations";
 import type { MenuCategory, MenuItem } from "../types/menuManagement.types";
@@ -17,13 +18,11 @@ export const MenuManagementPage: React.FC<MenuManagementPageProps> = ({ venueId 
   const [editingCategory, setEditingCategory] = useState<MenuCategory | null>(null);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
 
-  // For demo purposes, use a mock menu ID
-  const menuId = "demo-menu-id";
-  
-  const { data: categoriesData, isLoading } = useCategoriesQuery(menuId);
-  const deleteCategoryMutation = useDeleteCategory(menuId);
+  const { data: categoriesData, isLoading } = useCategoriesQuery(venueId);
+  const deleteCategoryMutation = useDeleteCategory(venueId);
 
-  const categories = categoriesData?.data || [];
+  // Ensure categories is always an array
+  const categories = Array.isArray(categoriesData) ? categoriesData : [];
 
   const handleCreateCategory = () => {
     setEditingCategory(null);
@@ -97,47 +96,13 @@ export const MenuManagementPage: React.FC<MenuManagementPageProps> = ({ venueId 
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((category) => (
-              <div key={category.id} className="bg-white rounded-lg border border-gray-200 p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
-                    <p className="text-sm text-gray-600">Sort: {category.sortIndex}</p>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleEditCategory(category)}
-                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                    >
-                      <PencilIcon className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteCategory(category.id)}
-                      className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {category.iconUrl && (
-                  <img
-                    src={category.iconUrl}
-                    alt={category.name}
-                    className="w-full h-32 object-cover rounded-md mb-4"
-                  />
-                )}
-
-                <div className="space-y-2">
-                  <p className="text-sm text-gray-600">0 items</p>
-                  <button
-                    onClick={() => handleCreateMenuItem(category)}
-                    className="w-full bg-gray-100 text-gray-700 py-2 px-3 rounded-md hover:bg-gray-200 transition-colors flex items-center justify-center"
-                  >
-                    <PlusIcon className="w-4 h-4 mr-2" />
-                    Add Item
-                  </button>
-                </div>
-              </div>
+              <CategoryCard
+                key={category.id}
+                category={category}
+                onEdit={() => handleEditCategory(category)}
+                onDelete={() => handleDeleteCategory(category.id)}
+                onAddItem={() => handleCreateMenuItem(category)}
+              />
             ))}
           </div>
         )}
@@ -151,7 +116,7 @@ export const MenuManagementPage: React.FC<MenuManagementPageProps> = ({ venueId 
           setEditingCategory(null);
         }}
         category={editingCategory}
-        menuId={menuId}
+        venueId={venueId}
       />
 
       <MenuItemForm

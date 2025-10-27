@@ -7,6 +7,9 @@ import { createDbConnection } from "@inkwave/db";
 import { DrizzleOrderRepository } from "../infrastructure/persistence/DrizzleOrderRepository.js";
 import { DrizzleMenuRepository } from "../infrastructure/persistence/DrizzleMenuRepository.js";
 import { DrizzleVenueRepository } from "../infrastructure/persistence/DrizzleVenueRepository.js";
+import { DrizzleTenantRepository } from "../infrastructure/persistence/DrizzleTenantRepository.js";
+import { DrizzleSuperAdminRepository } from "../infrastructure/persistence/DrizzleSuperAdminRepository.js";
+import { DrizzleUserRepository } from "../infrastructure/persistence/DrizzleUserRepository.js";
 // import { WebSocketManager } from "../infrastructure/websocket/WebSocketManager.js";
 
 // Use Cases
@@ -15,12 +18,22 @@ import { UpdateOrderStatusUseCase } from "../application/use-cases/UpdateOrderSt
 import { GetMenuUseCase } from "../application/use-cases/GetMenuUseCase.js";
 import { GetVenueOrdersUseCase } from "../application/use-cases/GetVenueOrdersUseCase.js";
 import { GetVenueTablesUseCase } from "../application/use-cases/GetVenueTablesUseCase.js";
+import { CreateTenantUseCase } from "../application/use-cases/admin/CreateTenantUseCase.js";
+import { GetCategoriesUseCase } from "../application/use-cases/GetCategoriesUseCase.js";
+import { CreateCategoryUseCase } from "../application/use-cases/CreateCategoryUseCase.js";
+import { UpdateCategoryUseCase } from "../application/use-cases/UpdateCategoryUseCase.js";
+import { DeleteCategoryUseCase } from "../application/use-cases/DeleteCategoryUseCase.js";
+import { CreateMenuItemUseCase } from "../application/use-cases/CreateMenuItemUseCase.js";
+import { GetCategoryItemsUseCase } from "../application/use-cases/GetCategoryItemsUseCase.js";
+import { GetVenueInfoUseCase } from "../application/use-cases/GetVenueInfoUseCase.js";
 
 // Controllers
 import { HealthController } from "../interfaces/controllers/health.controller.js";
 import { OrderController } from "../interfaces/controllers/order.controller.js";
 import { MenuController } from "../interfaces/controllers/menu.controller.js";
 import { VenueController } from "../interfaces/controllers/venue.controller.js";
+import { AdminController } from "../interfaces/controllers/admin.controller.js";
+import { AuthController } from "../interfaces/controllers/auth.controller.js";
 
 // Register logger
 const logger = createLogger("api");
@@ -48,6 +61,18 @@ container.register("IVenueRepository", {
   useClass: DrizzleVenueRepository,
 });
 
+container.register("ITenantRepository", {
+  useClass: DrizzleTenantRepository,
+});
+
+container.register("DrizzleSuperAdminRepository", {
+  useClass: DrizzleSuperAdminRepository,
+});
+
+container.register("IUserRepository", {
+  useClass: DrizzleUserRepository,
+});
+
 // Register use cases
 container.register("CreateOrderUseCase", {
   useClass: CreateOrderUseCase,
@@ -69,6 +94,38 @@ container.register("GetVenueTablesUseCase", {
   useClass: GetVenueTablesUseCase,
 });
 
+container.register("CreateTenantUseCase", {
+  useClass: CreateTenantUseCase,
+});
+
+container.register("GetCategoriesUseCase", {
+  useClass: GetCategoriesUseCase,
+});
+
+container.register("CreateCategoryUseCase", {
+  useClass: CreateCategoryUseCase,
+});
+
+container.register("UpdateCategoryUseCase", {
+  useClass: UpdateCategoryUseCase,
+});
+
+container.register("DeleteCategoryUseCase", {
+  useClass: DeleteCategoryUseCase,
+});
+
+container.register("CreateMenuItemUseCase", {
+  useClass: CreateMenuItemUseCase,
+});
+
+container.register("GetCategoryItemsUseCase", {
+  useClass: GetCategoryItemsUseCase,
+});
+
+container.register("GetVenueInfoUseCase", {
+  useClass: GetVenueInfoUseCase,
+});
+
 // Register controllers
 container.register("HealthController", {
   useClass: HealthController,
@@ -84,6 +141,14 @@ container.register("MenuController", {
 
 container.register("VenueController", {
   useClass: VenueController,
+});
+
+container.register("AdminController", {
+  useClass: AdminController,
+});
+
+container.register("AuthController", {
+  useClass: AuthController,
 });
 
 // Register WebSocket manager (temporarily disabled)

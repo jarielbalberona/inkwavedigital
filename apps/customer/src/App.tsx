@@ -1,11 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MenuPage } from "./features/menu/components/MenuPage";
 import { QRScannerComponent } from "./features/qr/components/QRScanner";
 import { useSessionStore } from "./features/menu/hooks/stores/useSessionStore";
 
 function App() {
-  const { venueId, tableId } = useSessionStore();
+  const { venueId, tableId, setSession } = useSessionStore();
   const [showQRScanner, setShowQRScanner] = useState(false);
+
+  // Check for URL query params on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const venueParam = params.get('venue');
+    const tableParam = params.get('table');
+
+    // If URL has venue and table params, set session automatically
+    if (venueParam && tableParam && !venueId) {
+      setSession(venueParam, tableParam);
+    }
+  }, [setSession, venueId]);
 
   // If no session, show QR scanner landing page
   if (!venueId) {
@@ -24,24 +36,11 @@ function App() {
 
           <button
             onClick={() => setShowQRScanner(true)}
-            className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors mb-4"
+            className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors"
           >
             Scan QR Code
           </button>
 
-          <button
-            onClick={() => {
-              // Demo mode - set demo session
-              useSessionStore.getState().setSession(
-                "9662b039-7056-436d-b336-63fa662412e3",
-                "1054b851-61e8-4bf0-9032-c46036167c7d",
-                `demo-device-${Date.now()}`
-              );
-            }}
-            className="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-          >
-            Demo Mode
-          </button>
         </div>
 
         {showQRScanner && (

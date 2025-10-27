@@ -1,4 +1,5 @@
 import { MenuItem } from "../entities/MenuItem.js";
+import { MenuCategory } from "../entities/MenuCategory.js";
 
 export interface IMenuRepository {
   /**
@@ -32,5 +33,26 @@ export interface IMenuRepository {
    * Update menu item availability
    */
   updateAvailability(id: string, isAvailable: boolean): Promise<void>;
+
+  // Category management methods
+  /**
+   * Find all categories for a venue
+   */
+  findCategoriesByVenueId(venueId: string): Promise<MenuCategory[]>;
+
+  /**
+   * Save a new or updated category
+   */
+  saveCategory(category: MenuCategory): Promise<void>;
+
+  /**
+   * Find a category by ID
+   */
+  findCategoryById(id: string): Promise<MenuCategory | null>;
+
+  /**
+   * Delete a category
+   */
+  deleteCategory(id: string): Promise<void>;
 }
 

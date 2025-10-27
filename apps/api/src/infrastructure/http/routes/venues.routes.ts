@@ -14,3 +14,6 @@ venuesRouter.get("/:venueId/orders", orderController.getVenueOrders.bind(orderCo
 // Get tables for a venue
 venuesRouter.get("/:venueId/tables", venueController.getTables.bind(venueController));
 
+// Get venue info with tenant details
+venuesRouter.get("/:venueId/info", venueController.getVenueInfo.bind(venueController));
+

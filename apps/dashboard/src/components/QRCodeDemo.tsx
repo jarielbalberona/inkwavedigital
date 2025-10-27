@@ -3,11 +3,11 @@ import { QRCodeDisplay } from '../features/qr-management/components/QRCodeDispla
 
 export const QRCodeDemo: React.FC = () => {
   // Demo venue and table IDs from our seeded data
-  const demoVenueId = "9662b039-7056-436d-b336-63fa662412e3";
+  const demoVenueId = "e9aa1151-05e2-488b-a18b-d50ac42909e5";
   const demoTables = [
-    { id: "1054b851-61e8-4bf0-9032-c46036167c7d", label: "Table 1" },
-    { id: "13c726ad-61f4-4c29-bc3e-bfbbb13188f7", label: "Table 2" },
-    { id: "d9856ec6-9890-4043-bdb4-577e53cb5cea", label: "Table 3" },
+    { id: "fa6d4b4d-5a89-42ab-b990-74cf2f4907d6", label: "Table 1" },
+    { id: "70d7b0f6-9699-4715-8985-b9e471ffb9a5", label: "Table 2" },
+    { id: "2e2831b7-c5e3-42df-aea2-06535fb65c68", label: "Table 3" },
   ];
 
   return (

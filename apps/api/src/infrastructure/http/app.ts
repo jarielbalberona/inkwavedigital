@@ -5,6 +5,8 @@ import { healthRouter } from "./routes/health.routes.js";
 import { ordersRouter } from "./routes/orders.routes.js";
 import { menuRouter } from "./routes/menu.routes.js";
 import { venuesRouter } from "./routes/venues.routes.js";
+import { adminRouter } from "./routes/admin.routes.js";
+import { authRouter } from "./routes/auth.routes.js";
 import { errorHandler } from "../../interfaces/middlewares/error-handler.middleware.js";
 
 export const app: Application = express();
@@ -30,6 +32,8 @@ app.use("/health", healthRouter);
 app.use("/api/v1/orders", ordersRouter);
 app.use("/api/v1/menu", menuRouter);
 app.use("/api/v1/venues", venuesRouter);
+app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/auth", authRouter);
 
 // Error handling (must be last)
 app.use(errorHandler);

@@ -3,6 +3,7 @@ import { QRCodeGenerator, type QRCodeData } from '../../../lib/qrCodeGenerator';
 
 interface QRCodeDisplayProps {
   data: QRCodeData;
+  qrUrl?: string; // Optional URL string for the QR code
   title: string;
   subtitle?: string;
   showDownloadButtons?: boolean;
@@ -10,6 +11,7 @@ interface QRCodeDisplayProps {
 
 export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   data,
+  qrUrl,
   title,
   subtitle,
   showDownloadButtons = true,
@@ -20,8 +22,14 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
   useEffect(() => {
     const generateQR = async () => {
       try {
-        const dataURL = await QRCodeGenerator.generateQRCodeDataURL(data);
-        setQrCodeDataURL(dataURL);
+        // If qrUrl is provided, use it; otherwise use JSON data
+        if (qrUrl) {
+          const dataURL = await QRCodeGenerator.generateQRCodeFromURL(qrUrl);
+          setQrCodeDataURL(dataURL);
+        } else {
+          const dataURL = await QRCodeGenerator.generateQRCodeDataURL(data);
+          setQrCodeDataURL(dataURL);
+        }
       } catch (error) {
         console.error('Failed to generate QR code:', error);
       } finally {
@@ -30,14 +38,22 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
     };
 
     generateQR();
-  }, [data]);
+  }, [data, qrUrl]);
 
   const handleDownloadPNG = () => {
-    QRCodeGenerator.downloadQRCode(data, `${title.replace(/\s+/g, '_')}_QR`);
+    if (qrUrl) {
+      QRCodeGenerator.downloadQRCodeFromURL(qrUrl, `${title.replace(/\s+/g, '_')}_QR`);
+    } else {
+      QRCodeGenerator.downloadQRCode(data, `${title.replace(/\s+/g, '_')}_QR`);
+    }
   };
 
   const handleDownloadSVG = () => {
-    QRCodeGenerator.downloadQRCodeSVG(data, `${title.replace(/\s+/g, '_')}_QR`);
+    if (qrUrl) {
+      QRCodeGenerator.downloadQRCodeSVGFromURL(qrUrl, `${title.replace(/\s+/g, '_')}_QR`);
+    } else {
+      QRCodeGenerator.downloadQRCodeSVG(data, `${title.replace(/\s+/g, '_')}_QR`);
+    }
   };
 
   if (isLoading) {
@@ -55,6 +71,12 @@ export const QRCodeDisplay: React.FC<QRCodeDisplayProps> = ({
       {subtitle && (
         <p className="text-sm text-gray-600 mb-4">{subtitle}</p>
       )}
+      
+      {/* QR Code Data (Admin only, not in downloads) */}
+      <div className="mb-4 p-3 bg-gray-50 rounded-lg text-left">
+        <p className="text-xs text-gray-500 mb-1">QR URL (Admin):</p>
+        <code className="text-xs text-gray-700 break-all">{qrUrl || JSON.stringify(data, null, 2)}</code>
+      </div>
       
       <div className="mb-4">
         <img 

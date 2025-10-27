@@ -7,14 +7,14 @@ interface CategoryFormProps {
   isOpen: boolean;
   onClose: () => void;
   category?: MenuCategory;
-  menuId: string;
+  venueId: string;
 }
 
 export const CategoryForm: React.FC<CategoryFormProps> = ({
   isOpen,
   onClose,
   category,
-  menuId,
+  venueId,
 }) => {
   const [formData, setFormData] = useState({
     name: category?.name || "",
@@ -22,8 +22,8 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
     sortIndex: category?.sortIndex || 0,
   });
 
-  const createCategoryMutation = useCreateCategory(menuId);
-  const updateCategoryMutation = useUpdateCategory(menuId);
+  const createCategoryMutation = useCreateCategory(venueId);
+  const updateCategoryMutation = useUpdateCategory(venueId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +38,6 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
     } else {
       // Create new category
       const createData: CreateCategoryInput = {
-        menuId,
         ...formData,
       };
       await createCategoryMutation.mutateAsync(createData);

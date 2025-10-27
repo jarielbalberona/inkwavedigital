@@ -1,5 +1,6 @@
 import React from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { useVenueInfoQuery } from "../hooks/queries/useVenueInfoQuery";
 import type { MenuCategory } from "../types/menu.types";
 
 interface CategorySidebarProps {
@@ -8,6 +9,7 @@ interface CategorySidebarProps {
   onCategorySelect: (categoryId: string) => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  venueId: string;
 }
 
 // Category icons mapping for mobile-first design
@@ -26,7 +28,9 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
   onCategorySelect,
   isCollapsed,
   onToggleCollapse,
+  venueId,
 }) => {
+  const { data: venueInfo } = useVenueInfoQuery(venueId);
   return (
     <div className={`bg-white border-r border-gray-200 transition-all duration-300 ${
       isCollapsed ? "w-20 md:w-20" : "w-20 md:w-64"
@@ -43,8 +47,12 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
             <div className="hidden md:block">
               {!isCollapsed && (
                 <>
-                  <h2 className="text-lg font-semibold text-gray-900">Demo Café</h2>
-                  <p className="text-xs text-gray-500">Branch 1</p>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    {venueInfo?.tenant.name || "Welcome"}
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    {venueInfo?.name || "Digital Menu"}
+                  </p>
                 </>
               )}
             </div>

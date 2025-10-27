@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { QrCodeIcon } from "@heroicons/react/24/outline";
 import { QRCodeDisplay } from "./QRCodeDisplay";
+import { generateQRData } from "../hooks/helpers/qrHelpers";
 import { useTablesQuery } from "../hooks/useTablesQuery";
 
 interface QRManagementPageProps {
@@ -109,19 +110,23 @@ export const QRManagementPage: React.FC<QRManagementPageProps> = ({ venueId }) =
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {tables
                     .filter(table => generatedTables.has(table.id))
-                    .map((table) => (
-                      <QRCodeDisplay
-                        key={table.id}
-                        data={{
-                          venueId: venueId,
-                          tableId: table.id,
-                          deviceId: `table-${table.id}`
-                        }}
-                        title={table.label}
-                        subtitle={`Table QR Code`}
-                        showDownloadButtons={true}
-                      />
-                    ))}
+                    .map((table) => {
+                      const qrUrl = generateQRData(venueId, table.id);
+                      return (
+                        <QRCodeDisplay
+                          key={table.id}
+                          data={{
+                            venueId: venueId,
+                            tableId: table.id,
+                            deviceId: `table-${table.id}`
+                          }}
+                          qrUrl={qrUrl}
+                          title={table.label}
+                          subtitle={`Table QR Code`}
+                          showDownloadButtons={true}
+                        />
+                      );
+                    })}
                 </div>
               </div>
             )}
