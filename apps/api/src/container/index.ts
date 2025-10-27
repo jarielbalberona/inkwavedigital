@@ -11,7 +11,7 @@ import { DrizzleTenantRepository } from "../infrastructure/persistence/DrizzleTe
 import { DrizzleSuperAdminRepository } from "../infrastructure/persistence/DrizzleSuperAdminRepository.js";
 import { DrizzleUserRepository } from "../infrastructure/persistence/DrizzleUserRepository.js";
 import { DrizzleVenueStaffRepository } from "../infrastructure/persistence/DrizzleVenueStaffRepository.js";
-// import { WebSocketManager } from "../infrastructure/websocket/WebSocketManager.js";
+import { WebSocketManager } from "../infrastructure/websocket/WebSocketManager.js";
 
 // Use Cases
 import { CreateOrderUseCase } from "../application/use-cases/CreateOrderUseCase.js";
@@ -176,10 +176,10 @@ container.register("AuthController", {
   useClass: AuthController,
 });
 
-// Register WebSocket manager (temporarily disabled)
-// container.register("WebSocketManager", {
-//   useClass: WebSocketManager,
-// });
+// Register WebSocket manager
+container.register("WebSocketManager", {
+  useClass: WebSocketManager,
+});
 
 logger.info("Database connection initialized");
 

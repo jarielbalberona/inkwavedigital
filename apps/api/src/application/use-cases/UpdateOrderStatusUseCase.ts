@@ -3,7 +3,7 @@ import type { IOrderRepository } from "../../domain/repositories/IOrderRepositor
 import { OrderStatus } from "../../domain/value-objects/OrderStatus.js";
 import { NotFoundError, ValidationError } from "../../shared/errors/domain-error.js";
 import type { Logger } from "@inkwave/utils";
-// import type { WebSocketManager } from "../../infrastructure/websocket/WebSocketManager.js";
+import type { WebSocketManager } from "../../infrastructure/websocket/WebSocketManager.js";
 
 export interface UpdateOrderStatusInput {
   orderId: string;
@@ -21,8 +21,8 @@ export interface UpdateOrderStatusOutput {
 export class UpdateOrderStatusUseCase {
   constructor(
     @inject("IOrderRepository") private orderRepository: IOrderRepository,
-    @inject("Logger") private logger: Logger
-    // @inject("WebSocketManager") private wsManager: WebSocketManager
+    @inject("Logger") private logger: Logger,
+    @inject("WebSocketManager") private wsManager: WebSocketManager
   ) {}
 
   async execute(input: UpdateOrderStatusInput): Promise<UpdateOrderStatusOutput> {
@@ -48,8 +48,8 @@ export class UpdateOrderStatusUseCase {
     // Save updated order
     await this.orderRepository.save(order);
 
-    // Broadcast order status change (temporarily disabled)
-    // this.wsManager.broadcastOrderStatusChanged(order.venueId, order.id, order.status.toString());
+    // Broadcast order status change
+    this.wsManager.broadcastOrderStatusChanged(order.venueId, order.id, order.status.toString());
 
     this.logger.info(
       { orderId: order.id, status: order.status.toString() },

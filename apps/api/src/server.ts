@@ -4,7 +4,7 @@ import { config } from "dotenv";
 import { app } from "./infrastructure/http/app.js";
 import { createLogger } from "@inkwave/utils";
 import { container } from "tsyringe";
-// import { WebSocketManager } from "./infrastructure/websocket/WebSocketManager.js";
+import { WebSocketManager } from "./infrastructure/websocket/WebSocketManager.js";
 
 config();
 
@@ -16,9 +16,9 @@ const server = app.listen(PORT, () => {
   logger.info(`📊 Health check: http://localhost:${PORT}/health`);
 });
 
-// Initialize WebSocket server (temporarily disabled)
-// const wsManager = container.resolve(WebSocketManager);
-// wsManager.initialize(server);
+// Initialize WebSocket server
+const wsManager = container.resolve(WebSocketManager);
+wsManager.initialize(server);
 
 // Graceful shutdown
 process.on("SIGTERM", () => {

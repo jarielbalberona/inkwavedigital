@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { wsClient } from "../../../lib/websocket";
 import { useOrdersQuery } from "../hooks/queries/useOrdersQuery";
 import { OrderStatusColumn } from "./OrderStatusColumn";
 import { groupOrdersByStatus } from "../hooks/helpers/orderHelpers";
@@ -8,10 +10,30 @@ interface KDSPageProps {
 }
 
 export const KDSPage: React.FC<KDSPageProps> = ({ venueId }) => {
+  const queryClient = useQueryClient();
   const { data: ordersData, isLoading, error } = useOrdersQuery(venueId);
   
   const orders = ordersData || [];
   const ordersByStatus = groupOrdersByStatus(orders);
+
+  // WebSocket integration for real-time updates
+  useEffect(() => {
+    // Connect to WebSocket
+    wsClient.connect(venueId);
+
+    // Subscribe to messages
+    const unsubscribe = wsClient.subscribe((message) => {
+      if (message.type === "order_created" || message.type === "order_status_changed") {
+        // Invalidate queries to refetch orders
+        queryClient.invalidateQueries({ queryKey: ["orders", venueId] });
+      }
+    });
+
+    return () => {
+      unsubscribe();
+      wsClient.disconnect();
+    };
+  }, [venueId, queryClient]);
 
   if (isLoading) {
     return (

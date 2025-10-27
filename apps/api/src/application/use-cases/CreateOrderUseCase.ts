@@ -8,7 +8,7 @@ import { Money } from "../../domain/value-objects/Money.js";
 import { OrderStatus } from "../../domain/value-objects/OrderStatus.js";
 import { NotFoundError, ValidationError } from "../../shared/errors/domain-error.js";
 import type { Logger } from "@inkwave/utils";
-// import type { WebSocketManager } from "../../infrastructure/websocket/WebSocketManager.js";
+import type { WebSocketManager } from "../../infrastructure/websocket/WebSocketManager.js";
 
 export interface CreateOrderInput {
   venueId: string;
@@ -37,8 +37,8 @@ export class CreateOrderUseCase {
     @inject("IOrderRepository") private orderRepository: IOrderRepository,
     @inject("IMenuRepository") private menuRepository: IMenuRepository,
     @inject("IVenueRepository") private venueRepository: IVenueRepository,
-    @inject("Logger") private logger: Logger
-    // @inject("WebSocketManager") private wsManager: WebSocketManager
+    @inject("Logger") private logger: Logger,
+    @inject("WebSocketManager") private wsManager: WebSocketManager
   ) {}
 
   async execute(input: CreateOrderInput): Promise<CreateOrderOutput> {
@@ -97,8 +97,8 @@ export class CreateOrderUseCase {
     // Save order
     await this.orderRepository.save(order);
 
-    // Broadcast order created event (temporarily disabled)
-    // this.wsManager.broadcastOrderCreated(input.venueId, order.toJSON());
+    // Broadcast order created event
+    this.wsManager.broadcastOrderCreated(input.venueId, order.toJSON());
 
     this.logger.info({ orderId: order.id, total: order.total.toNumber() }, "Order created successfully");
 
