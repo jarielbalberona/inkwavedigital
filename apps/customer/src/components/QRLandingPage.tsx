@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { QRScannerComponent } from "../features/qr/components/QRScanner";
 
 export function QRLandingPage() {
-  const [showQRScanner, setShowQRScanner] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -29,25 +27,9 @@ export function QRLandingPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Ink Wave</h1>
           <p className="text-gray-600">Scan the QR code on your table to start ordering</p>
+          <p className="text-sm text-gray-500 mt-2">Or wait while we redirect you...</p>
         </div>
-
-        <button
-          onClick={() => setShowQRScanner(true)}
-          className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-        >
-          Scan QR Code
-        </button>
-
       </div>
-
-      {showQRScanner && (
-        <QRScannerComponent
-          onScanSuccess={() => {
-            setShowQRScanner(false);
-          }}
-          onClose={() => setShowQRScanner(false)}
-        />
-      )}
     </div>
   );
 }
