@@ -3,6 +3,7 @@ export interface Table {
   venueId: string;
   label: string;
   isActive: boolean;
+  capacity?: number; // Number of people the table can accommodate
   createdAt: string;
   updatedAt: string;
 }

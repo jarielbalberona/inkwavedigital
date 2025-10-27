@@ -10,7 +10,7 @@ interface KDSPageProps {
 export const KDSPage: React.FC<KDSPageProps> = ({ venueId }) => {
   const { data: ordersData, isLoading, error } = useOrdersQuery(venueId);
   
-  const orders = ordersData?.data || [];
+  const orders = ordersData || [];
   const ordersByStatus = groupOrdersByStatus(orders);
 
   if (isLoading) {

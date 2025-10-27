@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { CategorySidebar } from "./CategorySidebar";
 import { MenuGrid } from "./MenuGrid";
 import { FloatingCartButton } from "../../cart/components/FloatingCartButton";
 import { CartDrawer } from "../../cart/components/CartDrawer";
 import { OrderConfirmation } from "../../order/components/OrderConfirmation";
+import { PaxPrompt } from "../../qr/components/PaxPrompt";
 import { useMenuQuery } from "../hooks/queries/useMenuQuery";
 import { useCategoriesQuery } from "../hooks/queries/useCategoriesQuery";
 import { useSessionStore } from "../hooks/stores/useSessionStore";
@@ -12,12 +14,36 @@ import { getCategoriesFromItems } from "../hooks/helpers/menuHelpers";
 import type { OrderConfirmation as OrderConfirmationType } from "../../order/types/order.types";
 
 export const MenuPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [orderConfirmation, setOrderConfirmation] = useState<OrderConfirmationType | null>(null);
+  const [showPaxPrompt, setShowPaxPrompt] = useState(false);
   
-  const { venueId, tableId, pax, clearSession } = useSessionStore();
+  const { venueId, tableId, tableLabel, pax, clearSession, setSession, setPax } = useSessionStore();
+
+  // Check for required query params and handle session setup
+  useEffect(() => {
+    const venueParam = searchParams.get('venue');
+    const tableParam = searchParams.get('table');
+    const labelParam = searchParams.get('label');
+    
+    // If there are query params, set session from them
+    if (venueParam && tableParam && !venueId) {
+      setSession(venueParam, tableParam, undefined, undefined, labelParam || undefined);
+      // If no pax is set yet, show the pax prompt
+      if (!pax) {
+        setShowPaxPrompt(true);
+      }
+    }
+    
+    // If no session and no query params, redirect to homepage
+    if (!venueParam && !tableParam && !venueId) {
+      navigate('/', { replace: true });
+    }
+  }, [venueId, searchParams, setSession, navigate, pax]);
   
   const { data: menuData, isLoading: isMenuLoading, error } = useMenuQuery({
     venueId: venueId || "",
@@ -42,21 +68,41 @@ export const MenuPage: React.FC = () => {
     setActiveCategoryId(categoryId);
   };
 
-  const handleCheckout = () => {
+  const handlePaxConfirm = (confirmedPax: number) => {
+    setPax(confirmedPax);
+    setShowPaxPrompt(false);
+  };
+
+  const handlePaxSkip = () => {
+    setShowPaxPrompt(false);
+  };
+
+  const handleCheckout = (orderData: any) => {
     // This will be called after successful order submission
     setIsCartOpen(false);
-    // For now, create a mock order confirmation
+    // Use the actual order data from the API
     setOrderConfirmation({
-      orderId: `ORD-${Date.now()}`,
-      status: "NEW",
-      total: 0, // Will be set by the actual order
-      createdAt: new Date().toISOString(),
+      orderId: orderData.orderId,
+      status: orderData.status || "NEW",
+      total: orderData.total || 0,
+      createdAt: orderData.createdAt || new Date().toISOString(),
     });
   };
 
   const handleBackToMenu = () => {
     setOrderConfirmation(null);
   };
+
+  // Show pax prompt if needed
+  if (showPaxPrompt && tableId) {
+    return (
+      <PaxPrompt
+        tableId={tableLabel || tableId}
+        onConfirm={handlePaxConfirm}
+        onSkip={handlePaxSkip}
+      />
+    );
+  }
 
   // Show order confirmation if available
   if (orderConfirmation) {
@@ -127,9 +173,27 @@ export const MenuPage: React.FC = () => {
             <div className="flex justify-between items-center">
               <div>
                 <h1 className="text-xl md:text-2xl font-bold text-gray-900">Menu</h1>
-                <p className="text-sm md:text-base text-gray-600">
-                  {tableId ? `Table ${tableId.slice(-1)}${pax ? ` • ${pax} ${pax === 1 ? 'person' : 'people'}` : ''}` : "Choose your favorite items"}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm md:text-base text-gray-600">
+                    {tableId ? tableLabel || `Table ${tableId.slice(-1)}` : "Choose your favorite items"}
+                  </p>
+                  {pax && (
+                    <button
+                      onClick={() => setShowPaxPrompt(true)}
+                      className="text-sm md:text-base text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
+                    >
+                      • {pax} {pax === 1 ? 'person' : 'people'}
+                    </button>
+                  )}
+                  {tableId && !pax && (
+                    <button
+                      onClick={() => setShowPaxPrompt(true)}
+                      className="text-sm md:text-base text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
+                    >
+                      • Add party size
+                    </button>
+                  )}
+                </div>
               </div>
               <button
                 onClick={() => {

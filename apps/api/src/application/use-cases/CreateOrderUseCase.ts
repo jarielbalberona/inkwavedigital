@@ -26,7 +26,9 @@ export interface CreateOrderInput {
 
 export interface CreateOrderOutput {
   orderId: string;
+  status: string;
   total: number;
+  createdAt: string;
 }
 
 @injectable()
@@ -102,7 +104,9 @@ export class CreateOrderUseCase {
 
     return {
       orderId: order.id,
+      status: order.status.toString(),
       total: order.total.toNumber(),
+      createdAt: order.createdAt.toISOString(),
     };
   }
 }

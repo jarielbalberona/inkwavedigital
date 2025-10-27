@@ -1,13 +1,20 @@
-import type { QRCode } from "../types/qr.types";
+import type { QRCode } from "../../types/table.types";
 
-export const generateQRData = (venueId: string, tableId: string): string => {
+export const generateQRData = (venueId: string, tableId: string, tableLabel?: string): string => {
   // Customer app runs on port 5173
-  const customerAppUrl = process.env.VITE_CUSTOMER_APP_URL || 'http://localhost:5173';
-  return `${customerAppUrl}/menu?venue=${venueId}&table=${tableId}`;
+  const customerAppUrl = import.meta.env.VITE_CUSTOMER_APP_URL || 'http://localhost:5173';
+  const params = new URLSearchParams({
+    venue: venueId,
+    table: tableId,
+  });
+  if (tableLabel) {
+    params.append('label', tableLabel);
+  }
+  return `${customerAppUrl}/menu?${params.toString()}`;
 };
 
 export const generateQRCode = (venueId: string, tableId: string, tableLabel: string): QRCode => {
-  const qrData = generateQRData(venueId, tableId);
+  const qrData = generateQRData(venueId, tableId, tableLabel);
   return {
     tableId,
     tableLabel,

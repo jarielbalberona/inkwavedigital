@@ -1,7 +1,7 @@
 import { injectable, inject } from "tsyringe";
-import { eq, and, desc, inArray, sql } from "drizzle-orm";
+import { eq, and, desc, inArray } from "drizzle-orm";
 import type { Database } from "@inkwave/db";
-import { orders, orderItems, orderEvents, menuItems } from "@inkwave/db";
+import { orders, orderItems, menuItems } from "@inkwave/db";
 import type { IOrderRepository } from "../../domain/repositories/IOrderRepository.js";
 import { Order } from "../../domain/entities/Order.js";
 import type { OrderItem } from "../../domain/entities/Order.js";
@@ -26,25 +26,44 @@ export class DrizzleOrderRepository implements IOrderRepository {
       updatedAt: order.updatedAt,
     };
 
-    // Insert order with pax and notes
-    await this.db.insert(orders).values(orderData);
+    // Check if order already exists
+    const existingOrder = await this.db.query.orders.findFirst({
+      where: eq(orders.id, order.id),
+    });
 
-    // Delete existing order items and re-insert
-    await this.db.delete(orderItems).where(eq(orderItems.orderId, order.id));
+    if (existingOrder) {
+      // Update existing order
+      await this.db
+        .update(orders)
+        .set({
+          status: order.status.toString(),
+          total: order.total.toNumber().toString(),
+          deviceId: order.deviceId,
+          pax: order.pax,
+          notes: order.notes,
+          updatedAt: order.updatedAt,
+        })
+        .where(eq(orders.id, order.id));
+    } else {
+      // Insert new order
+      await this.db.insert(orders).values(orderData);
 
-    if (order.items.length > 0) {
-      await this.db.insert(orderItems).values(
-        order.items.map((item) => ({
-          id: item.id,
-          orderId: order.id,
-          itemId: item.itemId,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice.toNumber().toString(),
-          notes: item.notes,
-          optionsJson: item.optionsJson,
-          createdAt: new Date(),
-        }))
-      );
+      // Insert order items
+      if (order.items.length > 0) {
+        await this.db.insert(orderItems).values(
+          order.items.map((item) => ({
+            id: item.id,
+            orderId: order.id,
+            itemId: item.itemId,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice.toNumber().toString(),
+            notes: item.notes,
+            optionsJson: item.optionsJson,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }))
+        );
+      }
     }
   }
 

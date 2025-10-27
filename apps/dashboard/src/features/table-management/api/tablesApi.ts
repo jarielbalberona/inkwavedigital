@@ -1,5 +1,5 @@
 import { api } from "../../../lib/api";
-import type { Table } from "../types/qr.types";
+import type { Table } from "../types/table.types";
 import type { ApiResponse } from "../../menu-management/types/menuManagement.types";
 
 export const tablesApi = {

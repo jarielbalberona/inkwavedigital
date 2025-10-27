@@ -48,11 +48,11 @@ export const OrderConfirmation: React.FC<OrderConfirmationProps> = ({
               onClick={onBackToMenu}
               className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
-              Back to Menu
+              Place New Order
             </button>
             
-            <p className="text-sm text-gray-500">
-              You'll receive a notification when your order is ready
+            <p className="text-sm text-gray-500 text-center">
+              Your order has been placed successfully and will be prepared shortly.
             </p>
           </div>
         </div>

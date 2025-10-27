@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
+import { useNavigate } from "react-router-dom";
 import { useSessionStore } from "../../menu/hooks/stores/useSessionStore";
 import { PaxPrompt } from "./PaxPrompt";
 
 interface QRScannerProps {
-  onScanSuccess: (data: { venueId: string; tableId: string }) => void;
+  onScanSuccess: (data: { venueId: string; tableId: string; tableLabel?: string }) => void;
   onClose: () => void;
 }
 
@@ -14,8 +15,9 @@ export const QRScannerComponent: React.FC<QRScannerProps> = ({
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [showPaxPrompt, setShowPaxPrompt] = useState(false);
-  const [scannedData, setScannedData] = useState<{ venueId: string; tableId: string } | null>(null);
+  const [scannedData, setScannedData] = useState<{ venueId: string; tableId: string; tableLabel?: string } | null>(null);
   const { setSession } = useSessionStore();
+  const navigate = useNavigate();
 
   const handleScan = (result: any) => {
     try {
@@ -30,6 +32,7 @@ export const QRScannerComponent: React.FC<QRScannerProps> = ({
       setScannedData({
         venueId: qrData.venueId,
         tableId: qrData.tableId,
+        tableLabel: qrData.tableLabel,
       });
       setShowPaxPrompt(true);
       
@@ -42,10 +45,13 @@ export const QRScannerComponent: React.FC<QRScannerProps> = ({
   const handlePaxConfirm = (pax: number) => {
     if (scannedData) {
       // Set session data with pax
-      setSession(scannedData.venueId, scannedData.tableId, undefined, pax);
+      setSession(scannedData.venueId, scannedData.tableId, undefined, pax, scannedData.tableLabel);
       
       // Call success callback
       onScanSuccess(scannedData);
+      
+      // Navigate to menu
+      navigate('/menu');
       
       onClose();
     }
@@ -54,10 +60,13 @@ export const QRScannerComponent: React.FC<QRScannerProps> = ({
   const handlePaxSkip = () => {
     if (scannedData) {
       // Set session data without pax
-      setSession(scannedData.venueId, scannedData.tableId);
+      setSession(scannedData.venueId, scannedData.tableId, undefined, undefined, scannedData.tableLabel);
       
       // Call success callback
       onScanSuccess(scannedData);
+      
+      // Navigate to menu
+      navigate('/menu');
       
       onClose();
     }
@@ -72,7 +81,7 @@ export const QRScannerComponent: React.FC<QRScannerProps> = ({
   if (showPaxPrompt && scannedData) {
     return (
       <PaxPrompt
-        tableId={scannedData.tableId}
+        tableId={scannedData.tableLabel || scannedData.tableId}
         onConfirm={handlePaxConfirm}
         onSkip={handlePaxSkip}
       />
@@ -102,7 +111,7 @@ export const QRScannerComponent: React.FC<QRScannerProps> = ({
 
         <div className="relative">
           <Scanner
-            onDecode={handleScan}
+            onScan={handleScan}
             onError={handleError}
             containerStyle={{
               width: "100%",
@@ -140,6 +149,8 @@ export const QRScannerComponent: React.FC<QRScannerProps> = ({
                 venueId: demoData.venueId,
                 tableId: demoData.tableId,
               });
+              // Navigate to menu
+              navigate('/menu');
               onClose();
             }}
             className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

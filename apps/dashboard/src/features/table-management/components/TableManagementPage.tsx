@@ -4,11 +4,11 @@ import { QRCodeDisplay } from "./QRCodeDisplay";
 import { generateQRData } from "../hooks/helpers/qrHelpers";
 import { useTablesQuery } from "../hooks/useTablesQuery";
 
-interface QRManagementPageProps {
+interface TableManagementPageProps {
   venueId: string;
 }
 
-export const QRManagementPage: React.FC<QRManagementPageProps> = ({ venueId }) => {
+export const TableManagementPage: React.FC<TableManagementPageProps> = ({ venueId }) => {
   const [generatedTables, setGeneratedTables] = useState<Set<string>>(new Set());
   
   const { data: tables, isLoading, error } = useTablesQuery(venueId);
@@ -50,8 +50,8 @@ export const QRManagementPage: React.FC<QRManagementPageProps> = ({ venueId }) =
       <div className="bg-white border-b border-gray-200 p-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">QR Code Management</h1>
-            <p className="text-gray-600">Generate QR codes for your tables</p>
+            <h1 className="text-2xl font-bold text-gray-900">Table Management</h1>
+            <p className="text-gray-600">Manage your tables and generate QR codes</p>
           </div>
           <button
             onClick={handleGenerateAll}
@@ -111,7 +111,7 @@ export const QRManagementPage: React.FC<QRManagementPageProps> = ({ venueId }) =
                   {tables
                     .filter(table => generatedTables.has(table.id))
                     .map((table) => {
-                      const qrUrl = generateQRData(venueId, table.id);
+                      const qrUrl = generateQRData(venueId, table.id, table.label);
                       return (
                         <QRCodeDisplay
                           key={table.id}

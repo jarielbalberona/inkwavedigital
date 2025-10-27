@@ -24,7 +24,7 @@ export const PaxPrompt: React.FC<PaxPromptProps> = ({ tableId, onConfirm, onSkip
           <UserGroupIcon className="w-16 h-16 text-blue-600 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome!</h2>
           <p className="text-gray-600">
-            You're seated at <span className="font-semibold">Table {tableId.slice(-1)}</span>
+            You're seated at <span className="font-semibold">{tableId}</span>
           </p>
         </div>
 

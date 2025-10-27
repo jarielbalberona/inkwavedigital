@@ -15,9 +15,9 @@ export interface OrderItemInput {
 
 export interface CreateOrderData {
   orderId: string;
-  status: string;
+  status?: string;
   total: number;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export interface CreateOrderResponse {

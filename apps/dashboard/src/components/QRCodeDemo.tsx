@@ -1,5 +1,5 @@
 import React from 'react';
-import { QRCodeDisplay } from '../features/qr-management/components/QRCodeDisplay';
+import { QRCodeDisplay } from '../features/table-management/components/QRCodeDisplay';
 
 export const QRCodeDemo: React.FC = () => {
   // Demo venue and table IDs from our seeded data

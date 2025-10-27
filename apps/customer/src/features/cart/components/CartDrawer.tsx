@@ -5,10 +5,12 @@ import { useCreateOrder } from "../../order/hooks/mutations/useCreateOrder";
 import { useSessionStore } from "../../menu/hooks/stores/useSessionStore";
 import type { CartItem } from "../types/cart.types";
 
+import type { CreateOrderData } from "../../order/types/order.types";
+
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onCheckout: () => void;
+  onCheckout: (orderData: CreateOrderData) => void;
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheckout }) => {
@@ -26,10 +28,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
     try {
       const orderData = {
         venueId,
-        tableId,
+        tableId: tableId || undefined,
         deviceId,
-        pax,
-        notes: orderNotes,
+        pax: pax || undefined,
+        notes: orderNotes || undefined,
         items: items.map(item => ({
           itemId: item.itemId,
           quantity: item.quantity,
@@ -40,13 +42,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
       
       const result = await createOrderMutation.mutateAsync(orderData);
       
-      if (result.success) {
+      if (result) {
         clearCart();
-        onCheckout();
+        // Pass the order data to the callback
+        onCheckout(result);
         onClose();
       }
     } catch (error) {
       console.error("Order submission failed:", error);
+      alert("Failed to place order. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
