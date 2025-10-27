@@ -17,6 +17,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "drizzle:generate": "drizzle-kit generate:pg",
     "drizzle:migrate": "tsx src/migrate.ts",
+    "migrate:prod": "drizzle-kit migrate",
     "drizzle:studio": "drizzle-kit studio",
     "seed": "tsx src/seed.ts"
   },

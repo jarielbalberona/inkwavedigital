@@ -5,6 +5,9 @@
   "description": "Ink Wave Digital - QR-based café ordering platform",
   "scripts": {
     "build": "pnpm -r build",
+    "build:api": "pnpm --filter @inkwave/db build && pnpm --filter api build",
+    "build:customer": "pnpm --filter customer build",
+    "build:dashboard": "pnpm --filter dashboard build",
     "dev": "pnpm -r --workspace-concurrency=1 dev",
     "typecheck": "pnpm -r typecheck",
     "dev:api": "pnpm --filter api dev",
