@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useCreateMenuItem, useUpdateMenuItem } from "../hooks/mutations";
 import type { MenuItem, CreateMenuItemInput, UpdateMenuItemInput } from "../types/menuManagement.types";
+import { ImagePicker } from "../../image-library/components/ImagePicker";
 
 interface MenuItemFormProps {
   isOpen: boolean;
@@ -112,14 +113,12 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Image URL
+                Item Image
               </label>
-              <input
-                type="url"
+              <ImagePicker
                 value={formData.imageUrl}
-                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="https://example.com/image.jpg"
+                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                type="image"
               />
             </div>
 

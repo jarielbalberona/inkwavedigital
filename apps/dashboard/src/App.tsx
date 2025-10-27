@@ -9,6 +9,7 @@ import { VenueManagementPage } from "./features/venue-management/components/Venu
 import { useSuperAdmin } from "./hooks/useSuperAdmin";
 import { useUserRole } from "./hooks/useUserRole";
 import { VenueSelector } from "./components/VenueSelector";
+import { AuthProvider } from "./components/AuthProvider";
 import { 
   QueueListIcon, 
   Cog6ToothIcon, 
@@ -46,8 +47,9 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <SignedOut>
+    <AuthProvider>
+      <div className="min-h-screen bg-gray-50">
+        <SignedOut>
         <Routes>
           <Route path="*" element={
             <div className="min-h-screen flex items-center justify-center">
@@ -176,7 +178,8 @@ function App() {
           } />
         </Routes>
       </SignedIn>
-    </div>
+      </div>
+    </AuthProvider>
   );
 }
 

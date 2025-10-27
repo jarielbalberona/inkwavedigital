@@ -1,5 +1,5 @@
 import { injectable, inject } from "tsyringe";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import type { Database } from "@inkwave/db";
 import { venues, tables } from "@inkwave/db";
 import type { IVenueRepository } from "../../domain/repositories/IVenueRepository.js";
@@ -105,12 +105,79 @@ export class DrizzleVenueRepository implements IVenueRepository {
     return Table.restore({
       id: tableData.id,
       venueId: tableData.venueId,
+      tableNumber: tableData.tableNumber,
+      name: tableData.name || undefined,
       label: tableData.label,
+      description: tableData.description || undefined,
+      capacity: tableData.capacity || undefined,
       qrCode: tableData.qrCode || undefined,
       isActive: tableData.isActive,
       createdAt: new Date(tableData.createdAt),
       updatedAt: new Date(tableData.updatedAt),
     });
+  }
+
+  async findTableById(id: string): Promise<Table | null> {
+    const result = await this.db.query.tables.findFirst({
+      where: eq(tables.id, id),
+    });
+
+    if (!result) {
+      return null;
+    }
+
+    return this.mapTableToEntity(result);
+  }
+
+  async saveTable(table: Table): Promise<void> {
+    const tableData = {
+      id: table.id,
+      venueId: table.venueId,
+      tableNumber: table.tableNumber,
+      name: table.name || null,
+      label: table.label,
+      description: table.description || null,
+      capacity: table.capacity || null,
+      qrCode: table.qrCode || null,
+      isActive: table.isActive,
+      createdAt: table.createdAt,
+      updatedAt: table.updatedAt,
+    };
+
+    // Check if table exists
+    const existing = await this.db.query.tables.findFirst({
+      where: eq(tables.id, table.id),
+    });
+
+    if (existing) {
+      // Update existing table
+      await this.db
+        .update(tables)
+        .set(tableData)
+        .where(eq(tables.id, table.id));
+    } else {
+      // Insert new table
+      await this.db.insert(tables).values(tableData);
+    }
+  }
+
+  async deleteTable(id: string): Promise<void> {
+    await this.db.delete(tables).where(eq(tables.id, id));
+  }
+
+  async getNextTableNumber(venueId: string): Promise<number> {
+    const result = await this.db
+      .select({ maxTableNumber: tables.tableNumber })
+      .from(tables)
+      .where(eq(tables.venueId, venueId))
+      .orderBy(desc(tables.tableNumber))
+      .limit(1);
+
+    if (result.length === 0 || !result[0].maxTableNumber) {
+      return 1;
+    }
+
+    return result[0].maxTableNumber + 1;
   }
 }
 

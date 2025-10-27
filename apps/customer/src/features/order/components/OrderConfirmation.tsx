@@ -5,11 +5,13 @@ import type { OrderConfirmation } from "../types/order.types";
 interface OrderConfirmationProps {
   order: OrderConfirmation;
   onBackToMenu: () => void;
+  onViewOrders: () => void;
 }
 
 export const OrderConfirmation: React.FC<OrderConfirmationProps> = ({
   order,
   onBackToMenu,
+  onViewOrders,
 }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -44,6 +46,13 @@ export const OrderConfirmation: React.FC<OrderConfirmationProps> = ({
           </div>
 
           <div className="space-y-3">
+            <button
+              onClick={onViewOrders}
+              className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+            >
+              View Orders
+            </button>
+            
             <button
               onClick={onBackToMenu}
               className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"

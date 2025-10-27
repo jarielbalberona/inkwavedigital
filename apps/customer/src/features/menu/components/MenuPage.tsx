@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import { CategorySidebar } from "./CategorySidebar";
 import { MenuGrid } from "./MenuGrid";
 import { FloatingCartButton } from "../../cart/components/FloatingCartButton";
 import { CartDrawer } from "../../cart/components/CartDrawer";
 import { OrderConfirmation } from "../../order/components/OrderConfirmation";
+import { OrderStatusDrawer } from "../../order/components/OrderStatusDrawer";
 import { PaxPrompt } from "../../qr/components/PaxPrompt";
 import { useMenuQuery } from "../hooks/queries/useMenuQuery";
 import { useCategoriesQuery } from "../hooks/queries/useCategoriesQuery";
+import { useDeviceOrdersQuery } from "../../order/hooks/queries/useDeviceOrdersQuery";
 import { useSessionStore } from "../hooks/stores/useSessionStore";
 import { useCartStore } from "../../cart/hooks/stores/useCartStore";
 import { getCategoriesFromItems } from "../hooks/helpers/menuHelpers";
@@ -18,11 +21,18 @@ export const MenuPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isOrderStatusOpen, setIsOrderStatusOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [orderConfirmation, setOrderConfirmation] = useState<OrderConfirmationType | null>(null);
   const [showPaxPrompt, setShowPaxPrompt] = useState(false);
   
-  const { venueId, tableId, tableLabel, pax, clearSession, setSession, setPax } = useSessionStore();
+  const { venueId, tableId, tableLabel, pax, deviceId, clearSession, setSession, setPax } = useSessionStore();
+
+  // Fetch active orders for this device
+  const { data: activeOrders = [], isLoading: isOrdersLoading } = useDeviceOrdersQuery(
+    deviceId,
+    venueId || undefined
+  );
 
   // Check for required query params and handle session setup
   useEffect(() => {
@@ -30,11 +40,15 @@ export const MenuPage: React.FC = () => {
     const tableParam = searchParams.get('table');
     const labelParam = searchParams.get('label');
     
-    // If there are query params, set session from them
-    if (venueParam && tableParam && !venueId) {
-      setSession(venueParam, tableParam, undefined, undefined, labelParam || undefined);
-      // If no pax is set yet, show the pax prompt
-      if (!pax) {
+    // If there are query params, check if they match the current session
+    if (venueParam && tableParam) {
+      // If venue or table is different from stored session, replace the session
+      if (venueParam !== venueId || tableParam !== tableId) {
+        setSession(venueParam, tableParam, undefined, undefined, labelParam || undefined);
+        // Always ask for pax when switching to a different table/venue
+        setShowPaxPrompt(true);
+      } else if (!pax) {
+        // If same table but no pax set, ask for pax
         setShowPaxPrompt(true);
       }
     }
@@ -43,7 +57,7 @@ export const MenuPage: React.FC = () => {
     if (!venueParam && !tableParam && !venueId) {
       navigate('/', { replace: true });
     }
-  }, [venueId, searchParams, setSession, navigate, pax]);
+  }, [venueId, tableId, searchParams, setSession, navigate, pax]);
   
   const { data: menuData, isLoading: isMenuLoading, error } = useMenuQuery({
     venueId: venueId || "",
@@ -93,6 +107,11 @@ export const MenuPage: React.FC = () => {
     setOrderConfirmation(null);
   };
 
+  const handleViewOrders = () => {
+    setOrderConfirmation(null);
+    setIsOrderStatusOpen(true);
+  };
+
   // Show pax prompt if needed
   if (showPaxPrompt && tableId) {
     return (
@@ -110,6 +129,7 @@ export const MenuPage: React.FC = () => {
       <OrderConfirmation
         order={orderConfirmation}
         onBackToMenu={handleBackToMenu}
+        onViewOrders={handleViewOrders}
       />
     );
   }
@@ -150,6 +170,8 @@ export const MenuPage: React.FC = () => {
       </div>
     );
   }
+
+  const hasActiveOrders = activeOrders.length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -195,19 +217,21 @@ export const MenuPage: React.FC = () => {
                   )}
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  clearSession();
-                  // Clear cart as well
-                  useCartStore.getState().clearCart();
-                }}
-                className="text-gray-500 hover:text-gray-700 p-2"
-                title="Logout"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
+              
+              {/* Order Status Button - Only show if there are active orders */}
+              {hasActiveOrders && (
+                <button
+                  onClick={() => setIsOrderStatusOpen(true)}
+                  className="relative text-blue-600 hover:text-blue-700 p-2"
+                  title="View Orders"
+                >
+                  <ClipboardDocumentListIcon className="w-6 h-6" />
+                  {/* Badge showing number of active orders */}
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    {activeOrders.length}
+                  </span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -229,6 +253,14 @@ export const MenuPage: React.FC = () => {
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         onCheckout={handleCheckout}
+      />
+
+      {/* Order Status Drawer */}
+      <OrderStatusDrawer
+        isOpen={isOrderStatusOpen}
+        onClose={() => setIsOrderStatusOpen(false)}
+        orders={activeOrders}
+        isLoading={isOrdersLoading}
       />
     </div>
   );

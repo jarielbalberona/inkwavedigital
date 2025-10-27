@@ -43,11 +43,17 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       </div>
 
       {category.iconUrl && (
-        <img
-          src={category.iconUrl}
-          alt={category.name}
-          className="w-full h-32 object-cover rounded-md mb-4"
-        />
+        category.iconUrl.startsWith('http') ? (
+          <img
+            src={category.iconUrl}
+            alt={category.name}
+            className="w-full h-32 object-cover rounded-md mb-4"
+          />
+        ) : (
+          <div className="w-full h-32 flex items-center justify-center text-6xl mb-4 bg-gray-50 rounded-md">
+            {category.iconUrl}
+          </div>
+        )
       )}
 
       <div className="space-y-2">

@@ -22,6 +22,27 @@
       "when": 1761551314323,
       "tag": "0002_mean_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1761582017827,
+      "tag": "0003_yielding_mercury",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1761589012215,
+      "tag": "0004_blue_leader",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1761592470628,
+      "tag": "0005_robust_longshot",
+      "breakpoints": true
     }
   ]
 }

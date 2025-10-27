@@ -7,7 +7,7 @@ import App from "./App";
 import "./index.css";
 
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "";
-
+console.log("CLERK_PUBLISHABLE_KEY", CLERK_PUBLISHABLE_KEY);
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

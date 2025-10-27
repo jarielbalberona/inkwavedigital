@@ -2,24 +2,30 @@ import { Router } from "express";
 import { container } from "tsyringe";
 import { OrderController } from "../../../interfaces/controllers/order.controller.js";
 import { VenueController } from "../../../interfaces/controllers/venue.controller.js";
+import { requireAuth } from "../../middlewares/auth.middleware.js";
 
 export const venuesRouter = Router();
 
 const orderController = container.resolve(OrderController);
 const venueController = container.resolve(VenueController);
 
-// CRUD operations for venues
-venuesRouter.get("/", venueController.getVenues.bind(venueController));
-venuesRouter.post("/", venueController.createVenue.bind(venueController));
-venuesRouter.put("/:venueId", venueController.updateVenue.bind(venueController));
-venuesRouter.delete("/:venueId", venueController.deleteVenue.bind(venueController));
+// PROTECTED - CRUD operations for venues
+venuesRouter.get("/", requireAuth, venueController.getVenues.bind(venueController));
+venuesRouter.post("/", requireAuth, venueController.createVenue.bind(venueController));
+venuesRouter.put("/:venueId", requireAuth, venueController.updateVenue.bind(venueController));
+venuesRouter.delete("/:venueId", requireAuth, venueController.deleteVenue.bind(venueController));
 
-// Get venue info with tenant details
+// PUBLIC - Get venue info with tenant details (customers may need this)
 venuesRouter.get("/:venueId/info", venueController.getVenueInfo.bind(venueController));
 
-// Get orders for a venue
-venuesRouter.get("/:venueId/orders", orderController.getVenueOrders.bind(orderController));
+// PROTECTED - Get orders for a venue (KDS/staff only)
+venuesRouter.get("/:venueId/orders", requireAuth, orderController.getVenueOrders.bind(orderController));
 
-// Get tables for a venue
+// PUBLIC - Get tables for a venue (customers need this for QR codes)
 venuesRouter.get("/:venueId/tables", venueController.getTables.bind(venueController));
+
+// PROTECTED - Table CRUD operations
+venuesRouter.post("/:venueId/tables", requireAuth, venueController.createTable.bind(venueController));
+venuesRouter.put("/tables/:tableId", requireAuth, venueController.updateTable.bind(venueController));
+venuesRouter.delete("/tables/:tableId", requireAuth, venueController.deleteTable.bind(venueController));
 

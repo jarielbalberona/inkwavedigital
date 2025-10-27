@@ -6,6 +6,10 @@ import { GetVenuesUseCase } from "../../application/use-cases/GetVenuesUseCase.j
 import { CreateVenueUseCase } from "../../application/use-cases/CreateVenueUseCase.js";
 import { UpdateVenueUseCase } from "../../application/use-cases/UpdateVenueUseCase.js";
 import { DeleteVenueUseCase } from "../../application/use-cases/DeleteVenueUseCase.js";
+import { CreateTableUseCase } from "../../application/use-cases/CreateTableUseCase.js";
+import { UpdateTableUseCase } from "../../application/use-cases/UpdateTableUseCase.js";
+import { DeleteTableUseCase } from "../../application/use-cases/DeleteTableUseCase.js";
+import { ValidationError } from "../../shared/errors/domain-error.js";
 
 @injectable()
 export class VenueController {
@@ -15,7 +19,10 @@ export class VenueController {
     @inject(GetVenuesUseCase) private getVenuesUseCase: GetVenuesUseCase,
     @inject(CreateVenueUseCase) private createVenueUseCase: CreateVenueUseCase,
     @inject(UpdateVenueUseCase) private updateVenueUseCase: UpdateVenueUseCase,
-    @inject(DeleteVenueUseCase) private deleteVenueUseCase: DeleteVenueUseCase
+    @inject(DeleteVenueUseCase) private deleteVenueUseCase: DeleteVenueUseCase,
+    @inject(CreateTableUseCase) private createTableUseCase: CreateTableUseCase,
+    @inject(UpdateTableUseCase) private updateTableUseCase: UpdateTableUseCase,
+    @inject(DeleteTableUseCase) private deleteTableUseCase: DeleteTableUseCase
   ) {}
 
   async getTables(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -140,6 +147,72 @@ export class VenueController {
       res.json({
         success: true,
         message: "Venue deleted successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async createTable(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { venueId } = req.params;
+      const { tableNumber, name, label, description, capacity } = req.body;
+
+      if (!label) {
+        throw new ValidationError("Table label is required");
+      }
+
+      const result = await this.createTableUseCase.execute({
+        venueId,
+        tableNumber,
+        name,
+        label,
+        description,
+        capacity,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateTable(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { tableId } = req.params;
+      const { tableNumber, name, label, description, capacity, isActive } = req.body;
+
+      const result = await this.updateTableUseCase.execute({
+        id: tableId,
+        tableNumber,
+        name,
+        label,
+        description,
+        capacity,
+        isActive,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteTable(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { tableId } = req.params;
+
+      await this.deleteTableUseCase.execute({ id: tableId });
+
+      res.json({
+        success: true,
+        message: "Table deleted successfully",
       });
     } catch (error) {
       next(error);

@@ -1,5 +1,7 @@
 # Base stage
 FROM node:20-alpine AS base
+# Install build dependencies for sharp
+RUN apk add --no-cache python3 make g++ vips-dev
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
@@ -8,7 +10,9 @@ FROM base AS development
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
 COPY apps/api ./apps/api
 COPY packages ./packages
+# Install dependencies and rebuild sharp
 RUN pnpm install --frozen-lockfile
+RUN pnpm rebuild sharp
 WORKDIR /app/apps/api
 CMD ["pnpm", "dev"]
 

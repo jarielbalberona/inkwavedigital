@@ -17,6 +17,7 @@ export const menuCategories = pgTable("menu_categories", {
         .references(() => menus.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     sortIndex: integer("sort_index").notNull().default(0),
+    iconUrl: text("icon_url"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

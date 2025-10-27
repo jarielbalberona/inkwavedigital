@@ -107,11 +107,18 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
                     {/* Icon/Emoji */}
                     <div className="flex justify-center md:justify-start mb-1 md:mb-0">
                       {category.iconUrl ? (
-                        <img
-                          src={category.iconUrl}
-                          alt={category.name}
-                          className="w-6 h-6 md:w-8 md:h-8 rounded object-cover"
-                        />
+                        // Check if it's a URL (starts with http) or emoji
+                        category.iconUrl.startsWith('http') ? (
+                          <img
+                            src={category.iconUrl}
+                            alt={category.name}
+                            className="w-6 h-6 md:w-8 md:h-8 rounded object-cover"
+                          />
+                        ) : (
+                          <div className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-lg md:text-xl">
+                            {category.iconUrl}
+                          </div>
+                        )
                       ) : (
                         <div className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-lg md:text-xl">
                           {icon}

@@ -44,19 +44,19 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
     .filter(opt => opt.required)
     .every(opt => selectedOptions[opt.id]?.length > 0);
 
+  const DEFAULT_IMAGE = "https://pub-41bef80e05e044e8a7e02c461f986c84.r2.dev/a1088200-e822-4a1d-b796-ff6abf742155/1761589977537-wjwzl8.jpg";
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
       {/* Image */}
-      {item.imageUrl && (
-        <div className="aspect-w-16 aspect-h-9 bg-gray-200">
-          <img
-            src={item.imageUrl}
-            alt={item.name}
-            className="w-full h-48 object-cover"
-            loading="lazy"
-          />
-        </div>
-      )}
+      <div className="aspect-w-16 aspect-h-9 bg-gray-200">
+        <img
+          src={item.imageUrl || DEFAULT_IMAGE}
+          alt={item.name}
+          className="w-full h-48 object-cover"
+          loading="lazy"
+        />
+      </div>
 
       {/* Content */}
       <div className="p-4">

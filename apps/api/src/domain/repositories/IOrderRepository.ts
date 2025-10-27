@@ -28,7 +28,7 @@ export interface IOrderRepository {
   /**
    * Find orders by device ID (for anonymous customers)
    */
-  findByDeviceId(deviceId: string): Promise<Order[]>;
+  findByDeviceId(deviceId: string, venueId?: string): Promise<Order[]>;
 
   /**
    * Delete an order
@@ -44,4 +44,3 @@ export interface IOrderRepository {
     dateTo?: Date;
   }): Promise<number>;
 }
-

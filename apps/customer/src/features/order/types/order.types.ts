@@ -32,3 +32,27 @@ export interface OrderConfirmation {
   estimatedWaitTime?: number;
   createdAt: string;
 }
+
+export interface OrderItem {
+  id: string;
+  itemId: string;
+  itemName: string;
+  quantity: number;
+  unitPrice: number;
+  notes?: string;
+  optionsJson?: string;
+}
+
+export interface ActiveOrder {
+  id: string;
+  venueId: string;
+  tableId?: string;
+  status: string;
+  total: number;
+  deviceId: string;
+  pax?: number;
+  notes?: string;
+  items: OrderItem[];
+  createdAt: string;
+  updatedAt: string;
+}

@@ -18,4 +18,5 @@ export * from "./wifi.js";
 export * from "./superAdmins.js";
 export * from "./auditLogs.js";
 export * from "./venueStaff.js";
+export * from "./images.js";
 

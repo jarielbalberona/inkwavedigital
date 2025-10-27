@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { createLogger } from "@inkwave/utils";
 import { UnauthorizedError } from "../../shared/errors/domain-error.js";
+import { clerkClient, verifyToken } from "@clerk/clerk-sdk-node";
 
 const logger = createLogger("auth-middleware");
 
@@ -18,14 +19,67 @@ declare global {
 }
 
 /**
- * Middleware to verify authentication
- * For development: allows any request
- * In production: verify Clerk JWT token
+ * Middleware to verify authentication using Clerk
+ * Uses networkless token verification (recommended by Clerk)
+ * NO MOCK AUTH - Real Clerk authentication required
  */
-export function requireAuth(req: Request, res: Response, next: NextFunction): void {
-  // For development - accept any request
-  // In production, implement Clerk token verification
-  next();
+export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      logger.warn("No authorization header found");
+      throw new UnauthorizedError("Authentication required");
+    }
+
+    const token = authHeader.substring(7); // Remove "Bearer " prefix
+
+    // Verify the JWT token using networkless verification (recommended)
+    const payload = await verifyToken(token, {
+      secretKey: process.env.CLERK_SECRET_KEY,
+    });
+    
+    if (!payload || !payload.sub) {
+      logger.warn("Invalid token payload");
+      throw new UnauthorizedError("Invalid authentication token");
+    }
+
+    const userId = payload.sub;
+
+    // Get user details from Clerk to extract metadata
+    const user = await clerkClient.users.getUser(userId);
+    
+    if (!user) {
+      logger.warn({ userId }, "User not found in Clerk");
+      throw new UnauthorizedError("User not found");
+    }
+
+    // Set auth data on request
+    req.auth = {
+      userId,
+      email: user.emailAddresses[0]?.emailAddress || "",
+    };
+
+    // Get tenant ID from user's public metadata
+    const tenantId = user.publicMetadata?.tenantId as string | undefined;
+    
+    if (tenantId) {
+      req.tenantId = tenantId;
+    }
+
+    logger.info(
+      { userId, email: req.auth.email, tenantId },
+      "User authenticated successfully"
+    );
+
+    next();
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return next(error);
+    }
+    logger.error({ error }, "Authentication error");
+    return next(new UnauthorizedError("Authentication failed"));
+  }
 }
 
 /**

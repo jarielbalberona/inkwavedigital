@@ -10,8 +10,12 @@ export interface GetVenueTablesInput {
 export interface GetVenueTablesOutput {
   tables: Array<{
     id: string;
-    label: string;
     venueId: string;
+    tableNumber: number;
+    name?: string;
+    label: string;
+    description?: string;
+    capacity?: number;
     qrCode?: string;
     isActive: boolean;
     createdAt: string;
@@ -47,8 +51,12 @@ export class GetVenueTablesUseCase {
     return {
       tables: tables.map((table) => ({
         id: table.id,
-        label: table.label,
         venueId: table.venueId,
+        tableNumber: table.tableNumber,
+        name: table.name,
+        label: table.label,
+        description: table.description,
+        capacity: table.capacity,
         qrCode: table.qrCode,
         isActive: table.isActive,
         createdAt: table.createdAt.toISOString(),

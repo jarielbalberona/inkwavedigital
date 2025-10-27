@@ -3,6 +3,7 @@ import type { Request, Response, NextFunction } from "express";
 import { CreateOrderUseCase } from "../../application/use-cases/CreateOrderUseCase.js";
 import { UpdateOrderStatusUseCase } from "../../application/use-cases/UpdateOrderStatusUseCase.js";
 import { GetVenueOrdersUseCase } from "../../application/use-cases/GetVenueOrdersUseCase.js";
+import { GetDeviceOrdersUseCase } from "../../application/use-cases/GetDeviceOrdersUseCase.js";
 import { ValidationError } from "../../shared/errors/domain-error.js";
 
 @injectable()
@@ -10,7 +11,8 @@ export class OrderController {
   constructor(
     @inject(CreateOrderUseCase) private createOrderUseCase: CreateOrderUseCase,
     @inject(UpdateOrderStatusUseCase) private updateOrderStatusUseCase: UpdateOrderStatusUseCase,
-    @inject(GetVenueOrdersUseCase) private getVenueOrdersUseCase: GetVenueOrdersUseCase
+    @inject(GetVenueOrdersUseCase) private getVenueOrdersUseCase: GetVenueOrdersUseCase,
+    @inject(GetDeviceOrdersUseCase) private getDeviceOrdersUseCase: GetDeviceOrdersUseCase
   ) {}
 
   async create(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -72,6 +74,29 @@ export class OrderController {
         status: status as string | undefined,
         limit: limit ? parseInt(limit as string) : undefined,
         offset: offset ? parseInt(offset as string) : undefined,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getDeviceOrders(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { deviceId } = req.params;
+      const { venueId } = req.query;
+
+      if (!deviceId) {
+        throw new ValidationError("Device ID is required");
+      }
+
+      const result = await this.getDeviceOrdersUseCase.execute({
+        deviceId,
+        venueId: venueId as string | undefined,
       });
 
       res.json({

@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
 import { tenants } from "./tenants";
 export const venues = pgTable("venues", {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -17,7 +17,11 @@ export const tables = pgTable("tables", {
     venueId: uuid("venue_id")
         .notNull()
         .references(() => venues.id, { onDelete: "cascade" }),
+    tableNumber: integer("table_number").notNull(),
+    name: text("name"),
     label: text("label").notNull(),
+    description: text("description"),
+    capacity: integer("capacity"),
     qrCode: text("qr_code"),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),

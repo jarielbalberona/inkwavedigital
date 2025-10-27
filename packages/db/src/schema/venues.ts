@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
 import { tenants } from "./tenants.js";
 
 export const venues = pgTable("venues", {
@@ -19,7 +19,11 @@ export const tables = pgTable("tables", {
   venueId: uuid("venue_id")
     .notNull()
     .references(() => venues.id, { onDelete: "cascade" }),
-  label: text("label").notNull(),
+  tableNumber: integer("table_number").notNull(), // Incremental number for the table
+  name: text("name"), // Optional custom name (e.g., "Window Seat", "Private Room")
+  label: text("label").notNull(), // Display label (e.g., "Table 1", "Table A")
+  description: text("description"), // Optional description
+  capacity: integer("capacity"), // Number of people the table can accommodate
   qrCode: text("qr_code"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),

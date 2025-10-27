@@ -169,9 +169,13 @@ export class DrizzleOrderRepository implements IOrderRepository {
     );
   }
 
-  async findByDeviceId(deviceId: string): Promise<Order[]> {
+  async findByDeviceId(deviceId: string, venueId?: string): Promise<Order[]> {
+    const conditions = venueId
+      ? and(eq(orders.deviceId, deviceId), eq(orders.venueId, venueId))
+      : eq(orders.deviceId, deviceId);
+
     const results = await this.db.query.orders.findMany({
-      where: eq(orders.deviceId, deviceId),
+      where: conditions,
       orderBy: [desc(orders.createdAt)],
     });
 
