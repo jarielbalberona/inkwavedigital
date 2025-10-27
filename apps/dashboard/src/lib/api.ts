@@ -14,16 +14,20 @@ export const api = {
     const response = await apiClient.get<T>(url, config);
     return response.data;
   },
-  post: async <T>(url: string, data: unknown): Promise<T> => {
-    const response = await apiClient.post<T>(url, data);
+  post: async <T>(url: string, data: unknown, config?: AxiosRequestConfig): Promise<T> => {
+    const response = await apiClient.post<T>(url, data, config);
     return response.data;
   },
-  patch: async <T>(url: string, data: unknown): Promise<T> => {
-    const response = await apiClient.patch<T>(url, data);
+  patch: async <T>(url: string, data: unknown, config?: AxiosRequestConfig): Promise<T> => {
+    const response = await apiClient.patch<T>(url, data, config);
     return response.data;
   },
-  delete: async <T>(url: string): Promise<T> => {
-    const response = await apiClient.delete<T>(url);
+  put: async <T>(url: string, data: unknown, config?: AxiosRequestConfig): Promise<T> => {
+    const response = await apiClient.put<T>(url, data, config);
+    return response.data;
+  },
+  delete: async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
+    const response = await apiClient.delete<T>(url, config);
     return response.data;
   },
 };

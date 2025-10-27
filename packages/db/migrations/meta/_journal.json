@@ -15,6 +15,13 @@
       "when": 1761504644992,
       "tag": "0001_square_grey_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1761551314323,
+      "tag": "0002_mean_bedlam",
+      "breakpoints": true
     }
   ]
 }

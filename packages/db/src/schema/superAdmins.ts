@@ -6,10 +6,9 @@ export const superAdmins = pgTable("super_admins", {
   email: text("email").notNull(),
   role: text("role").notNull().default("super_admin"), // 'super_admin' | 'support' | 'billing_admin'
   permissions: jsonb("permissions").default({}).notNull(),
-  addedBy: uuid("added_by").references(() => superAdmins.id, { onDelete: "set null" }),
+  addedBy: uuid("added_by"),
   status: text("status").notNull().default("active"), // 'active' | 'suspended'
   lastLogin: timestamp("last_login"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
-

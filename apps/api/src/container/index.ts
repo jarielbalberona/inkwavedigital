@@ -10,6 +10,7 @@ import { DrizzleVenueRepository } from "../infrastructure/persistence/DrizzleVen
 import { DrizzleTenantRepository } from "../infrastructure/persistence/DrizzleTenantRepository.js";
 import { DrizzleSuperAdminRepository } from "../infrastructure/persistence/DrizzleSuperAdminRepository.js";
 import { DrizzleUserRepository } from "../infrastructure/persistence/DrizzleUserRepository.js";
+import { DrizzleVenueStaffRepository } from "../infrastructure/persistence/DrizzleVenueStaffRepository.js";
 // import { WebSocketManager } from "../infrastructure/websocket/WebSocketManager.js";
 
 // Use Cases
@@ -26,6 +27,10 @@ import { DeleteCategoryUseCase } from "../application/use-cases/DeleteCategoryUs
 import { CreateMenuItemUseCase } from "../application/use-cases/CreateMenuItemUseCase.js";
 import { GetCategoryItemsUseCase } from "../application/use-cases/GetCategoryItemsUseCase.js";
 import { GetVenueInfoUseCase } from "../application/use-cases/GetVenueInfoUseCase.js";
+import { GetVenuesUseCase } from "../application/use-cases/GetVenuesUseCase.js";
+import { CreateVenueUseCase } from "../application/use-cases/CreateVenueUseCase.js";
+import { UpdateVenueUseCase } from "../application/use-cases/UpdateVenueUseCase.js";
+import { DeleteVenueUseCase } from "../application/use-cases/DeleteVenueUseCase.js";
 
 // Controllers
 import { HealthController } from "../interfaces/controllers/health.controller.js";
@@ -71,6 +76,10 @@ container.register("DrizzleSuperAdminRepository", {
 
 container.register("IUserRepository", {
   useClass: DrizzleUserRepository,
+});
+
+container.register("IVenueStaffRepository", {
+  useClass: DrizzleVenueStaffRepository,
 });
 
 // Register use cases
@@ -124,6 +133,22 @@ container.register("GetCategoryItemsUseCase", {
 
 container.register("GetVenueInfoUseCase", {
   useClass: GetVenueInfoUseCase,
+});
+
+container.register("GetVenuesUseCase", {
+  useClass: GetVenuesUseCase,
+});
+
+container.register("CreateVenueUseCase", {
+  useClass: CreateVenueUseCase,
+});
+
+container.register("UpdateVenueUseCase", {
+  useClass: UpdateVenueUseCase,
+});
+
+container.register("DeleteVenueUseCase", {
+  useClass: DeleteVenueUseCase,
 });
 
 // Register controllers
