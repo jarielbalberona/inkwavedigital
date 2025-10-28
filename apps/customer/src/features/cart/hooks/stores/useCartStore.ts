@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { CartItem, CartStore } from "../../types/cart.types";
+import type { CartItem, CartStore, SelectedOption } from "../../types/cart.types";
 import type { MenuItem } from "../../../menu/types/menu.types";
-import { getItemTotalPrice } from "../../../menu/hooks/helpers/menuHelpers";
 
 export const useCartStore = create<CartStore>()(
   persist(
@@ -10,37 +9,32 @@ export const useCartStore = create<CartStore>()(
       items: [],
       orderNotes: "",
       
-      addItem: (item: MenuItem, selectedOptions: Record<string, string[]> = {}) => {
-        const totalPrice = getItemTotalPrice(item, selectedOptions);
+      addItem: (item: MenuItem, quantity: number, selectedOptions: SelectedOption[], notes?: string) => {
+        // Calculate item price (base + option deltas)
+        let itemPrice = item.price;
+        selectedOptions.forEach((option) => {
+          option.values.forEach((value) => {
+            itemPrice += value.priceDelta;
+          });
+        });
+        
+        const totalPrice = itemPrice * quantity;
+        
         const cartItem: CartItem = {
-          id: `${item.id}-${JSON.stringify(selectedOptions)}`,
+          id: `${item.id}-${Date.now()}-${Math.random()}`, // Unique ID for each cart entry
           itemId: item.id,
           name: item.name,
-          price: item.price,
-          quantity: 1,
+          basePrice: item.price,
+          quantity,
           imageUrl: item.imageUrl,
           selectedOptions,
+          notes,
           totalPrice,
         };
         
-        set((state) => {
-          const existingItem = state.items.find(
-            (i) => i.itemId === item.id && 
-            JSON.stringify(i.selectedOptions) === JSON.stringify(selectedOptions)
-          );
-          
-          if (existingItem) {
-            return {
-              items: state.items.map((i) =>
-                i.id === existingItem.id
-                  ? { ...i, quantity: i.quantity + 1, totalPrice: i.totalPrice + totalPrice }
-                  : i
-              ),
-            };
-          }
-          
-          return { items: [...state.items, cartItem] };
-        });
+        set((state) => ({
+          items: [...state.items, cartItem],
+        }));
       },
       
       removeItem: (id: string) => {
@@ -56,11 +50,19 @@ export const useCartStore = create<CartStore>()(
         }
         
         set((state) => ({
-          items: state.items.map((item) =>
-            item.id === id
-              ? { ...item, quantity, totalPrice: item.price * quantity }
-              : item
-          ),
+          items: state.items.map((item) => {
+            if (item.id === id) {
+              // Recalculate item price (base + option deltas)
+              let itemPrice = item.basePrice;
+              item.selectedOptions.forEach((option) => {
+                option.values.forEach((value) => {
+                  itemPrice += value.priceDelta;
+                });
+              });
+              return { ...item, quantity, totalPrice: itemPrice * quantity };
+            }
+            return item;
+          }),
         }));
       },
       

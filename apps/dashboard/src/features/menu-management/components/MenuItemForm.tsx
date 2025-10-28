@@ -3,6 +3,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useCreateMenuItem, useUpdateMenuItem } from "../hooks/mutations";
 import type { MenuItem, CreateMenuItemInput, UpdateMenuItemInput } from "../types/menuManagement.types";
 import { ImagePicker } from "../../image-library/components/ImagePicker";
+import { ItemOptionsManager } from "./ItemOptionsManager";
 
 interface MenuItemFormProps {
   isOpen: boolean;
@@ -57,8 +58,8 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
       
       <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
             <h2 className="text-lg font-semibold text-gray-900">
               {item ? "Edit Menu Item" : "Add Menu Item"}
             </h2>
@@ -135,7 +136,28 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
               </label>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4">
+            {/* Options Section */}
+            <div className="border-t border-gray-200 pt-6">
+              {item ? (
+                <ItemOptionsManager itemId={item.id} />
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium text-gray-900">Item Options / Modifiers</h3>
+                  </div>
+                  <div className="text-center py-8 bg-blue-50 rounded-lg border-2 border-dashed border-blue-300">
+                    <p className="text-sm text-gray-700 mb-1">
+                      Options can be added after creating the item
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Save this item first, then edit it to add options like Size, Add-ons, or Customizations
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
               <button
                 type="button"
                 onClick={onClose}

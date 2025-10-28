@@ -5,6 +5,8 @@ import { MenuItemForm } from "./MenuItemForm";
 import { CategoryCard } from "./CategoryCard";
 import { useCategoriesQuery } from "../hooks/queries/useCategoriesQuery";
 import { useDeleteCategory } from "../hooks/mutations";
+import { menuItemsApi } from "../api/menuItemsApi";
+import { useQueryClient } from "@tanstack/react-query";
 import type { MenuCategory, MenuItem } from "../types/menuManagement.types";
 
 interface MenuManagementPageProps {
@@ -20,6 +22,7 @@ export const MenuManagementPage: React.FC<MenuManagementPageProps> = ({ venueId 
 
   const { data: categoriesData, isLoading } = useCategoriesQuery(venueId);
   const deleteCategoryMutation = useDeleteCategory(venueId);
+  const queryClient = useQueryClient();
 
   // Ensure categories is always an array
   const categories = Array.isArray(categoriesData) ? categoriesData : [];
@@ -46,9 +49,23 @@ export const MenuManagementPage: React.FC<MenuManagementPageProps> = ({ venueId 
     setShowMenuItemForm(true);
   };
 
-  const handleEditMenuItem = (item: MenuItem) => {
+  const handleEditMenuItem = (item: MenuItem, category: MenuCategory) => {
+    setSelectedCategory(category);
     setEditingItem(item);
     setShowMenuItemForm(true);
+  };
+
+  const handleDeleteMenuItem = async (itemId: string, categoryId: string) => {
+    if (window.confirm("Are you sure you want to delete this menu item?")) {
+      try {
+        await menuItemsApi.deleteMenuItem(itemId);
+        // Invalidate the query to refresh the menu items list
+        queryClient.invalidateQueries({ queryKey: ["menuItems", categoryId] });
+      } catch (error) {
+        console.error("Failed to delete menu item:", error);
+        alert("Failed to delete menu item. Please try again.");
+      }
+    }
   };
 
   if (isLoading) {
@@ -102,6 +119,8 @@ export const MenuManagementPage: React.FC<MenuManagementPageProps> = ({ venueId 
                 onEdit={() => handleEditCategory(category)}
                 onDelete={() => handleDeleteCategory(category.id)}
                 onAddItem={() => handleCreateMenuItem(category)}
+                onEditItem={(item) => handleEditMenuItem(item, category)}
+                onDeleteItem={(itemId) => handleDeleteMenuItem(itemId, category.id)}
               />
             ))}
           </div>

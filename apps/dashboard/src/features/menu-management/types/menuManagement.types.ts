@@ -72,6 +72,32 @@ export interface UpdateMenuItemInput {
   isAvailable?: boolean;
 }
 
+export interface CreateItemOptionInput {
+  itemId: string;
+  name: string;
+  type: "select" | "multi";
+  required: boolean;
+}
+
+export interface UpdateItemOptionInput {
+  id: string;
+  name?: string;
+  type?: "select" | "multi";
+  required?: boolean;
+}
+
+export interface CreateOptionValueInput {
+  optionId: string;
+  label: string;
+  priceDelta: number;
+}
+
+export interface UpdateOptionValueInput {
+  id: string;
+  label?: string;
+  priceDelta?: number;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data: T;

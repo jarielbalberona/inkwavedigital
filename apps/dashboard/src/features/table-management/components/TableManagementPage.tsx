@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { QrCodeIcon, PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { QRCodeDisplay } from "./QRCodeDisplay";
 import { TableForm, type TableFormData } from "./TableForm";
@@ -7,6 +8,7 @@ import { useTablesQuery } from "../hooks/useTablesQuery";
 import { useCreateTable } from "../hooks/useCreateTable";
 import { useUpdateTable } from "../hooks/useUpdateTable";
 import { useDeleteTable } from "../hooks/useDeleteTable";
+import { venuesApi } from "../../venue-management/api/venuesApi";
 import type { Table } from "../types/table.types";
 
 interface TableManagementPageProps {
@@ -20,6 +22,11 @@ export const TableManagementPage: React.FC<TableManagementPageProps> = ({ venueI
   const [deletingTableId, setDeletingTableId] = useState<string | null>(null);
   
   const { data: tables, isLoading, error } = useTablesQuery(venueId);
+  const { data: venueInfo, isLoading: isLoadingVenueInfo } = useQuery({
+    queryKey: ["venueInfo", venueId],
+    queryFn: () => venuesApi.getVenueInfo(venueId),
+    enabled: !!venueId,
+  });
   const createTable = useCreateTable();
   const updateTable = useUpdateTable(venueId);
   const deleteTable = useDeleteTable(venueId);
@@ -90,7 +97,7 @@ export const TableManagementPage: React.FC<TableManagementPageProps> = ({ venueI
     setEditingTable(null);
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingVenueInfo) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -244,7 +251,9 @@ export const TableManagementPage: React.FC<TableManagementPageProps> = ({ venueI
                   {tables
                     .filter(table => generatedTables.has(table.id))
                     .map((table) => {
-                      const qrUrl = generateQRData(venueId, table.id, table.label);
+                      const qrUrl = venueInfo?.venue?.tenant?.slug && venueInfo?.venue?.slug
+                        ? generateQRData(venueInfo.venue.tenant.slug, venueInfo.venue.slug, table.id, table.label)
+                        : "";
                       return (
                         <QRCodeDisplay
                           key={table.id}

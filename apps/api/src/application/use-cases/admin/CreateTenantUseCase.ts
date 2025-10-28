@@ -71,6 +71,17 @@ export class CreateTenantUseCase {
       throw new ValidationError(`Tenant with slug "${input.slug}" already exists`);
     }
 
+    // Validate owner email before creating tenant
+    if (input.ownerEmail) {
+      const existingUser = await this.userRepository.findByEmail(input.ownerEmail);
+      if (existingUser && existingUser.tenantId) {
+        throw new ValidationError(
+          `Email "${input.ownerEmail}" is already associated with another tenant. ` +
+          `Each email can only be the owner of one tenant.`
+        );
+      }
+    }
+
     // Create tenant
     const tenant = Tenant.create({
       name: input.name.trim(),
@@ -84,7 +95,7 @@ export class CreateTenantUseCase {
     if (input.ownerEmail) {
       logger.info({ email: input.ownerEmail, tenantId: tenant.id }, "Processing owner invitation");
       
-      // Always create user record first
+      // Create user record
       try {
         await this.userRepository.create({
           clerkUserId: null, // Will be set when user signs in
@@ -95,6 +106,7 @@ export class CreateTenantUseCase {
         logger.info({ email: input.ownerEmail, tenantId: tenant.id }, "User record created");
       } catch (error) {
         logger.error({ error, email: input.ownerEmail }, "Failed to create user record");
+        throw error;
       }
       
       // Try to send Clerk invitation (may fail if key not configured)

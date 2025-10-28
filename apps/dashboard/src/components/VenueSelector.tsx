@@ -2,6 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { venuesApi } from "../features/venue-management/api/venuesApi";
 import { useTenantId } from "../hooks/useTenantId";
 import { useMemo, useEffect } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 interface VenueSelectorProps {
   selectedVenueId: string | null;
@@ -58,16 +65,17 @@ export function VenueSelector({ selectedVenueId, onVenueChange, role, assignedVe
   }
 
   return (
-    <select
-      value={selectedVenueId || ""}
-      onChange={(e) => onVenueChange(e.target.value)}
-      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-    >
-      {venues.map((venue) => (
-        <option key={venue.id} value={venue.id}>
-          {venue.name}
-        </option>
-      ))}
-    </select>
+    <Select value={selectedVenueId || ""} onValueChange={onVenueChange}>
+      <SelectTrigger className="w-[200px]">
+        <SelectValue placeholder="Select a venue" />
+      </SelectTrigger>
+      <SelectContent>
+        {venues.map((venue) => (
+          <SelectItem key={venue.id} value={venue.id}>
+            {venue.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

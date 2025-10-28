@@ -1,6 +1,8 @@
 import { injectable, inject } from "tsyringe";
 import { Venue } from "../../domain/entities/Venue.js";
+import { Menu } from "../../domain/entities/Menu.js";
 import type { IVenueRepository } from "../../domain/repositories/IVenueRepository.js";
+import type { IMenuRepository } from "../../domain/repositories/IMenuRepository.js";
 
 export interface CreateVenueInput {
   tenantId: string;
@@ -20,11 +22,22 @@ export interface CreateVenueOutput {
     createdAt: string;
     updatedAt: string;
   };
+  menu: {
+    id: string;
+    venueId: string;
+    name: string;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
 }
 
 @injectable()
 export class CreateVenueUseCase {
-  constructor(@inject("IVenueRepository") private venueRepository: IVenueRepository) {}
+  constructor(
+    @inject("IVenueRepository") private venueRepository: IVenueRepository,
+    @inject("IMenuRepository") private menuRepository: IMenuRepository
+  ) {}
 
   async execute(input: CreateVenueInput): Promise<CreateVenueOutput> {
     // Check if venue with same slug already exists for this tenant
@@ -47,6 +60,15 @@ export class CreateVenueUseCase {
 
     await this.venueRepository.save(venue);
 
+    // Create default menu for the venue (set as active)
+    const defaultMenu = Menu.create({
+      venueId: venue.id,
+      name: "Main Menu",
+      isActive: true,
+    });
+
+    await this.menuRepository.saveMenu(defaultMenu);
+
     return {
       venue: {
         id: venue.id,
@@ -57,6 +79,7 @@ export class CreateVenueUseCase {
         createdAt: venue.createdAt.toISOString(),
         updatedAt: venue.updatedAt.toISOString(),
       },
+      menu: defaultMenu.toJSON(),
     };
   }
 }

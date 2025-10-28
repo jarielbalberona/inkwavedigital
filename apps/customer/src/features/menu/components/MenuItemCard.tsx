@@ -1,48 +1,36 @@
 import React, { useState } from "react";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import type { MenuItem } from "../types/menu.types";
-import { formatPrice, getItemTotalPrice } from "../hooks/helpers/menuHelpers";
+import { formatPrice } from "../hooks/helpers/menuHelpers";
 import { useCartStore } from "../../cart/hooks/stores/useCartStore";
+import { MenuItemModal } from "./MenuItemModal";
+import type { SelectedOption } from "../../cart/types/cart.types";
 
 interface MenuItemCardProps {
   item: MenuItem;
 }
 
 export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string[]>>({});
-  const [showOptions, setShowOptions] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { addItem } = useCartStore();
 
   const handleAddToCart = () => {
-    if (item.options.length > 0 && !showOptions) {
-      setShowOptions(true);
-      return;
+    // If item has options, open modal; otherwise add directly
+    if (item.options.length > 0) {
+      setIsModalOpen(true);
+    } else {
+      addItem(item, 1, [], undefined);
     }
-    
-    addItem(item, selectedOptions);
-    setShowOptions(false);
-    setSelectedOptions({});
   };
 
-  const handleOptionChange = (optionId: string, valueId: string, isMulti: boolean) => {
-    setSelectedOptions(prev => {
-      const current = prev[optionId] || [];
-      if (isMulti) {
-        const newValues = current.includes(valueId)
-          ? current.filter(id => id !== valueId)
-          : [...current, valueId];
-        return { ...prev, [optionId]: newValues };
-      } else {
-        return { ...prev, [optionId]: [valueId] };
-      }
-    });
+  const handleAddToCartFromModal = (
+    item: MenuItem,
+    quantity: number,
+    selectedOptions: SelectedOption[],
+    notes?: string
+  ) => {
+    addItem(item, quantity, selectedOptions, notes);
   };
-
-  const totalPrice = getItemTotalPrice(item, selectedOptions);
-  const hasRequiredOptions = item.options.some(opt => opt.required);
-  const allRequiredSelected = item.options
-    .filter(opt => opt.required)
-    .every(opt => selectedOptions[opt.id]?.length > 0);
 
   const DEFAULT_IMAGE = "https://pub-41bef80e05e044e8a7e02c461f986c84.r2.dev/a1088200-e822-4a1d-b796-ff6abf742155/1761589977537-wjwzl8.jpg";
 
@@ -63,67 +51,43 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
           <span className="text-lg font-bold text-green-600">
-            {formatPrice(totalPrice)}
+            {formatPrice(item.price)}
           </span>
         </div>
 
         {item.description && (
-          <p className="text-gray-600 text-sm mb-3">{item.description}</p>
+          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{item.description}</p>
         )}
 
-        {/* Options */}
-        {showOptions && item.options.length > 0 && (
-          <div className="space-y-3 mb-4">
-            {item.options.map((option) => (
-              <div key={option.id}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {option.name} {option.required && <span className="text-red-500">*</span>}
-                </label>
-                <div className="space-y-2">
-                  {option.values.map((value) => (
-                    <label key={value.id} className="flex items-center">
-                      <input
-                        type={option.type === "multi" ? "checkbox" : "radio"}
-                        name={option.id}
-                        value={value.id}
-                        checked={selectedOptions[option.id]?.includes(value.id) || false}
-                        onChange={() => handleOptionChange(option.id, value.id, option.type === "multi")}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-gray-700">
-                        {value.label}
-                        {value.priceDelta > 0 && (
-                          <span className="text-green-600 ml-1">
-                            (+{formatPrice(value.priceDelta)})
-                          </span>
-                        )}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Show options indicator */}
+        {item.options.length > 0 && (
+          <p className="text-xs text-gray-500 mb-3">
+            {item.options.length} customization option{item.options.length !== 1 ? "s" : ""} available
+          </p>
         )}
 
         {/* Add to Cart Button */}
         <button
           onClick={handleAddToCart}
-          disabled={!item.isAvailable || (hasRequiredOptions && !allRequiredSelected)}
+          disabled={!item.isAvailable}
           className={`w-full flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors ${
-            !item.isAvailable || (hasRequiredOptions && !allRequiredSelected)
+            !item.isAvailable
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-blue-600 text-white hover:bg-blue-700"
           }`}
         >
           <PlusIcon className="w-5 h-5 mr-2" />
-          {!item.isAvailable
-            ? "Unavailable"
-            : showOptions
-            ? "Add to Cart"
-            : "Add to Cart"}
+          {!item.isAvailable ? "Unavailable" : "Add to Cart"}
         </button>
       </div>
+
+      {/* Menu Item Modal */}
+      <MenuItemModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        item={item}
+        onAddToCart={handleAddToCartFromModal}
+      />
     </div>
   );
 };

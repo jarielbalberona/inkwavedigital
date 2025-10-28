@@ -72,12 +72,59 @@ export class CreateOrderUseCase {
         throw new ValidationError(`Menu item "${menuItem.name}" is not available`);
       }
 
+      // Calculate unit price including option deltas
+      let unitPrice = menuItem.price.toNumber();
+      
+      // Parse and validate options if provided
+      if (inputItem.optionsJson) {
+        try {
+          const selectedOptions = typeof inputItem.optionsJson === 'string' 
+            ? JSON.parse(inputItem.optionsJson) 
+            : inputItem.optionsJson;
+
+          // Fetch item options to validate and calculate price
+          const itemOptions = await this.menuRepository.findItemOptions(menuItem.id);
+          
+          // Validate required options are selected
+          for (const option of itemOptions) {
+            if (option.required) {
+              const selectedOption = Array.isArray(selectedOptions) 
+                ? selectedOptions.find((so: any) => so.optionId === option.id)
+                : null;
+              
+              if (!selectedOption || !selectedOption.values || selectedOption.values.length === 0) {
+                throw new ValidationError(`Required option "${option.name}" must be selected for item "${menuItem.name}"`);
+              }
+            }
+          }
+
+          // Calculate price deltas from selected options
+          if (Array.isArray(selectedOptions)) {
+            for (const selectedOption of selectedOptions) {
+              if (selectedOption.values && Array.isArray(selectedOption.values)) {
+                for (const value of selectedOption.values) {
+                  if (typeof value.priceDelta === 'number') {
+                    unitPrice += value.priceDelta;
+                  }
+                }
+              }
+            }
+          }
+        } catch (error) {
+          if (error instanceof ValidationError) {
+            throw error;
+          }
+          this.logger.warn({ error, itemId: inputItem.itemId }, "Failed to parse options JSON");
+          throw new ValidationError(`Invalid options format for item "${menuItem.name}"`);
+        }
+      }
+
       orderItems.push({
         id: crypto.randomUUID(),
         itemId: menuItem.id,
         itemName: menuItem.name,
         quantity: inputItem.quantity,
-        unitPrice: menuItem.price,
+        unitPrice: Money.fromAmount(unitPrice),
         notes: inputItem.notes,
         optionsJson: inputItem.optionsJson,
       });

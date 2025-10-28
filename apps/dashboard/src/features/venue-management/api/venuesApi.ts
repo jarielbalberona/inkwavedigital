@@ -37,6 +37,19 @@ export interface UpdateVenueInput {
   timezone?: string;
 }
 
+export interface VenueInfo {
+  venue: {
+    id: string;
+    name: string;
+    slug: string;
+    tenant: {
+      id: string;
+      name: string;
+      slug: string;
+    };
+  };
+}
+
 export const venuesApi = {
   getVenues: async (tenantId: string): Promise<GetVenuesResponse> => {
     const response = await api.get<ApiResponse<GetVenuesResponse>>("/api/v1/venues", {
@@ -46,6 +59,11 @@ export const venuesApi = {
     });
     // response = { success: true, data: { venues: [...] } }
     // so response.data = { venues: [...] }
+    return response.data;
+  },
+
+  getVenueInfo: async (venueId: string): Promise<VenueInfo> => {
+    const response = await api.get<ApiResponse<VenueInfo>>(`/api/v1/venues/${venueId}/info`);
     return response.data;
   },
 

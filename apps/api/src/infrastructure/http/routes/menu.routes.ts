@@ -27,3 +27,24 @@ menuRouter.delete("/categories/:categoryId", requireAuth, menuController.deleteC
 
 // PROTECTED - Create menu item
 menuRouter.post("/items", requireAuth, menuController.createMenuItem.bind(menuController));
+
+// PUBLIC - Get item options (customers need this)
+menuRouter.get("/items/:itemId/options", menuController.getItemOptions.bind(menuController));
+
+// PROTECTED - Create item option
+menuRouter.post("/items/:itemId/options", requireAuth, menuController.createItemOption.bind(menuController));
+
+// PROTECTED - Update item option
+menuRouter.patch("/options/:optionId", requireAuth, menuController.updateItemOption.bind(menuController));
+
+// PROTECTED - Delete item option
+menuRouter.delete("/options/:optionId", requireAuth, menuController.deleteItemOption.bind(menuController));
+
+// PROTECTED - Create option value
+menuRouter.post("/options/:optionId/values", requireAuth, menuController.createOptionValue.bind(menuController));
+
+// PROTECTED - Update option value
+menuRouter.patch("/option-values/:valueId", requireAuth, menuController.updateOptionValue.bind(menuController));
+
+// PROTECTED - Delete option value
+menuRouter.delete("/option-values/:valueId", requireAuth, menuController.deleteOptionValue.bind(menuController));

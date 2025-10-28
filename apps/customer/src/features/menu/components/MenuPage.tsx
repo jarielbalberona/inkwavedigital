@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import { CategorySidebar } from "./CategorySidebar";
 import { MenuGrid } from "./MenuGrid";
@@ -14,11 +14,14 @@ import { useDeviceOrdersQuery } from "../../order/hooks/queries/useDeviceOrdersQ
 import { useSessionStore } from "../hooks/stores/useSessionStore";
 import { useCartStore } from "../../cart/hooks/stores/useCartStore";
 import { getCategoriesFromItems } from "../hooks/helpers/menuHelpers";
+import { venueApi } from "../api/venueApi";
 import type { OrderConfirmation as OrderConfirmationType } from "../../order/types/order.types";
+import { useQuery } from "@tanstack/react-query";
 
 export const MenuPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const pathParams = useParams<{ tenantSlug?: string; venueSlug?: string }>();
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isOrderStatusOpen, setIsOrderStatusOpen] = useState(false);
@@ -28,6 +31,13 @@ export const MenuPage: React.FC = () => {
   
   const { venueId, tableId, tableLabel, pax, deviceId, clearSession, setSession, setPax } = useSessionStore();
 
+  // Fetch venue by slugs if using new URL format
+  const { data: venueBySlugData, isLoading: isLoadingVenueBySlug } = useQuery({
+    queryKey: ["venueBySlug", pathParams.tenantSlug, pathParams.venueSlug],
+    queryFn: () => venueApi.getVenueBySlug(pathParams.tenantSlug!, pathParams.venueSlug!),
+    enabled: !!(pathParams.tenantSlug && pathParams.venueSlug),
+  });
+
   // Fetch active orders for this device
   const { data: activeOrders = [], isLoading: isOrdersLoading } = useDeviceOrdersQuery(
     deviceId,
@@ -36,6 +46,27 @@ export const MenuPage: React.FC = () => {
 
   // Check for required query params and handle session setup
   useEffect(() => {
+    // New slug-based URL: /:tenantSlug/:venueSlug/menu?table=xxx&label=xxx
+    if (pathParams.tenantSlug && pathParams.venueSlug && venueBySlugData) {
+      const tableParam = searchParams.get('table');
+      const labelParam = searchParams.get('label');
+      
+      if (tableParam) {
+        const fetchedVenueId = venueBySlugData.venue.id;
+        // If venue or table is different from stored session, replace the session
+        if (fetchedVenueId !== venueId || tableParam !== tableId) {
+          setSession(fetchedVenueId, tableParam, undefined, undefined, labelParam || undefined);
+          // Always ask for pax when switching to a different table/venue
+          setShowPaxPrompt(true);
+        } else if (!pax) {
+          // If same table but no pax set, ask for pax
+          setShowPaxPrompt(true);
+        }
+      }
+      return;
+    }
+
+    // Legacy UUID-based URL: /menu?venue=xxx&table=xxx&label=xxx
     const venueParam = searchParams.get('venue');
     const tableParam = searchParams.get('table');
     const labelParam = searchParams.get('label');
@@ -51,13 +82,14 @@ export const MenuPage: React.FC = () => {
         // If same table but no pax set, ask for pax
         setShowPaxPrompt(true);
       }
+      return;
     }
     
     // If no session and no query params, redirect to homepage
-    if (!venueParam && !tableParam && !venueId) {
+    if (!venueParam && !tableParam && !venueId && !pathParams.tenantSlug) {
       navigate('/', { replace: true });
     }
-  }, [venueId, tableId, searchParams, setSession, navigate, pax]);
+  }, [venueId, tableId, searchParams, setSession, navigate, pax, pathParams, venueBySlugData]);
   
   const { data: menuData, isLoading: isMenuLoading, error } = useMenuQuery({
     venueId: venueId || "",
@@ -69,7 +101,7 @@ export const MenuPage: React.FC = () => {
   const items = menuData?.items || [];
   // Use API categories if available, otherwise fall back to generating from items
   const categories = categoriesData || getCategoriesFromItems(items);
-  const isLoading = isMenuLoading || isCategoriesLoading;
+  const isLoading = isMenuLoading || isCategoriesLoading || isLoadingVenueBySlug;
 
   // Set first category as active when data loads
   useEffect(() => {

@@ -34,12 +34,22 @@ import { CreateMenuItemUseCase } from "../application/use-cases/CreateMenuItemUs
 import { GetCategoryItemsUseCase } from "../application/use-cases/GetCategoryItemsUseCase.js";
 import { GetVenueInfoUseCase } from "../application/use-cases/GetVenueInfoUseCase.js";
 import { GetVenuesUseCase } from "../application/use-cases/GetVenuesUseCase.js";
+import { GetVenueBySlugUseCase } from "../application/use-cases/GetVenueBySlugUseCase.js";
 import { CreateVenueUseCase } from "../application/use-cases/CreateVenueUseCase.js";
 import { UpdateVenueUseCase } from "../application/use-cases/UpdateVenueUseCase.js";
 import { DeleteVenueUseCase } from "../application/use-cases/DeleteVenueUseCase.js";
 import { UploadImageUseCase } from "../application/use-cases/UploadImageUseCase.js";
 import { GetImagesUseCase } from "../application/use-cases/GetImagesUseCase.js";
 import { DeleteImageUseCase } from "../application/use-cases/DeleteImageUseCase.js";
+import { CreateItemOptionUseCase } from "../application/use-cases/CreateItemOptionUseCase.js";
+import { UpdateItemOptionUseCase } from "../application/use-cases/UpdateItemOptionUseCase.js";
+import { DeleteItemOptionUseCase } from "../application/use-cases/DeleteItemOptionUseCase.js";
+import { GetItemOptionsUseCase } from "../application/use-cases/GetItemOptionsUseCase.js";
+import { CreateItemOptionValueUseCase } from "../application/use-cases/CreateItemOptionValueUseCase.js";
+import { UpdateItemOptionValueUseCase } from "../application/use-cases/UpdateItemOptionValueUseCase.js";
+import { DeleteItemOptionValueUseCase } from "../application/use-cases/DeleteItemOptionValueUseCase.js";
+import { GetActiveMenuUseCase } from "../application/use-cases/GetActiveMenuUseCase.js";
+import { CreateMenuUseCase } from "../application/use-cases/CreateMenuUseCase.js";
 
 // Controllers
 import { HealthController } from "../interfaces/controllers/health.controller.js";
@@ -49,6 +59,7 @@ import { VenueController } from "../interfaces/controllers/venue.controller.js";
 import { AdminController } from "../interfaces/controllers/admin.controller.js";
 import { AuthController } from "../interfaces/controllers/auth.controller.js";
 import { ImageController } from "../interfaces/controllers/image.controller.js";
+import { WebhookController } from "../interfaces/controllers/webhook.controller.js";
 
 // Register logger
 const logger = createLogger("api");
@@ -174,6 +185,10 @@ container.register("GetVenuesUseCase", {
   useClass: GetVenuesUseCase,
 });
 
+container.register("GetVenueBySlugUseCase", {
+  useClass: GetVenueBySlugUseCase,
+});
+
 container.register("CreateVenueUseCase", {
   useClass: CreateVenueUseCase,
 });
@@ -196,6 +211,42 @@ container.register("GetImagesUseCase", {
 
 container.register("DeleteImageUseCase", {
   useClass: DeleteImageUseCase,
+});
+
+container.register("CreateItemOptionUseCase", {
+  useClass: CreateItemOptionUseCase,
+});
+
+container.register("UpdateItemOptionUseCase", {
+  useClass: UpdateItemOptionUseCase,
+});
+
+container.register("DeleteItemOptionUseCase", {
+  useClass: DeleteItemOptionUseCase,
+});
+
+container.register("GetItemOptionsUseCase", {
+  useClass: GetItemOptionsUseCase,
+});
+
+container.register("CreateItemOptionValueUseCase", {
+  useClass: CreateItemOptionValueUseCase,
+});
+
+container.register("UpdateItemOptionValueUseCase", {
+  useClass: UpdateItemOptionValueUseCase,
+});
+
+container.register("DeleteItemOptionValueUseCase", {
+  useClass: DeleteItemOptionValueUseCase,
+});
+
+container.register("GetActiveMenuUseCase", {
+  useClass: GetActiveMenuUseCase,
+});
+
+container.register("CreateMenuUseCase", {
+  useClass: CreateMenuUseCase,
 });
 
 // Register controllers
@@ -225,6 +276,10 @@ container.register("AuthController", {
 
 container.register("ImageController", {
   useClass: ImageController,
+});
+
+container.register("WebhookController", {
+  useClass: WebhookController,
 });
 
 // Register WebSocket manager

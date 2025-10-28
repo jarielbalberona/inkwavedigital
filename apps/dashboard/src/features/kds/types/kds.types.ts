@@ -18,7 +18,7 @@ export interface OrderItem {
   unitPrice: number;
   totalPrice: number;
   notes?: string;
-  options?: Record<string, string[]>;
+  optionsJson?: string;
 }
 
 export interface OrdersResponse {

@@ -54,10 +54,39 @@ export class GetMenuUseCase {
       availableOnly: input.availableOnly ?? false,
     });
 
+    // Fetch options for each item
+    const itemsWithOptions = await Promise.all(
+      menuItems.map(async (item) => {
+        const options = await this.menuRepository.findItemOptions(item.id);
+        const optionsWithValues = await Promise.all(
+          options.map(async (option) => {
+            const values = await this.menuRepository.findOptionValues(option.id);
+            return {
+              id: option.id,
+              name: option.name,
+              type: option.type,
+              required: option.required,
+              values: values.map((v) => ({
+                id: v.id,
+                label: v.label,
+                priceDelta: v.priceDelta,
+              })),
+            };
+          })
+        );
+
+        const itemJson = item.toJSON();
+        return {
+          ...itemJson,
+          options: optionsWithValues,
+        };
+      })
+    );
+
     this.logger.info({ venueId: input.venueId, itemCount: menuItems.length }, "Menu fetched successfully");
 
     return {
-      items: menuItems.map((item) => item.toJSON()),
+      items: itemsWithOptions,
     };
   }
 }

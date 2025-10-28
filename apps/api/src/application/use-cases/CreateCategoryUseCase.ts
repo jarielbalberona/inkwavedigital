@@ -42,29 +42,16 @@ export class CreateCategoryUseCase {
       throw new NotFoundError("Venue");
     }
 
-    // Get the menu for this venue
-    const venueMenus = await this.menuRepository.findCategoriesByVenueId(input.venueId);
-    let menuId: string;
-
-    if (venueMenus.length === 0) {
-      // Get the menu ID directly from the database
-      // This is a temporary solution - we need to add a method to get menu by venue
-      const db = (this.menuRepository as any).db; // Access the database directly
-      const menus = await db.query.menus.findMany({
-        where: (m: any, { eq }: any) => eq(m.venueId, input.venueId),
-      });
-      
-      if (menus.length === 0) {
-        throw new ValidationError("No menu found for venue. Please create a menu first.");
-      }
-      menuId = menus[0].id;
-    } else {
-      menuId = venueMenus[0].menuId;
+    // Get the active menu for this venue
+    const activeMenu = await this.menuRepository.findActiveMenuByVenueId(input.venueId);
+    
+    if (!activeMenu) {
+      throw new ValidationError("No active menu found for venue. Please create a menu first.");
     }
 
-    // Create category
+    // Create category for the active menu
     const category = MenuCategory.create({
-      menuId,
+      menuId: activeMenu.id,
       name: input.name.trim(),
       sortIndex: input.sortIndex ?? 0,
       iconUrl: input.iconUrl,
@@ -72,7 +59,7 @@ export class CreateCategoryUseCase {
 
     await this.menuRepository.saveCategory(category);
 
-    logger.info({ categoryId: category.id, venueId: input.venueId }, "Category created successfully");
+    logger.info({ categoryId: category.id, venueId: input.venueId, menuId: activeMenu.id }, "Category created successfully");
 
     return {
       category: category.toJSON(),

@@ -3,6 +3,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useMutation } from "@tanstack/react-query";
 import { tenantsApi } from "../api/tenantsApi";
 import type { Tenant, CreateTenantInput } from "../types/admin.types";
+import { slugify } from "../../../lib/slugify";
 
 interface TenantFormProps {
   isOpen: boolean;
@@ -110,7 +111,14 @@ export const TenantForm: React.FC<TenantFormProps> = ({
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      setFormData({ 
+                        ...formData, 
+                        name,
+                        slug: slugify(name)
+                      });
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
@@ -126,16 +134,16 @@ export const TenantForm: React.FC<TenantFormProps> = ({
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
+                        slug: slugify(e.target.value),
                       })
                     }
-                    placeholder="lowercase-letters-numbers-hyphens"
+                    placeholder="auto-generated-from-name"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                     pattern="^[a-z0-9-]+$"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Only lowercase letters, numbers, and hyphens allowed
+                    Auto-generated from tenant name (editable)
                   </p>
                 </div>
 
@@ -184,7 +192,14 @@ export const TenantForm: React.FC<TenantFormProps> = ({
                     <input
                       type="text"
                       value={formData.venueName}
-                      onChange={(e) => setFormData({ ...formData, venueName: e.target.value })}
+                      onChange={(e) => {
+                        const venueName = e.target.value;
+                        setFormData({ 
+                          ...formData, 
+                          venueName,
+                          venueSlug: slugify(venueName)
+                        });
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required={formData.addInitialVenue}
                     />
@@ -200,12 +215,16 @@ export const TenantForm: React.FC<TenantFormProps> = ({
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          venueSlug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
+                          venueSlug: slugify(e.target.value),
                         })
                       }
+                      placeholder="auto-generated-from-venue-name"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required={formData.addInitialVenue}
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Auto-generated from venue name (editable)
+                    </p>
                   </div>
 
                   <div>

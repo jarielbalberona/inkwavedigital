@@ -35,8 +35,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
         items: items.map(item => ({
           itemId: item.itemId,
           quantity: item.quantity,
-          unitPrice: item.price,
-          options: item.selectedOptions,
+          unitPrice: item.basePrice,
+          notes: item.notes,
+          optionsJson: JSON.stringify(item.selectedOptions),
         })),
       };
       
@@ -185,22 +186,41 @@ const CartItemRow: React.FC<CartItemRowProps> = ({ item, onUpdateQuantity, onRem
       
       <div className="flex-1 min-w-0">
         <h3 className="font-medium text-gray-900 truncate">{item.name}</h3>
-        <p className="text-sm text-gray-600">₱{item.totalPrice.toFixed(2)}</p>
+        <p className="text-sm text-gray-600">
+          ₱{item.basePrice.toFixed(2)} × {item.quantity}
+        </p>
         
         {/* Selected options */}
-        {Object.keys(item.selectedOptions).length > 0 && (
-          <div className="text-xs text-gray-500 mt-1">
-            {Object.entries(item.selectedOptions).map(([optionId, values]) => (
-              <div key={optionId}>
-                {values.map(valueId => (
-                  <span key={valueId} className="mr-2">
-                    {valueId}
+        {item.selectedOptions.length > 0 && (
+          <div className="text-xs text-gray-500 mt-1 space-y-0.5">
+            {item.selectedOptions.map((option) => (
+              <div key={option.optionId}>
+                <span className="font-medium">{option.optionName}:</span>{" "}
+                {option.values.map((value, idx) => (
+                  <span key={value.valueId}>
+                    {value.valueLabel}
+                    {value.priceDelta !== 0 && (
+                      <span className="text-green-600">
+                        {" "}(+₱{value.priceDelta.toFixed(2)})
+                      </span>
+                    )}
+                    {idx < option.values.length - 1 && ", "}
                   </span>
                 ))}
               </div>
             ))}
           </div>
         )}
+        
+        {/* Item notes */}
+        {item.notes && (
+          <p className="text-xs text-gray-500 mt-1 italic">Note: {item.notes}</p>
+        )}
+        
+        {/* Total price for this item */}
+        <p className="text-sm font-semibold text-gray-900 mt-1">
+          Total: ₱{item.totalPrice.toFixed(2)}
+        </p>
       </div>
       
       <div className="flex items-center space-x-2">

@@ -4,7 +4,7 @@ import { tenants } from "./tenants.js";
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   clerkUserId: text("clerk_user_id").unique(),
-  email: text("email"),
+  email: text("email").unique().notNull(), // Unique and required
   role: text("role"), // 'owner', 'manager', 'staff'
   tenantId: uuid("tenant_id").references(() => tenants.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),

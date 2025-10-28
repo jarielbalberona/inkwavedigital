@@ -9,6 +9,9 @@ export const venuesRouter = Router();
 const orderController = container.resolve(OrderController);
 const venueController = container.resolve(VenueController);
 
+// PUBLIC - Get venue by slug (must be before :venueId routes to avoid conflicts)
+venuesRouter.get("/by-slug/:tenantSlug/:venueSlug", venueController.getVenueBySlug.bind(venueController));
+
 // PROTECTED - CRUD operations for venues
 venuesRouter.get("/", requireAuth, venueController.getVenues.bind(venueController));
 venuesRouter.post("/", requireAuth, venueController.createVenue.bind(venueController));

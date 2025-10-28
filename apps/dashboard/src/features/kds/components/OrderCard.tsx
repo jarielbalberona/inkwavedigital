@@ -43,15 +43,61 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, venueId }) => {
       </div>
 
       {/* Items */}
-      <div className="space-y-2 mb-4">
-        {order.items.map((item) => (
-          <div key={item.id} className="flex justify-between items-center text-sm">
-            <span className="text-gray-700">
-              {item.quantity}x {item.name}
-            </span>
-            <span className="font-medium">{formatOrderTotal(item.totalPrice)}</span>
-          </div>
-        ))}
+      <div className="space-y-3 mb-4">
+        {order.items.map((item) => {
+          let parsedOptions: any[] = [];
+          try {
+            if (item.optionsJson) {
+              parsedOptions = JSON.parse(item.optionsJson);
+            }
+          } catch (e) {
+            console.error("Failed to parse options JSON", e);
+          }
+
+          return (
+            <div key={item.id} className="border-b border-gray-100 pb-2 last:border-b-0">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <span className="text-gray-900 font-medium">
+                    {item.quantity}x {item.name}
+                  </span>
+                  
+                  {/* Display selected options */}
+                  {parsedOptions.length > 0 && (
+                    <div className="mt-1 space-y-0.5">
+                      {parsedOptions.map((option: any, idx: number) => (
+                        <div key={idx} className="text-xs text-gray-600">
+                          <span className="font-medium">{option.optionName}:</span>{" "}
+                          {option.values?.map((value: any, vIdx: number) => (
+                            <span key={vIdx}>
+                              {value.valueLabel}
+                              {value.priceDelta !== 0 && (
+                                <span className="text-green-600">
+                                  {" "}(+₱{value.priceDelta.toFixed(2)})
+                                </span>
+                              )}
+                              {vIdx < option.values.length - 1 && ", "}
+                            </span>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Display item notes */}
+                  {item.notes && (
+                    <div className="mt-1 text-xs text-gray-500 italic">
+                      Note: {item.notes}
+                    </div>
+                  )}
+                </div>
+                <span className="font-medium text-gray-900 ml-2">
+                  {formatOrderTotal(item.totalPrice)}
+                </span>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Total */}

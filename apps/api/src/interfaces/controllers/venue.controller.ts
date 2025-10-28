@@ -3,6 +3,7 @@ import type { Request, Response, NextFunction } from "express";
 import { GetVenueTablesUseCase } from "../../application/use-cases/GetVenueTablesUseCase.js";
 import { GetVenueInfoUseCase } from "../../application/use-cases/GetVenueInfoUseCase.js";
 import { GetVenuesUseCase } from "../../application/use-cases/GetVenuesUseCase.js";
+import { GetVenueBySlugUseCase } from "../../application/use-cases/GetVenueBySlugUseCase.js";
 import { CreateVenueUseCase } from "../../application/use-cases/CreateVenueUseCase.js";
 import { UpdateVenueUseCase } from "../../application/use-cases/UpdateVenueUseCase.js";
 import { DeleteVenueUseCase } from "../../application/use-cases/DeleteVenueUseCase.js";
@@ -17,6 +18,7 @@ export class VenueController {
     @inject(GetVenueTablesUseCase) private getVenueTablesUseCase: GetVenueTablesUseCase,
     @inject(GetVenueInfoUseCase) private getVenueInfoUseCase: GetVenueInfoUseCase,
     @inject(GetVenuesUseCase) private getVenuesUseCase: GetVenuesUseCase,
+    @inject(GetVenueBySlugUseCase) private getVenueBySlugUseCase: GetVenueBySlugUseCase,
     @inject(CreateVenueUseCase) private createVenueUseCase: CreateVenueUseCase,
     @inject(UpdateVenueUseCase) private updateVenueUseCase: UpdateVenueUseCase,
     @inject(DeleteVenueUseCase) private deleteVenueUseCase: DeleteVenueUseCase,
@@ -48,6 +50,24 @@ export class VenueController {
 
       const result = await this.getVenueInfoUseCase.execute({
         venueId,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getVenueBySlug(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { tenantSlug, venueSlug } = req.params;
+
+      const result = await this.getVenueBySlugUseCase.execute({
+        tenantSlug,
+        venueSlug,
       });
 
       res.json({

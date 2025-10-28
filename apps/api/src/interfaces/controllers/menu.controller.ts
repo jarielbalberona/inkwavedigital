@@ -7,6 +7,13 @@ import { UpdateCategoryUseCase } from "../../application/use-cases/UpdateCategor
 import { DeleteCategoryUseCase } from "../../application/use-cases/DeleteCategoryUseCase.js";
 import { CreateMenuItemUseCase } from "../../application/use-cases/CreateMenuItemUseCase.js";
 import { GetCategoryItemsUseCase } from "../../application/use-cases/GetCategoryItemsUseCase.js";
+import { CreateItemOptionUseCase } from "../../application/use-cases/CreateItemOptionUseCase.js";
+import { UpdateItemOptionUseCase } from "../../application/use-cases/UpdateItemOptionUseCase.js";
+import { DeleteItemOptionUseCase } from "../../application/use-cases/DeleteItemOptionUseCase.js";
+import { GetItemOptionsUseCase } from "../../application/use-cases/GetItemOptionsUseCase.js";
+import { CreateItemOptionValueUseCase } from "../../application/use-cases/CreateItemOptionValueUseCase.js";
+import { UpdateItemOptionValueUseCase } from "../../application/use-cases/UpdateItemOptionValueUseCase.js";
+import { DeleteItemOptionValueUseCase } from "../../application/use-cases/DeleteItemOptionValueUseCase.js";
 
 @injectable()
 export class MenuController {
@@ -17,7 +24,14 @@ export class MenuController {
     @inject(UpdateCategoryUseCase) private updateCategoryUseCase: UpdateCategoryUseCase,
     @inject(DeleteCategoryUseCase) private deleteCategoryUseCase: DeleteCategoryUseCase,
     @inject(CreateMenuItemUseCase) private createMenuItemUseCase: CreateMenuItemUseCase,
-    @inject(GetCategoryItemsUseCase) private getCategoryItemsUseCase: GetCategoryItemsUseCase
+    @inject(GetCategoryItemsUseCase) private getCategoryItemsUseCase: GetCategoryItemsUseCase,
+    @inject(CreateItemOptionUseCase) private createItemOptionUseCase: CreateItemOptionUseCase,
+    @inject(UpdateItemOptionUseCase) private updateItemOptionUseCase: UpdateItemOptionUseCase,
+    @inject(DeleteItemOptionUseCase) private deleteItemOptionUseCase: DeleteItemOptionUseCase,
+    @inject(GetItemOptionsUseCase) private getItemOptionsUseCase: GetItemOptionsUseCase,
+    @inject(CreateItemOptionValueUseCase) private createItemOptionValueUseCase: CreateItemOptionValueUseCase,
+    @inject(UpdateItemOptionValueUseCase) private updateItemOptionValueUseCase: UpdateItemOptionValueUseCase,
+    @inject(DeleteItemOptionValueUseCase) private deleteItemOptionValueUseCase: DeleteItemOptionValueUseCase
   ) {}
 
   async getMenu(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -137,6 +151,134 @@ export class MenuController {
       res.json({
         success: true,
         data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Item Options Management
+  async getItemOptions(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { itemId } = req.params;
+
+      const result = await this.getItemOptionsUseCase.execute({
+        itemId,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async createItemOption(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { itemId } = req.params;
+      const optionData = req.body;
+
+      const result = await this.createItemOptionUseCase.execute({
+        itemId,
+        ...optionData,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateItemOption(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { optionId } = req.params;
+      const updateData = req.body;
+
+      const result = await this.updateItemOptionUseCase.execute({
+        id: optionId,
+        ...updateData,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteItemOption(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { optionId } = req.params;
+
+      await this.deleteItemOptionUseCase.execute({
+        id: optionId,
+      });
+
+      res.json({
+        success: true,
+        data: null,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async createOptionValue(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { optionId } = req.params;
+      const valueData = req.body;
+
+      const result = await this.createItemOptionValueUseCase.execute({
+        optionId,
+        ...valueData,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateOptionValue(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { valueId } = req.params;
+      const updateData = req.body;
+
+      const result = await this.updateItemOptionValueUseCase.execute({
+        id: valueId,
+        ...updateData,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteOptionValue(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { valueId } = req.params;
+
+      await this.deleteItemOptionValueUseCase.execute({
+        id: valueId,
+      });
+
+      res.json({
+        success: true,
+        data: null,
       });
     } catch (error) {
       next(error);

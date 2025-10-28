@@ -8,6 +8,7 @@ import { venuesRouter } from "./routes/venues.routes.js";
 import { adminRouter } from "./routes/admin.routes.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { imagesRouter } from "./routes/images.routes.js";
+import { webhookRouter } from "./routes/webhook.routes.js";
 import { errorHandler } from "../../interfaces/middlewares/error-handler.middleware.js";
 
 export const app: Application = express();
@@ -23,6 +24,10 @@ app.use(
     credentials: true,
   })
 );
+
+// Webhook routes MUST come before body parsing middleware
+// Webhooks need raw body for signature verification
+app.use("/api/v1/webhooks", webhookRouter);
 
 // Body parsing
 app.use(express.json());

@@ -3,6 +3,7 @@ import { venuesApi } from "../api/venuesApi";
 import { useTenantId } from "../../../hooks/useTenantId";
 import { useState, useMemo } from "react";
 import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { slugify } from "../../../lib/slugify";
 
 interface VenueManagementPageProps {
   role: "owner" | "manager" | null;
@@ -193,7 +194,7 @@ function VenueForm({ venue, onSubmit, onCancel }: VenueFormProps) {
     e.preventDefault();
     onSubmit({
       name,
-      slug: venue ? slug : slug.toLowerCase().replace(/\s+/g, "-"),
+      slug,
       address: address || undefined,
       timezone,
     });
@@ -208,7 +209,13 @@ function VenueForm({ venue, onSubmit, onCancel }: VenueFormProps) {
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              const newName = e.target.value;
+              setName(newName);
+              if (!venue) {
+                setSlug(slugify(newName));
+              }
+            }}
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
           />
@@ -218,16 +225,18 @@ function VenueForm({ venue, onSubmit, onCancel }: VenueFormProps) {
           <input
             type="text"
             value={slug}
-            onChange={(e) => setSlug(e.target.value)}
+            onChange={(e) => setSlug(slugify(e.target.value))}
             required
             disabled={!!venue}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent disabled:bg-gray-100"
+            className={`w-full px-3 py-2 border border-gray-300 rounded-lg ${
+              venue 
+                ? 'bg-gray-100 text-gray-600 cursor-not-allowed' 
+                : 'focus:ring-2 focus:ring-purple-600 focus:border-transparent'
+            }`}
           />
-          {!venue && (
-            <p className="text-xs text-gray-500 mt-1">
-              Leave empty to auto-generate from name
-            </p>
-          )}
+          <p className="text-xs text-gray-500 mt-1">
+            {venue ? "Slug cannot be changed after creation" : "Auto-generated from venue name (editable)"}
+          </p>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
