@@ -6,6 +6,8 @@ import { CreateCategoryUseCase } from "../../application/use-cases/CreateCategor
 import { UpdateCategoryUseCase } from "../../application/use-cases/UpdateCategoryUseCase.js";
 import { DeleteCategoryUseCase } from "../../application/use-cases/DeleteCategoryUseCase.js";
 import { CreateMenuItemUseCase } from "../../application/use-cases/CreateMenuItemUseCase.js";
+import { UpdateMenuItemUseCase } from "../../application/use-cases/UpdateMenuItemUseCase.js";
+import { DeleteMenuItemUseCase } from "../../application/use-cases/DeleteMenuItemUseCase.js";
 import { GetCategoryItemsUseCase } from "../../application/use-cases/GetCategoryItemsUseCase.js";
 import { CreateItemOptionUseCase } from "../../application/use-cases/CreateItemOptionUseCase.js";
 import { UpdateItemOptionUseCase } from "../../application/use-cases/UpdateItemOptionUseCase.js";
@@ -24,6 +26,8 @@ export class MenuController {
     @inject(UpdateCategoryUseCase) private updateCategoryUseCase: UpdateCategoryUseCase,
     @inject(DeleteCategoryUseCase) private deleteCategoryUseCase: DeleteCategoryUseCase,
     @inject(CreateMenuItemUseCase) private createMenuItemUseCase: CreateMenuItemUseCase,
+    @inject(UpdateMenuItemUseCase) private updateMenuItemUseCase: UpdateMenuItemUseCase,
+    @inject(DeleteMenuItemUseCase) private deleteMenuItemUseCase: DeleteMenuItemUseCase,
     @inject(GetCategoryItemsUseCase) private getCategoryItemsUseCase: GetCategoryItemsUseCase,
     @inject(CreateItemOptionUseCase) private createItemOptionUseCase: CreateItemOptionUseCase,
     @inject(UpdateItemOptionUseCase) private updateItemOptionUseCase: UpdateItemOptionUseCase,
@@ -134,6 +138,42 @@ export class MenuController {
       res.json({
         success: true,
         data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateMenuItem(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { itemId } = req.params;
+      const updateData = req.body;
+
+      const result = await this.updateMenuItemUseCase.execute({
+        itemId,
+        ...updateData,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteMenuItem(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { itemId } = req.params;
+
+      await this.deleteMenuItemUseCase.execute({
+        itemId,
+      });
+
+      res.json({
+        success: true,
+        message: "Menu item deleted successfully",
       });
     } catch (error) {
       next(error);

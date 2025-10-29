@@ -13,16 +13,16 @@ export const menuItemsApi = {
   },
   
   updateMenuItem: async (input: UpdateMenuItemInput): Promise<MenuItem> => {
-    const response = await api.patch<ApiResponse<MenuItem>>(`/api/v1/menu-items/${input.id}`, input);
-    return response.data;
+    const response = await api.patch<ApiResponse<{ item: MenuItem }>>(`/api/v1/menu/items/${input.id}`, input);
+    return response.data.item;
   },
   
   deleteMenuItem: async (id: string): Promise<void> => {
-    await api.delete<ApiResponse<void>>(`/api/v1/menu-items/${id}`);
+    await api.delete<ApiResponse<void>>(`/api/v1/menu/items/${id}`);
   },
   
   updateAvailability: async (id: string, isAvailable: boolean): Promise<MenuItem> => {
-    const response = await api.patch<ApiResponse<MenuItem>>(`/api/v1/menu-items/${id}/availability`, { isAvailable });
-    return response.data;
+    const response = await api.patch<ApiResponse<{ item: MenuItem }>>(`/api/v1/menu/items/${id}/availability`, { isAvailable });
+    return response.data.item;
   },
 };

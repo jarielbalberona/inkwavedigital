@@ -4,6 +4,7 @@ import { createLogger } from "@inkwave/utils";
 import { DrizzleSuperAdminRepository } from "../../infrastructure/persistence/DrizzleSuperAdminRepository.js";
 import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
 import type { IVenueStaffRepository } from "../../domain/repositories/IVenueStaffRepository.js";
+import type { ITenantRepository } from "../../domain/repositories/ITenantRepository.js";
 
 const logger = createLogger("auth-controller");
 
@@ -11,7 +12,9 @@ const logger = createLogger("auth-controller");
 export class AuthController {
   constructor(
     @inject("DrizzleSuperAdminRepository") private superAdminRepo: DrizzleSuperAdminRepository,
-    @inject("IUserRepository") private userRepository: IUserRepository
+    @inject("IUserRepository") private userRepository: IUserRepository,
+    @inject("IVenueStaffRepository") private venueStaffRepository: IVenueStaffRepository,
+    @inject("ITenantRepository") private tenantRepository: ITenantRepository
   ) {}
 
   async checkSuperAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -71,6 +74,48 @@ export class AuthController {
         data: {
           tenantId,
         },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getTenantInfo(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const email = req.query.email as string;
+      
+      if (!email) {
+        logger.warn("No email found in request");
+        return void res.json({
+          success: true,
+          data: null,
+        });
+      }
+
+      const user = await this.userRepository.findByEmail(email);
+      
+      if (!user || !user.tenantId) {
+        return void res.json({
+          success: true,
+          data: null,
+        });
+      }
+
+      // Get tenant details
+      const tenant = await this.tenantRepository.findById(user.tenantId);
+
+      if (!tenant) {
+        return void res.json({
+          success: true,
+          data: null,
+        });
+      }
+
+      logger.info({ email, tenantId: user.tenantId }, "Tenant info lookup completed");
+
+      res.json({
+        success: true,
+        data: tenant.toJSON(),
       });
     } catch (error) {
       next(error);

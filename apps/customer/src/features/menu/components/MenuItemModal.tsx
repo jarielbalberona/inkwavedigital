@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { XMarkIcon, PlusIcon, MinusIcon } from "@heroicons/react/24/outline";
 import type { MenuItem, MenuItemOption } from "../types/menu.types";
+import { Textarea } from "../../../components/ui/textarea";
+import { Button } from "../../../components/ui/button";
+import { Checkbox } from "../../../components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
+import { Label } from "../../../components/ui/label";
 
 interface SelectedOption {
   optionId: string;
@@ -170,22 +175,23 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
 
                     {option.type === "select" ? (
                       // Radio buttons for single select
-                      <div className="space-y-2">
+                      <RadioGroup
+                        value={selectedOptions[option.id]?.[0] || ""}
+                        onValueChange={(valueId) => handleOptionChange(option, valueId)}
+                        className="space-y-2"
+                      >
                         {option.values.map((value) => (
                           <label
                             key={value.id}
                             className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"
                           >
-                            <input
-                              type="radio"
-                              name={option.id}
-                              checked={selectedOptions[option.id]?.[0] === value.id}
-                              onChange={() => handleOptionChange(option, value.id)}
-                              className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                            />
-                            <span className="ml-3 flex-1 text-gray-900">
+                            <RadioGroupItem value={value.id} id={value.id} />
+                            <Label
+                              htmlFor={value.id}
+                              className="ml-3 flex-1 text-gray-900 cursor-pointer font-normal"
+                            >
                               {value.label}
-                            </span>
+                            </Label>
                             {value.priceDelta !== 0 && (
                               <span className="text-sm text-gray-600">
                                 {value.priceDelta > 0 ? "+" : ""}₱
@@ -194,7 +200,7 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
                             )}
                           </label>
                         ))}
-                      </div>
+                      </RadioGroup>
                     ) : (
                       // Checkboxes for multi select
                       <div className="space-y-2">
@@ -203,15 +209,17 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
                             key={value.id}
                             className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"
                           >
-                            <input
-                              type="checkbox"
+                            <Checkbox
+                              id={value.id}
                               checked={selectedOptions[option.id]?.includes(value.id) || false}
-                              onChange={() => handleOptionChange(option, value.id)}
-                              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                              onCheckedChange={() => handleOptionChange(option, value.id)}
                             />
-                            <span className="ml-3 flex-1 text-gray-900">
+                            <Label
+                              htmlFor={value.id}
+                              className="ml-3 flex-1 text-gray-900 cursor-pointer font-normal"
+                            >
                               {value.label}
-                            </span>
+                            </Label>
                             {value.priceDelta !== 0 && (
                               <span className="text-sm text-gray-600">
                                 {value.priceDelta > 0 ? "+" : ""}₱
@@ -236,15 +244,15 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
 
             {/* Special Instructions */}
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <Label htmlFor="notes" className="block mb-2">
                 Special Instructions (Optional)
-              </label>
-              <textarea
+              </Label>
+              <Textarea
+                id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Any special requests?"
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -252,29 +260,34 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
             <div className="flex items-center justify-between border-t border-gray-200 pt-6">
               <span className="text-sm font-medium text-gray-900">Quantity</span>
               <div className="flex items-center gap-3">
-                <button
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   <MinusIcon className="w-4 h-4" />
-                </button>
+                </Button>
                 <span className="text-lg font-semibold w-8 text-center">{quantity}</span>
-                <button
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
                   onClick={() => setQuantity(quantity + 1)}
-                  className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   <PlusIcon className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
             </div>
 
             {/* Add to Cart Button */}
-            <button
+            <Button
               onClick={validateAndAddToCart}
-              className="w-full py-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              className="w-full py-4 text-lg font-semibold"
+              size="lg"
             >
               Add to Cart - ₱{calculateTotalPrice().toFixed(2)}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

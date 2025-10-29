@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { UserGroupIcon } from '@heroicons/react/24/outline';
+import { Input } from '../../../components/ui/input';
+import { Button } from '../../../components/ui/button';
 
 interface PaxPromptProps {
   tableId: string;
@@ -34,17 +36,19 @@ export const PaxPrompt: React.FC<PaxPromptProps> = ({ tableId, onConfirm, onSkip
               How many people are dining?
             </label>
             <div className="flex items-center space-x-4">
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="icon"
                 onClick={() => setPax(Math.max(1, pax - 1))}
-                className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                className="w-10 h-10 rounded-full"
                 disabled={pax <= 1}
               >
                 <span className="text-lg font-medium">-</span>
-              </button>
+              </Button>
               
               <div className="flex-1 text-center">
-                <input
+                <Input
                   type="number"
                   id="pax"
                   min="1"
@@ -58,31 +62,34 @@ export const PaxPrompt: React.FC<PaxPromptProps> = ({ tableId, onConfirm, onSkip
                 </p>
               </div>
               
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="icon"
                 onClick={() => setPax(Math.min(20, pax + 1))}
-                className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                className="w-10 h-10 rounded-full"
                 disabled={pax >= 20}
               >
                 <span className="text-lg font-medium">+</span>
-              </button>
+              </Button>
             </div>
           </div>
 
           <div className="flex space-x-3">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={onSkip}
-              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex-1"
             >
               Skip
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex-1"
             >
               Continue
-            </button>
+            </Button>
           </div>
         </form>
 

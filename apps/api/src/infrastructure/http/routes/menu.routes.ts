@@ -28,6 +28,12 @@ menuRouter.delete("/categories/:categoryId", requireAuth, menuController.deleteC
 // PROTECTED - Create menu item
 menuRouter.post("/items", requireAuth, menuController.createMenuItem.bind(menuController));
 
+// PROTECTED - Update menu item
+menuRouter.patch("/items/:itemId", requireAuth, menuController.updateMenuItem.bind(menuController));
+
+// PROTECTED - Delete menu item
+menuRouter.delete("/items/:itemId", requireAuth, menuController.deleteMenuItem.bind(menuController));
+
 // PUBLIC - Get item options (customers need this)
 menuRouter.get("/items/:itemId/options", menuController.getItemOptions.bind(menuController));
 

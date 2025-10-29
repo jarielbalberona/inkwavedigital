@@ -1,9 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useCreateMenuItem, useUpdateMenuItem } from "../hooks/mutations";
 import type { MenuItem, CreateMenuItemInput, UpdateMenuItemInput } from "../types/menuManagement.types";
 import { ImagePicker } from "../../image-library/components/ImagePicker";
 import { ItemOptionsManager } from "./ItemOptionsManager";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Textarea } from "../../../components/ui/textarea";
+import { Checkbox } from "../../../components/ui/checkbox";
+import { Button } from "../../../components/ui/button";
+import CurrencyInput from "react-currency-input-field";
 
 interface MenuItemFormProps {
   isOpen: boolean;
@@ -19,15 +25,37 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
   categoryId,
 }) => {
   const [formData, setFormData] = useState({
-    name: item?.name || "",
-    description: item?.description || "",
-    price: item?.price || 0,
-    imageUrl: item?.imageUrl || "",
-    isAvailable: item?.isAvailable ?? true,
+    name: "",
+    description: "",
+    price: 0,
+    imageUrl: "",
+    isAvailable: true,
   });
 
   const createMenuItemMutation = useCreateMenuItem(categoryId);
   const updateMenuItemMutation = useUpdateMenuItem(categoryId);
+
+  // Update form data when item changes (for editing)
+  useEffect(() => {
+    if (item) {
+      setFormData({
+        name: item.name || "",
+        description: item.description || "",
+        price: item.price || 0,
+        imageUrl: item.imageUrl || "",
+        isAvailable: item.isAvailable ?? true,
+      });
+    } else {
+      // Reset form for new item
+      setFormData({
+        name: "",
+        description: "",
+        price: 0,
+        imageUrl: "",
+        isAvailable: true,
+      });
+    }
+  }, [item]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,50 +100,44 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Item Name
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="name">Item Name</Label>
+              <Input
+                id="name"
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
-              <textarea
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 rows={3}
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price (₱)
-              </label>
-              <input
-                type="number"
+            <div className="space-y-2">
+              <Label htmlFor="price">Price (₱)</Label>
+              <CurrencyInput
+                id="price"
+                name="price"
+                placeholder="0.00"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                min="0"
-                step="0.01"
+                decimalsLimit={2}
+                onValueChange={(value) => setFormData({ ...formData, price: parseFloat(value || "0") })}
+                prefix="₱"
+                className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Item Image
-              </label>
+            <div className="space-y-2">
+              <Label>Item Image</Label>
               <ImagePicker
                 value={formData.imageUrl}
                 onChange={(url) => setFormData({ ...formData, imageUrl: url })}
@@ -123,17 +145,18 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
               />
             </div>
 
-            <div className="flex items-center">
-              <input
-                type="checkbox"
+            <div className="flex items-center space-x-2">
+              <Checkbox
                 id="isAvailable"
                 checked={formData.isAvailable}
-                onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                onCheckedChange={(checked) => setFormData({ ...formData, isAvailable: checked as boolean })}
               />
-              <label htmlFor="isAvailable" className="ml-2 block text-sm text-gray-700">
+              <Label
+                htmlFor="isAvailable"
+                className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
                 Available for ordering
-              </label>
+              </Label>
             </div>
 
             {/* Options Section */}
@@ -158,24 +181,23 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
             </div>
 
             <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={onClose}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 disabled={createMenuItemMutation.isPending || updateMenuItemMutation.isPending}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {createMenuItemMutation.isPending || updateMenuItemMutation.isPending
                   ? "Saving..."
                   : item
                   ? "Update"
                   : "Create"}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

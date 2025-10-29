@@ -2,6 +2,12 @@ import React, { useState } from "react";
 import { XMarkIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useCreateItemOption, useCreateOptionValue, useDeleteOptionValue } from "../hooks";
 import type { MenuItemOption, CreateItemOptionInput, CreateOptionValueInput } from "../types/menuManagement.types";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Checkbox } from "../../../components/ui/checkbox";
+import { Button } from "../../../components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
+import CurrencyInput from "react-currency-input-field";
 
 interface ItemOptionFormProps {
   isOpen: boolean;
@@ -36,6 +42,9 @@ export const ItemOptionForm: React.FC<ItemOptionFormProps> = ({
     priceDelta: 0,
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const createOptionMutation = useCreateItemOption();
   const createValueMutation = useCreateOptionValue();
   const deleteValueMutation = useDeleteOptionValue();
@@ -47,37 +56,57 @@ export const ItemOptionForm: React.FC<ItemOptionFormProps> = ({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Prevent Enter key from submitting (since we removed the form element)
+    if (e.key === "Enter" && e.target instanceof HTMLInputElement) {
+      e.preventDefault();
+    }
+  };
+
   const handleRemoveValue = (index: number) => {
     setValues(values.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setError(null);
 
-    if (option) {
-      // TODO: Update existing option
-      console.log("Update not implemented yet");
-    } else {
-      // Create new option
-      const createData: CreateItemOptionInput = {
-        itemId,
-        ...formData,
-      };
-
-      const createdOption = await createOptionMutation.mutateAsync(createData);
-
-      // Create all values for this option
-      for (const value of values) {
-        const valueData: CreateOptionValueInput = {
-          optionId: createdOption.id,
-          label: value.label,
-          priceDelta: value.priceDelta,
+    try {
+      if (option) {
+        // TODO: Update existing option
+        console.log("Update not implemented yet");
+      } else {
+        // Create new option
+        console.log("Creating option with data:", { itemId, ...formData });
+        const createData: CreateItemOptionInput = {
+          itemId,
+          ...formData,
         };
-        await createValueMutation.mutateAsync(valueData);
-      }
-    }
 
-    onClose();
+        const createdOption = await createOptionMutation.mutateAsync(createData);
+        console.log("Option created:", createdOption);
+
+        // Create all values for this option
+        for (const value of values) {
+          console.log("Creating value:", value);
+          const valueData: CreateOptionValueInput = {
+            optionId: createdOption.id,
+            label: value.label,
+            priceDelta: value.priceDelta,
+          };
+          await createValueMutation.mutateAsync(valueData);
+        }
+
+        console.log("All values created successfully");
+      }
+
+      onClose();
+    } catch (err: any) {
+      console.error("Error creating option:", err);
+      setError(err?.response?.data?.message || err?.message || "Failed to create option. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -92,54 +121,62 @@ export const ItemOptionForm: React.FC<ItemOptionFormProps> = ({
             <h2 className="text-lg font-semibold text-gray-900">
               {option ? "Edit Option" : "Add Option"}
             </h2>
-            <button onClick={onClose} className="p-1 rounded-md hover:bg-gray-100">
+            <button type="button" onClick={onClose} className="p-1 rounded-md hover:bg-gray-100">
               <XMarkIcon className="w-5 h-5" />
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div className="p-6 space-y-6" onKeyDown={handleKeyDown}>
+            {/* Error Message */}
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            )}
+
             {/* Option Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Option Name
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="name">Option Name</Label>
+              <Input
+                id="name"
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="e.g., Size, Type, Sugar Level"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
 
             {/* Option Type */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Selection Type
-              </label>
-              <select
+            <div className="space-y-2">
+              <Label htmlFor="type">Selection Type</Label>
+              <Select
                 value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as "select" | "multi" })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onValueChange={(value) => setFormData({ ...formData, type: value as "select" | "multi" })}
               >
-                <option value="select">Single Select (Radio)</option>
-                <option value="multi">Multi Select (Checkbox)</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="select">Single Select (Radio)</SelectItem>
+                  <SelectItem value="multi">Multi Select (Checkbox)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Required Checkbox */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
+            <div className="flex items-center space-x-2">
+              <Checkbox
                 id="required"
                 checked={formData.required}
-                onChange={(e) => setFormData({ ...formData, required: e.target.checked })}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                onCheckedChange={(checked) => setFormData({ ...formData, required: checked as boolean })}
               />
-              <label htmlFor="required" className="ml-2 text-sm font-medium text-gray-700">
+              <Label
+                htmlFor="required"
+                className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
                 Required (customer must select this option)
-              </label>
+              </Label>
             </div>
 
             {/* Option Values */}
@@ -172,29 +209,31 @@ export const ItemOptionForm: React.FC<ItemOptionFormProps> = ({
               {/* Add New Value */}
               <div className="space-y-2">
                 <div className="flex gap-2">
-                  <input
+                  <Input
                     type="text"
                     value={newValue.label}
                     onChange={(e) => setNewValue({ ...newValue, label: e.target.value })}
                     placeholder="Value label (e.g., Small, Medium, Large)"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1"
                   />
-                  <input
-                    type="number"
+                  <CurrencyInput
+                    name="priceDelta"
+                    placeholder="0.00"
                     value={newValue.priceDelta}
-                    onChange={(e) => setNewValue({ ...newValue, priceDelta: parseFloat(e.target.value) || 0 })}
-                    placeholder="Price delta"
-                    step="0.01"
-                    className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    decimalsLimit={2}
+                    onValueChange={(value) => setNewValue({ ...newValue, priceDelta: parseFloat(value || "0") })}
+                    prefix="₱"
+                    allowNegativeValue={true}
+                    className="w-32 flex h-10 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
                     onClick={handleAddValue}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 flex items-center gap-1"
                   >
-                    <PlusIcon className="w-4 h-4" />
+                    <PlusIcon className="w-4 h-4 mr-1" />
                     Add
-                  </button>
+                  </Button>
                 </div>
                 <p className="text-xs text-gray-500">
                   Price delta: positive values add to price, negative values subtract, zero for no change
@@ -204,22 +243,23 @@ export const ItemOptionForm: React.FC<ItemOptionFormProps> = ({
 
             {/* Form Actions */}
             <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={onClose}
-                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                disabled={isSubmitting}
               >
                 Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={!formData.name || values.length === 0}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={!formData.name || values.length === 0 || isSubmitting}
               >
-                {option ? "Update Option" : "Create Option"}
-              </button>
+                {isSubmitting ? "Creating..." : option ? "Update Option" : "Create Option"}
+              </Button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>

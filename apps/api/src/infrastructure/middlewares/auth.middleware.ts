@@ -24,9 +24,9 @@ declare global {
  * NO MOCK AUTH - Real Clerk authentication required
  */
 export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
+  const authHeader = req.headers.authorization;
+  
   try {
-    const authHeader = req.headers.authorization;
-    
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       logger.warn("No authorization header found");
       throw new UnauthorizedError("Authentication required");
@@ -77,7 +77,13 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     if (error instanceof UnauthorizedError) {
       return next(error);
     }
-    logger.error({ error }, "Authentication error");
+    // Log detailed error information for debugging
+    logger.error({ 
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      tokenPresent: !!authHeader,
+      errorType: error instanceof Error ? error.constructor.name : typeof error
+    }, "Authentication error");
     return next(new UnauthorizedError("Authentication failed"));
   }
 }

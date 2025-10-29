@@ -58,6 +58,7 @@ export const ItemOptionsManager: React.FC<ItemOptionsManagerProps> = ({ itemId }
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-gray-900">Item Options</h3>
         <button
+          type="button"
           onClick={handleAddOption}
           className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
@@ -81,6 +82,7 @@ export const ItemOptionsManager: React.FC<ItemOptionsManagerProps> = ({ itemId }
                 <div className="flex items-center justify-between p-4 bg-white hover:bg-gray-50">
                   <div className="flex items-center gap-3 flex-1">
                     <button
+                      type="button"
                       onClick={() => toggleExpanded(option.id)}
                       className="p-1 hover:bg-gray-200 rounded"
                     >
@@ -109,6 +111,7 @@ export const ItemOptionsManager: React.FC<ItemOptionsManagerProps> = ({ itemId }
                   </div>
                   <div className="flex items-center gap-2">
                     <button
+                      type="button"
                       onClick={() => handleEditOption(option)}
                       className="p-2 text-gray-600 hover:bg-gray-200 rounded"
                       title="Edit option"
@@ -116,6 +119,7 @@ export const ItemOptionsManager: React.FC<ItemOptionsManagerProps> = ({ itemId }
                       <PencilIcon className="w-4 h-4" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDeleteOption(option.id)}
                       className="p-2 text-red-600 hover:bg-red-50 rounded"
                       title="Delete option"

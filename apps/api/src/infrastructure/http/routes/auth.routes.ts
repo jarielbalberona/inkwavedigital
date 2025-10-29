@@ -20,6 +20,13 @@ authRouter.get(
   authController.getTenantId.bind(authController)
 );
 
+// Get tenant info for a user
+// Note: For development, this endpoint accepts email as query parameter
+authRouter.get(
+  "/tenant-info",
+  authController.getTenantInfo.bind(authController)
+);
+
 // Get user role and assigned venues
 // Note: For development, this endpoint accepts email as query parameter
 authRouter.get(

@@ -8,6 +8,7 @@ import { TenantManagementPage } from "./features/admin/components/TenantManageme
 import { VenueManagementPage } from "./features/venue-management/components/VenueManagementPage";
 import { useSuperAdmin } from "./hooks/useSuperAdmin";
 import { useUserRole } from "./hooks/useUserRole";
+import { useTenantInfo } from "./hooks/useTenantInfo";
 import { VenueSelector } from "./components/VenueSelector";
 import { AuthProvider } from "./components/AuthProvider";
 import { 
@@ -24,6 +25,7 @@ function App() {
   const location = useLocation();
   const { isSuperAdmin, isLoading: isCheckingSuperAdmin } = useSuperAdmin();
   const { role, assignedVenueIds } = useUserRole();
+  const { tenantInfo } = useTenantInfo();
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
 
   // Redirect authenticated users to appropriate default page
@@ -73,7 +75,9 @@ function App() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-8">
-                <h1 className="text-xl font-bold text-gray-900">Ink Wave Dashboard</h1>
+                <h1 className="text-xl font-bold text-gray-900">
+                  {isSuperAdmin ? "Super Admin Dashboard" : `${tenantInfo?.name || "Ink Wave"} Dashboard`}
+                </h1>
                 
                 {isSuperAdmin ? (
                   <div className="flex items-center space-x-4">

@@ -22,6 +22,7 @@ apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     try {
       if (getTokenFunction) {
+        // Always get a fresh token for each request (Clerk handles caching)
         const token = await getTokenFunction();
         
         console.log("🔑 Token:", token ? `${token.substring(0, 30)}...` : "NULL");
@@ -42,6 +43,39 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle token expiration
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If 401 error and we haven't retried yet, try to refresh token
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      console.log("🔄 Got 401, retrying with fresh token...");
+
+      try {
+        if (getTokenFunction) {
+          // Get a fresh token (force refresh)
+          const token = await getTokenFunction();
+          
+          if (token) {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            console.log("✅ Retry with refreshed token");
+            return apiClient(originalRequest);
+          }
+        }
+      } catch (refreshError) {
+        console.error("❌ Failed to refresh token:", refreshError);
+        return Promise.reject(refreshError);
+      }
+    }
+
     return Promise.reject(error);
   }
 );
