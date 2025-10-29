@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { XMarkIcon, PlusIcon, MinusIcon } from "@heroicons/react/24/outline";
 import type { MenuItem, MenuItemOption } from "../types/menu.types";
+import { ImageCarousel } from "../../../components/ImageCarousel";
 import { Textarea } from "../../../components/ui/textarea";
 import { Button } from "../../../components/ui/button";
 import { Checkbox } from "../../../components/ui/checkbox";
@@ -25,7 +26,6 @@ interface MenuItemModalProps {
   onAddToCart: (item: MenuItem, quantity: number, selectedOptions: SelectedOption[], notes?: string) => void;
 }
 
-const DEFAULT_IMAGE = "https://pub-41bef80e05e044e8a7e02c461f986c84.r2.dev/a1088200-e822-4a1d-b796-ff6abf742155/1761589977537-wjwzl8.jpg";
 
 export const MenuItemModal: React.FC<MenuItemModalProps> = ({
   isOpen,
@@ -134,12 +134,13 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
 
       <div className="absolute inset-0 flex items-center justify-center p-4">
         <div className="bg-card rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          {/* Header with Image */}
+          {/* Header with Image Carousel */}
           <div className="relative">
-            <img
-              src={item.imageUrl || DEFAULT_IMAGE}
+            <ImageCarousel
+              images={item.imageUrls}
               alt={item.name}
               className="w-full h-64 object-cover rounded-t-lg"
+              showDots={true}
             />
             <Button
               variant="secondary"

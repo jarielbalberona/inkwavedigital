@@ -4,7 +4,7 @@ export interface MenuItem {
   name: string;
   description?: string;
   price: number;
-  imageUrl?: string;
+  imageUrls: string[];
   isAvailable: boolean;
   options: MenuItemOption[];
   createdAt: string;

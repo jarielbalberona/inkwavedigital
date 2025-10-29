@@ -24,6 +24,7 @@
     "axios": "^1.6.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "embla-carousel-react": "^8.6.0",
     "lucide-react": "^0.548.0",
     "react": "^18.2.0",
     "react-currency-input-field": "^4.0.3",

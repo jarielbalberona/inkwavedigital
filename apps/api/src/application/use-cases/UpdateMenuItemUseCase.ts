@@ -11,7 +11,7 @@ export interface UpdateMenuItemInput {
   name?: string;
   description?: string;
   price?: number;
-  imageUrl?: string;
+  imageUrls?: string[];
   isAvailable?: boolean;
 }
 
@@ -22,7 +22,7 @@ export interface UpdateMenuItemOutput {
     name: string;
     description?: string;
     price: number;
-    imageUrl?: string;
+    imageUrls: string[];
     isAvailable: boolean;
     options: any[];
     createdAt: string;
@@ -61,8 +61,8 @@ export class UpdateMenuItemUseCase {
       menuItem.updatePrice(Money.fromAmount(input.price));
     }
 
-    if (input.imageUrl !== undefined) {
-      menuItem.updateImageUrl(input.imageUrl);
+    if (input.imageUrls !== undefined) {
+      menuItem.updateImageUrls(input.imageUrls);
     }
 
     if (input.isAvailable !== undefined) {

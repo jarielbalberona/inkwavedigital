@@ -12,7 +12,7 @@ export interface CreateMenuItemInput {
   name: string;
   description?: string;
   price: number;
-  imageUrl?: string;
+  imageUrls?: string[];
   isAvailable?: boolean;
 }
 
@@ -23,7 +23,7 @@ export interface CreateMenuItemOutput {
     name: string;
     description?: string;
     price: number;
-    imageUrl?: string;
+    imageUrls: string[];
     isAvailable: boolean;
     options: any[];
     createdAt: string;
@@ -49,13 +49,19 @@ export class CreateMenuItemUseCase {
       throw new ValidationError("Menu item price must be non-negative");
     }
 
+    // Validate imageUrls count
+    const imageUrls = input.imageUrls || [];
+    if (imageUrls.length > 10) {
+      throw new ValidationError("Maximum 10 images allowed per menu item");
+    }
+
     // Create menu item
     const menuItem = MenuItem.create({
       categoryId: input.categoryId,
       name: input.name.trim(),
       description: input.description,
       price: Money.fromAmount(input.price),
-      imageUrl: input.imageUrl,
+      imageUrls: imageUrls,
       isAvailable: input.isAvailable ?? true,
       options: [],
     });

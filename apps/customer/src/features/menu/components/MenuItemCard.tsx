@@ -4,6 +4,7 @@ import type { MenuItem } from "../types/menu.types";
 import { formatPrice } from "../hooks/helpers/menuHelpers";
 import { useCartStore } from "../../cart/hooks/stores/useCartStore";
 import { MenuItemModal } from "./MenuItemModal";
+import { ImageCarousel } from "../../../components/ImageCarousel";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,17 +36,15 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
     addItem(item, quantity, selectedOptions, notes);
   };
 
-  const DEFAULT_IMAGE = "https://pub-41bef80e05e044e8a7e02c461f986c84.r2.dev/a1088200-e822-4a1d-b796-ff6abf742155/1761589977537-wjwzl8.jpg";
-
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow gap-0 py-0">
-      {/* Image */}
+      {/* Image Carousel */}
       <div className="aspect-w-16 aspect-h-9 bg-muted">
-        <img
-          src={item.imageUrl || DEFAULT_IMAGE}
+        <ImageCarousel
+          images={item.imageUrls}
           alt={item.name}
           className="w-full h-48 object-cover"
-          loading="lazy"
+          showDots={true}
         />
       </div>
 

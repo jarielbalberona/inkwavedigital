@@ -21,7 +21,7 @@ export interface MenuItemProps {
   name: string;
   description?: string;
   price: Money;
-  imageUrl?: string;
+  imageUrls: string[];
   isAvailable: boolean;
   options: MenuItemOption[];
   createdAt: Date;
@@ -78,8 +78,8 @@ export class MenuItem {
     return this.props.price;
   }
 
-  get imageUrl(): string | undefined {
-    return this.props.imageUrl;
+  get imageUrls(): string[] {
+    return [...this.props.imageUrls];
   }
 
   get isAvailable(): boolean {
@@ -119,9 +119,29 @@ export class MenuItem {
     this.props.updatedAt = new Date();
   }
 
-  updateImageUrl(imageUrl: string): void {
-    this.props.imageUrl = imageUrl;
+  updateImageUrls(imageUrls: string[]): void {
+    // Limit to max 10 images
+    if (imageUrls.length > 10) {
+      throw new ValidationError("Maximum 10 images allowed per menu item");
+    }
+    this.props.imageUrls = imageUrls;
     this.props.updatedAt = new Date();
+  }
+
+  addImage(imageUrl: string): void {
+    if (this.props.imageUrls.length >= 10) {
+      throw new ValidationError("Maximum 10 images allowed per menu item");
+    }
+    this.props.imageUrls.push(imageUrl);
+    this.props.updatedAt = new Date();
+  }
+
+  removeImage(imageUrl: string): void {
+    const index = this.props.imageUrls.indexOf(imageUrl);
+    if (index > -1) {
+      this.props.imageUrls.splice(index, 1);
+      this.props.updatedAt = new Date();
+    }
   }
 
   setAvailability(isAvailable: boolean): void {
@@ -169,7 +189,7 @@ export class MenuItem {
       name: this.props.name,
       description: this.props.description,
       price: this.props.price.toNumber(),
-      imageUrl: this.props.imageUrl,
+      imageUrls: this.props.imageUrls,
       isAvailable: this.props.isAvailable,
       options: this.props.options.map((opt) => ({
         ...opt,

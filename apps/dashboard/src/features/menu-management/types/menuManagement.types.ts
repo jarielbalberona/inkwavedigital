@@ -14,7 +14,7 @@ export interface MenuItem {
   name: string;
   description?: string;
   price: number;
-  imageUrl?: string;
+  imageUrls: string[];
   isAvailable: boolean;
   options: MenuItemOption[];
   createdAt: string;
@@ -59,7 +59,7 @@ export interface CreateMenuItemInput {
   name: string;
   description?: string;
   price: number;
-  imageUrl?: string;
+  imageUrls: string[];
   isAvailable: boolean;
 }
 
@@ -68,7 +68,7 @@ export interface UpdateMenuItemInput {
   name?: string;
   description?: string;
   price?: number;
-  imageUrl?: string;
+  imageUrls?: string[];
   isAvailable?: boolean;
 }
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useCreateMenuItem, useUpdateMenuItem } from "../hooks/mutations";
 import type { MenuItem, CreateMenuItemInput, UpdateMenuItemInput } from "../types/menuManagement.types";
-import { ImagePicker } from "../../image-library/components/ImagePicker";
+import { MultipleImagePicker } from "../../image-library/components/MultipleImagePicker";
 import { ItemOptionsManager } from "./ItemOptionsManager";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
@@ -28,7 +28,7 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
     name: "",
     description: "",
     price: 0,
-    imageUrl: "",
+    imageUrls: [] as string[],
     isAvailable: true,
   });
 
@@ -42,7 +42,7 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
         name: item.name || "",
         description: item.description || "",
         price: item.price || 0,
-        imageUrl: item.imageUrl || "",
+        imageUrls: item.imageUrls || [],
         isAvailable: item.isAvailable ?? true,
       });
     } else {
@@ -51,7 +51,7 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
         name: "",
         description: "",
         price: 0,
-        imageUrl: "",
+        imageUrls: [],
         isAvailable: true,
       });
     }
@@ -137,11 +137,11 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label>Item Image</Label>
-              <ImagePicker
-                value={formData.imageUrl}
-                onChange={(url) => setFormData({ ...formData, imageUrl: url })}
-                type="image"
+              <Label>Item Images (Max 10)</Label>
+              <MultipleImagePicker
+                value={formData.imageUrls}
+                onChange={(urls) => setFormData({ ...formData, imageUrls: urls })}
+                maxImages={10}
               />
             </div>
 

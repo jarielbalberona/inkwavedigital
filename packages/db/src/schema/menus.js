@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, boolean, integer, numeric } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, boolean, integer, numeric, jsonb } from "drizzle-orm/pg-core";
 import { venues } from "./venues";
 export const menus = pgTable("menus", {
     id: uuid("id").defaultRandom().primaryKey(),
@@ -29,7 +29,7 @@ export const menuItems = pgTable("menu_items", {
     name: text("name").notNull(),
     description: text("description"),
     price: numeric("price", { precision: 10, scale: 2 }).notNull(),
-    imageUrl: text("image_url"),
+    imageUrls: jsonb("image_urls").default([]),
     isAvailable: boolean("is_available").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
