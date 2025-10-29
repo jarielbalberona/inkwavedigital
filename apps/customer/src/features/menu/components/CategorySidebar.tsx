@@ -1,6 +1,7 @@
 import React from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useVenueInfoQuery } from "../hooks/queries/useVenueInfoQuery";
+import { Button } from "@/components/ui/button";
 import type { MenuCategory } from "../types/menu.types";
 
 interface CategorySidebarProps {
@@ -32,25 +33,25 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
 }) => {
   const { data: venueInfo } = useVenueInfoQuery(venueId);
   return (
-    <div className={`bg-white border-r border-gray-200 transition-all duration-300 ${
+    <div className={`bg-card border-r border-border transition-all duration-300 ${
       isCollapsed ? "w-20 md:w-20" : "w-20 md:w-64"
     }`}>
       {/* Header */}
-      <div className="p-3 md:p-4 border-b border-gray-200">
+      <div className="p-3 md:p-4 border-b border-border">
         <div className="flex items-center justify-center md:justify-start">
           <div className="flex items-center space-x-2">
             {/* Logo */}
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">IW</span>
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">IW</span>
             </div>
             {/* Tenant Name - Desktop only when expanded */}
             <div className="hidden md:block">
               {!isCollapsed && (
                 <>
-                  <h2 className="text-lg font-semibold text-gray-900">
+                  <h2 className="text-lg font-semibold text-foreground">
                     {venueInfo?.tenant.name || "Welcome"}
                   </h2>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {venueInfo?.name || "Digital Menu"}
                   </p>
                 </>
@@ -58,16 +59,18 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
             </div>
           </div>
           {/* Collapse button - Desktop only */}
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={onToggleCollapse}
-            className="hidden md:block ml-auto p-1 rounded-md hover:bg-gray-100 transition-colors"
+            className="hidden md:flex ml-auto"
           >
             {isCollapsed ? (
-              <ChevronRightIcon className="w-5 h-5 text-gray-600" />
+              <ChevronRightIcon className="w-5 h-5" />
             ) : (
-              <ChevronLeftIcon className="w-5 h-5 text-gray-600" />
+              <ChevronLeftIcon className="w-5 h-5" />
             )}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -75,19 +78,19 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
       <div className="overflow-y-auto">
         {categories.map((category) => {
           const icon = CATEGORY_ICONS[category.id] || "📋";
+          const isActive = activeCategoryId === category.id;
           return (
-            <button
+            <Button
               key={category.id}
+              variant={isActive ? "default" : "ghost"}
               onClick={() => onCategorySelect(category.id)}
-              className={`w-full text-left hover:bg-gray-50 transition-colors ${
-                activeCategoryId === category.id
-                  ? "bg-blue-50 border-r-2 border-blue-500 text-blue-700"
-                  : "text-gray-700"
+              className={`w-full justify-start rounded-none ${
+                isActive ? "border-r-2 border-primary" : ""
               }`}
             >
               {isCollapsed ? (
                 // Collapsed view - Desktop only
-                <div className="hidden md:flex items-center justify-center p-4">
+                <div className="hidden md:flex items-center justify-center w-full">
                   <div className="w-8 h-8 flex items-center justify-center text-xl">
                     {category.iconUrl ? (
                       <img
@@ -102,7 +105,7 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
                 </div>
               ) : (
                 // Expanded view - Always shown on mobile, conditional on desktop
-                <div className="p-2 md:p-4">
+                <div className="w-full">
                   <div className="flex flex-col md:flex-row md:items-center">
                     {/* Icon/Emoji */}
                     <div className="flex justify-center md:justify-start mb-1 md:mb-0">
@@ -135,7 +138,7 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
                   </div>
                 </div>
               )}
-            </button>
+            </Button>
           );
         })}
       </div>

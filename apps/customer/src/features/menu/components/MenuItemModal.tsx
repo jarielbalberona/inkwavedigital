@@ -133,7 +133,7 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
 
       <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="bg-card rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           {/* Header with Image */}
           <div className="relative">
             <img
@@ -141,35 +141,37 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
               alt={item.name}
               className="w-full h-64 object-cover rounded-t-lg"
             />
-            <button
+            <Button
+              variant="secondary"
+              size="icon"
               onClick={onClose}
-              className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100"
+              className="absolute top-4 right-4 shadow-lg"
             >
               <XMarkIcon className="w-5 h-5" />
-            </button>
+            </Button>
           </div>
 
           <div className="p-6 space-y-6">
             {/* Item Info */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{item.name}</h2>
+              <h2 className="text-2xl font-bold text-foreground">{item.name}</h2>
               {item.description && (
-                <p className="mt-2 text-gray-600">{item.description}</p>
+                <p className="mt-2 text-muted-foreground">{item.description}</p>
               )}
-              <p className="mt-2 text-xl font-semibold text-green-600">
+              <p className="mt-2 text-xl font-semibold text-success">
                 ₱{item.price.toFixed(2)}
               </p>
             </div>
 
             {/* Options */}
             {item.options.length > 0 && (
-              <div className="space-y-4 border-t border-gray-200 pt-6">
+              <div className="space-y-4 border-t border-border pt-6">
                 {item.options.map((option) => (
                   <div key={option.id} className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-900">
+                    <label className="block text-sm font-medium text-foreground">
                       {option.name}
                       {option.required && (
-                        <span className="ml-1 text-red-600">*</span>
+                        <span className="ml-1 text-destructive">*</span>
                       )}
                     </label>
 
@@ -183,17 +185,17 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
                         {option.values.map((value) => (
                           <label
                             key={value.id}
-                            className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"
+                            className="flex items-center p-3 border border-border rounded-lg cursor-pointer hover:bg-accent"
                           >
                             <RadioGroupItem value={value.id} id={value.id} />
                             <Label
                               htmlFor={value.id}
-                              className="ml-3 flex-1 text-gray-900 cursor-pointer font-normal"
+                              className="ml-3 flex-1 text-foreground cursor-pointer font-normal"
                             >
                               {value.label}
                             </Label>
                             {value.priceDelta !== 0 && (
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-muted-foreground">
                                 {value.priceDelta > 0 ? "+" : ""}₱
                                 {value.priceDelta.toFixed(2)}
                               </span>
@@ -207,7 +209,7 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
                         {option.values.map((value) => (
                           <label
                             key={value.id}
-                            className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50"
+                            className="flex items-center p-3 border border-border rounded-lg cursor-pointer hover:bg-accent"
                           >
                             <Checkbox
                               id={value.id}
@@ -216,12 +218,12 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
                             />
                             <Label
                               htmlFor={value.id}
-                              className="ml-3 flex-1 text-gray-900 cursor-pointer font-normal"
+                              className="ml-3 flex-1 text-foreground cursor-pointer font-normal"
                             >
                               {value.label}
                             </Label>
                             {value.priceDelta !== 0 && (
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-muted-foreground">
                                 {value.priceDelta > 0 ? "+" : ""}₱
                                 {value.priceDelta.toFixed(2)}
                               </span>
@@ -237,8 +239,8 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
 
             {/* Validation Error */}
             {validationError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600">{validationError}</p>
+              <div className="p-3 bg-destructive/10 border border-destructive rounded-lg">
+                <p className="text-sm text-destructive">{validationError}</p>
               </div>
             )}
 
@@ -257,8 +259,8 @@ export const MenuItemModal: React.FC<MenuItemModalProps> = ({
             </div>
 
             {/* Quantity Selector */}
-            <div className="flex items-center justify-between border-t border-gray-200 pt-6">
-              <span className="text-sm font-medium text-gray-900">Quantity</span>
+            <div className="flex items-center justify-between border-t border-border pt-6">
+              <span className="text-sm font-medium text-foreground">Quantity</span>
               <div className="flex items-center gap-3">
                 <Button
                   type="button"

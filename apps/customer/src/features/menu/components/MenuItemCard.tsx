@@ -4,6 +4,9 @@ import type { MenuItem } from "../types/menu.types";
 import { formatPrice } from "../hooks/helpers/menuHelpers";
 import { useCartStore } from "../../cart/hooks/stores/useCartStore";
 import { MenuItemModal } from "./MenuItemModal";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import type { SelectedOption } from "../../cart/types/cart.types";
 
 interface MenuItemCardProps {
@@ -35,9 +38,9 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
   const DEFAULT_IMAGE = "https://pub-41bef80e05e044e8a7e02c461f986c84.r2.dev/a1088200-e822-4a1d-b796-ff6abf742155/1761589977537-wjwzl8.jpg";
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+    <Card className="overflow-hidden hover:shadow-md transition-shadow gap-0 py-0">
       {/* Image */}
-      <div className="aspect-w-16 aspect-h-9 bg-gray-200">
+      <div className="aspect-w-16 aspect-h-9 bg-muted">
         <img
           src={item.imageUrl || DEFAULT_IMAGE}
           alt={item.name}
@@ -47,39 +50,37 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <CardContent className="p-4">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-semibold text-gray-900">{item.name}</h3>
-          <span className="text-lg font-bold text-green-600">
+          <h3 className="text-lg font-semibold text-foreground">{item.name}</h3>
+          <span className="text-lg font-bold text-success">
             {formatPrice(item.price)}
           </span>
         </div>
 
         {item.description && (
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">{item.description}</p>
+          <p className="text-muted-foreground text-sm mb-3 line-clamp-2">{item.description}</p>
         )}
 
         {/* Show options indicator */}
         {item.options.length > 0 && (
-          <p className="text-xs text-gray-500 mb-3">
+          <Badge variant="outline" className="mb-3">
             {item.options.length} customization option{item.options.length !== 1 ? "s" : ""} available
-          </p>
+          </Badge>
         )}
+      </CardContent>
 
-        {/* Add to Cart Button */}
-        <button
+      {/* Add to Cart Button */}
+      <CardFooter className="p-4 pt-0">
+        <Button
+          className="w-full"
           onClick={handleAddToCart}
           disabled={!item.isAvailable}
-          className={`w-full flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-colors ${
-            !item.isAvailable
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-blue-600 text-white hover:bg-blue-700"
-          }`}
         >
           <PlusIcon className="w-5 h-5 mr-2" />
           {!item.isAvailable ? "Unavailable" : "Add to Cart"}
-        </button>
-      </div>
+        </Button>
+      </CardFooter>
 
       {/* Menu Item Modal */}
       <MenuItemModal
@@ -88,6 +89,6 @@ export const MenuItemCard: React.FC<MenuItemCardProps> = ({ item }) => {
         item={item}
         onAddToCart={handleAddToCartFromModal}
       />
-    </div>
+    </Card>
   );
 };

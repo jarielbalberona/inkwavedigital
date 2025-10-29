@@ -11,6 +11,7 @@ import { useUserRole } from "./hooks/useUserRole";
 import { useTenantInfo } from "./hooks/useTenantInfo";
 import { VenueSelector } from "./components/VenueSelector";
 import { AuthProvider } from "./components/AuthProvider";
+import { Button } from "./components/ui/button";
 import { 
   QueueListIcon, 
   Cog6ToothIcon, 
@@ -50,19 +51,19 @@ function App() {
 
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <SignedOut>
         <Routes>
           <Route path="*" element={
             <div className="min-h-screen flex items-center justify-center">
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                <h2 className="text-2xl font-bold text-foreground mb-4">
                    Dashboard</h2>
-                <p className="text-gray-600 mb-6">Please sign in to access the dashboard features</p>
+                <p className="text-muted-foreground mb-6">Please sign in to access the dashboard features</p>
                 <SignInButton mode="modal">
-                  <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition">
+                  <Button size="lg">
                     Sign In
-                  </button>
+                  </Button>
                 </SignInButton>
               </div>
             </div>
@@ -71,21 +72,21 @@ function App() {
       </SignedOut>
 
       <SignedIn>
-        {location.pathname !== '/' && <nav className="bg-white shadow-md">
+        {location.pathname !== '/' && <nav className="bg-card shadow-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center space-x-8">
-                <h1 className="text-xl font-bold text-gray-900">
+                <h1 className="text-xl font-bold text-foreground">
                   {isSuperAdmin ? "Super Admin Dashboard" : `${tenantInfo?.name || "Ink Wave"} Dashboard`}
                 </h1>
                 
                 {isSuperAdmin ? (
                   <div className="flex items-center space-x-4">
-                    <span className="text-sm text-gray-600">Super Admin Mode</span>
-                    <div className="h-6 w-px bg-gray-300"></div>
+                    <span className="text-sm text-muted-foreground">Super Admin Mode</span>
+                    <div className="h-6 w-px bg-border"></div>
                     <div className="flex items-center text-sm">
-                      <BuildingOfficeIcon className="w-5 h-5 mr-2 text-purple-600" />
-                      <span className="font-medium text-purple-600">Tenant Management</span>
+                      <BuildingOfficeIcon className="w-5 h-5 mr-2 text-primary" />
+                      <span className="font-medium text-primary">Tenant Management</span>
                     </div>
                   </div>
                 ) : (
@@ -97,22 +98,19 @@ function App() {
                         role={role}
                         assignedVenueIds={assignedVenueIds}
                       />
-                      <div className="h-6 w-px bg-gray-300"></div>
+                      <div className="h-6 w-px bg-border"></div>
                     </div>
                     <div className="flex space-x-1">
                       {navItems.map((item) => (
-                        <button
+                        <Button
                           key={item.id}
+                          variant={isActive(item.path) ? "default" : "ghost"}
+                          size="sm"
                           onClick={() => navigate(item.path)}
-                          className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                            isActive(item.path)
-                              ? "bg-blue-100 text-blue-700"
-                              : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                          }`}
                         >
                           <item.icon className="w-4 h-4 mr-2" />
                           {item.label}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </>
@@ -140,13 +138,10 @@ function App() {
               <KDSPage venueId={selectedVenueId} />
             ) : (
               <div className="p-6 text-center">
-                <p className="text-gray-600 mb-4">Please select a venue to view KDS</p>
-                <button
-                  onClick={() => navigate('/venues')}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-                >
+                <p className="text-muted-foreground mb-4">Please select a venue to view KDS</p>
+                <Button onClick={() => navigate('/venues')}>
                   Go to Venues
-                </button>
+                </Button>
               </div>
             )
           } />
@@ -155,13 +150,10 @@ function App() {
               <MenuManagementPage venueId={selectedVenueId} />
             ) : (
               <div className="p-6 text-center">
-                <p className="text-gray-600 mb-4">Please select a venue to manage menu</p>
-                <button
-                  onClick={() => navigate('/venues')}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-                >
+                <p className="text-muted-foreground mb-4">Please select a venue to manage menu</p>
+                <Button onClick={() => navigate('/venues')}>
                   Go to Venues
-                </button>
+                </Button>
               </div>
             )
           } />
@@ -170,13 +162,10 @@ function App() {
               <TableManagementPage venueId={selectedVenueId} />
             ) : (
               <div className="p-6 text-center">
-                <p className="text-gray-600 mb-4">Please select a venue to manage tables</p>
-                <button
-                  onClick={() => navigate('/venues')}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
-                >
+                <p className="text-muted-foreground mb-4">Please select a venue to manage tables</p>
+                <Button onClick={() => navigate('/venues')}>
                   Go to Venues
-                </button>
+                </Button>
               </div>
             )
           } />

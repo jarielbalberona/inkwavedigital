@@ -3,6 +3,9 @@ import { XMarkIcon, MinusIcon, PlusIcon, TrashIcon, ShoppingBagIcon } from "@her
 import { useCartStore } from "../hooks/stores/useCartStore";
 import { useCreateOrder } from "../../order/hooks/mutations/useCreateOrder";
 import { useSessionStore } from "../../menu/hooks/stores/useSessionStore";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import type { CartItem } from "../types/cart.types";
 
 import type { CreateOrderData } from "../../order/types/order.types";
@@ -68,33 +71,36 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
       />
       
       {/* Drawer */}
-      <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl">
+      <div className="absolute right-0 top-0 h-full w-full max-w-md bg-card shadow-xl">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Your Cart</h2>
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <h2 className="text-lg font-semibold text-foreground">Your Cart</h2>
             <div className="flex items-center space-x-2">
               {items.length > 0 && (
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={clearCart}
-                  className="text-sm text-red-600 hover:text-red-700"
+                  className="text-destructive hover:text-destructive"
                 >
                   Clear All
-                </button>
+                </Button>
               )}
-              <button
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={onClose}
-                className="p-1 rounded-md hover:bg-gray-100"
               >
                 <XMarkIcon className="w-5 h-5" />
-              </button>
+              </Button>
             </div>
           </div>
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto">
             {items.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500">
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                 <ShoppingBagIcon className="w-16 h-16 mb-4" />
                 <p className="text-lg font-medium">Your cart is empty</p>
                 <p className="text-sm">Add some items to get started</p>
@@ -115,24 +121,23 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
 
           {/* Order Notes */}
           {items.length > 0 && (
-            <div className="border-t border-gray-200 p-4">
-              <label htmlFor="order-notes" className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="border-t border-border p-4">
+              <Label htmlFor="order-notes" className="mb-2">
                 Order Notes (Optional)
-              </label>
-              <textarea
+              </Label>
+              <Textarea
                 id="order-notes"
                 value={orderNotes}
                 onChange={(e) => setOrderNotes(e.target.value)}
                 placeholder="Any special requests or notes for your order..."
-                className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 rows={3}
                 maxLength={500}
               />
               <div className="flex justify-between items-center mt-2">
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-muted-foreground">
                   {pax && `${pax} ${pax === 1 ? 'person' : 'people'}`}
                 </div>
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-muted-foreground">
                   {orderNotes.length}/500 characters
                 </div>
               </div>
@@ -141,24 +146,21 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
 
           {/* Footer */}
           {items.length > 0 && (
-            <div className="border-t border-gray-200 p-4">
+            <div className="border-t border-border p-4">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-lg font-semibold">Total:</span>
-                <span className="text-xl font-bold text-green-600">
+                <span className="text-xl font-bold text-success">
                   ₱{total.toFixed(2)}
                 </span>
               </div>
-              <button
+              <Button
                 onClick={handleCheckout}
                 disabled={isSubmitting}
-                className={`w-full py-3 rounded-lg font-medium transition-colors ${
-                  isSubmitting
-                    ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                    : "bg-blue-600 text-white hover:bg-blue-700"
-                }`}
+                className="w-full"
+                size="lg"
               >
                 {isSubmitting ? "Placing Order..." : "Place Order"}
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -175,7 +177,7 @@ interface CartItemRowProps {
 
 const CartItemRow: React.FC<CartItemRowProps> = ({ item, onUpdateQuantity, onRemove }) => {
   return (
-    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+    <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
       {item.imageUrl && (
         <img
           src={item.imageUrl}
@@ -185,14 +187,14 @@ const CartItemRow: React.FC<CartItemRowProps> = ({ item, onUpdateQuantity, onRem
       )}
       
       <div className="flex-1 min-w-0">
-        <h3 className="font-medium text-gray-900 truncate">{item.name}</h3>
-        <p className="text-sm text-gray-600">
+        <h3 className="font-medium text-foreground truncate">{item.name}</h3>
+        <p className="text-sm text-muted-foreground">
           ₱{item.basePrice.toFixed(2)} × {item.quantity}
         </p>
         
         {/* Selected options */}
         {item.selectedOptions.length > 0 && (
-          <div className="text-xs text-gray-500 mt-1 space-y-0.5">
+          <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
             {item.selectedOptions.map((option) => (
               <div key={option.optionId}>
                 <span className="font-medium">{option.optionName}:</span>{" "}
@@ -200,7 +202,7 @@ const CartItemRow: React.FC<CartItemRowProps> = ({ item, onUpdateQuantity, onRem
                   <span key={value.valueId}>
                     {value.valueLabel}
                     {value.priceDelta !== 0 && (
-                      <span className="text-green-600">
+                      <span className="text-success">
                         {" "}(+₱{value.priceDelta.toFixed(2)})
                       </span>
                     )}
@@ -214,38 +216,42 @@ const CartItemRow: React.FC<CartItemRowProps> = ({ item, onUpdateQuantity, onRem
         
         {/* Item notes */}
         {item.notes && (
-          <p className="text-xs text-gray-500 mt-1 italic">Note: {item.notes}</p>
+          <p className="text-xs text-muted-foreground mt-1 italic">Note: {item.notes}</p>
         )}
         
         {/* Total price for this item */}
-        <p className="text-sm font-semibold text-gray-900 mt-1">
+        <p className="text-sm font-semibold text-foreground mt-1">
           Total: ₱{item.totalPrice.toFixed(2)}
         </p>
       </div>
       
       <div className="flex items-center space-x-2">
-        <button
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={() => onUpdateQuantity(item.quantity - 1)}
-          className="p-1 rounded-md hover:bg-gray-200"
         >
           <MinusIcon className="w-4 h-4" />
-        </button>
+        </Button>
         
         <span className="w-8 text-center font-medium">{item.quantity}</span>
         
-        <button
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={() => onUpdateQuantity(item.quantity + 1)}
-          className="p-1 rounded-md hover:bg-gray-200"
         >
           <PlusIcon className="w-4 h-4" />
-        </button>
+        </Button>
         
-        <button
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={onRemove}
-          className="p-1 rounded-md hover:bg-red-100 text-red-600"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
         >
           <TrashIcon className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
     </div>
   );

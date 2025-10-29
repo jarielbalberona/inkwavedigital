@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { CategorySidebar } from "./CategorySidebar";
 import { MenuGrid } from "./MenuGrid";
 import { FloatingCartButton } from "../../cart/components/FloatingCartButton";
@@ -168,10 +170,10 @@ export const MenuPage: React.FC = () => {
 
   if (isLoading || !categories.length) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading menu...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading menu...</p>
         </div>
       </div>
     );
@@ -179,15 +181,14 @@ export const MenuPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">Failed to load menu</p>
-          <button
+          <p className="text-destructive mb-4">Failed to load menu</p>
+          <Button
             onClick={() => window.location.reload()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
           >
             Try Again
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -195,9 +196,9 @@ export const MenuPage: React.FC = () => {
 
   if (!venueId) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 mb-4">Please scan a QR code to view the menu</p>
+          <p className="text-muted-foreground mb-4">Please scan a QR code to view the menu</p>
         </div>
       </div>
     );
@@ -206,7 +207,7 @@ export const MenuPage: React.FC = () => {
   const hasActiveOrders = activeOrders.length > 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="flex h-screen">
         {/* Sidebar */}
         <div className={`${isSidebarCollapsed ? "w-20 md:w-20" : "w-20 md:w-64"} transition-all duration-300`}>
@@ -223,46 +224,55 @@ export const MenuPage: React.FC = () => {
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <div className="bg-white border-b border-gray-200 p-3 md:p-4">
+          <div className="bg-card border-b border-border p-3 md:p-4">
             <div className="flex justify-between items-center">
               <div>
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900">Menu</h1>
+                <h1 className="text-xl md:text-2xl font-bold text-foreground">Menu</h1>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm md:text-base text-gray-600">
+                  <p className="text-sm md:text-base text-muted-foreground">
                     {tableId ? tableLabel || `Table ${tableId.slice(-1)}` : "Choose your favorite items"}
                   </p>
                   {pax && (
-                    <button
+                    <Button
+                      variant="link"
+                      size="sm"
                       onClick={() => setShowPaxPrompt(true)}
-                      className="text-sm md:text-base text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
+                      className="text-sm md:text-base h-auto p-0"
                     >
                       • {pax} {pax === 1 ? 'person' : 'people'}
-                    </button>
+                    </Button>
                   )}
                   {tableId && !pax && (
-                    <button
+                    <Button
+                      variant="link"
+                      size="sm"
                       onClick={() => setShowPaxPrompt(true)}
-                      className="text-sm md:text-base text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
+                      className="text-sm md:text-base h-auto p-0"
                     >
                       • Add party size
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
               
               {/* Order Status Button - Only show if there are active orders */}
               {hasActiveOrders && (
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setIsOrderStatusOpen(true)}
-                  className="relative text-blue-600 hover:text-blue-700 p-2"
+                  className="relative"
                   title="View Orders"
                 >
                   <ClipboardDocumentListIcon className="w-6 h-6" />
                   {/* Badge showing number of active orders */}
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center p-0"
+                  >
                     {activeOrders.length}
-                  </span>
-                </button>
+                  </Badge>
+                </Button>
               )}
             </div>
           </div>
