@@ -2,7 +2,7 @@ import { injectable, inject } from "tsyringe";
 import type { Request, Response, NextFunction } from "express";
 import { createLogger } from "@inkwave/utils";
 import type { IUserRepository } from "../../domain/repositories/IUserRepository.js";
-import { clerkClient } from "@clerk/clerk-sdk-node";
+import { clerkClient } from "@clerk/express";
 import { Webhook } from "svix";
 
 const logger = createLogger("webhook-controller");

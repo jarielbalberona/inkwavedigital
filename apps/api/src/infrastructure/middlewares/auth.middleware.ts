@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { createLogger } from "@inkwave/utils";
 import { UnauthorizedError } from "../../shared/errors/domain-error.js";
-import { clerkClient, verifyToken } from "@clerk/clerk-sdk-node";
+import { clerkClient, verifyToken } from "@clerk/express";
 
 const logger = createLogger("auth-middleware");
 

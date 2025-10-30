@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.917.0",
-    "@clerk/clerk-sdk-node": "^5.1.6",
+    "@clerk/express": "^1.6.11",
     "@inkwave/db": "workspace:*",
     "@inkwave/types": "workspace:*",
     "@inkwave/utils": "workspace:*",
@@ -38,9 +38,9 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/multer": "^2.0.0",
-    "@types/node": "^20.11.16",
-    "concurrently": "^8.2.2",
-    "nodemon": "^3.1.0",
-    "typescript": "^5.3.3"
+    "@types/node": "^22.10.5",
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.9",
+    "typescript": "^5.7.3"
   }
 }
