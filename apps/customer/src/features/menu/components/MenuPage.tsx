@@ -21,6 +21,7 @@ import { venueApi } from "../api/venueApi";
 import type { OrderConfirmation as OrderConfirmationType, ActiveOrder } from "../../order/types/order.types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { wsClient } from "@/lib/websocket";
+import { notificationManager } from "@/lib/notifications";
 import { applyTenantTheme } from "@/lib/themeLoader";
 
 export const MenuPage: React.FC = () => {
@@ -151,12 +152,51 @@ export const MenuPage: React.FC = () => {
   // Track previous orders to detect status changes
   const previousOrdersRef = useRef<Map<string, string>>(new Map());
 
-  // Request notification permission on mount
+  // Request notification permissions on mount (browser + audio)
   useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
+    notificationManager.requestPermissions();
   }, []);
+
+  // Helper function to get status-specific notification messages
+  const getStatusNotification = (status: string) => {
+    switch (status) {
+      case 'NEW':
+        return {
+          emoji: '📝',
+          title: 'Order Received',
+          description: 'Your order has been received',
+          type: 'order-update' as const,
+        };
+      case 'PREPARING':
+        return {
+          emoji: '👨‍🍳',
+          title: 'Order Being Prepared',
+          description: 'Your order is being prepared',
+          type: 'order-update' as const,
+        };
+      case 'READY':
+        return {
+          emoji: '🍽️',
+          title: 'Order Ready!',
+          description: 'Your order is ready for pickup!',
+          type: 'order-ready' as const,
+        };
+      case 'SERVED':
+        return {
+          emoji: '✅',
+          title: 'Order Served',
+          description: 'Enjoy your meal!',
+          type: 'order-update' as const,
+        };
+      default:
+        return {
+          emoji: '🔔',
+          title: 'Order Updated',
+          description: 'Your order status has been updated',
+          type: 'order-update' as const,
+        };
+    }
+  };
 
   // Detect order status changes and show notifications
   useEffect(() => {
@@ -165,25 +205,30 @@ export const MenuPage: React.FC = () => {
     activeOrders.forEach((order: ActiveOrder) => {
       const previousStatus = previousOrdersRef.current.get(order.id);
       
-      // If order status changed to READY
-      if (previousStatus && previousStatus !== 'READY' && order.status === 'READY') {
+      // Detect any status change (not just first time we see the order)
+      if (previousStatus && previousStatus !== order.status) {
         const orderNumber = order.id.slice(0, 8);
+        const notification = getStatusNotification(order.status);
         
-        // Show toast notification
-        toast.success('Order Ready!', {
-          description: `Order #${orderNumber} is ready for pickup!`,
-          duration: 10000,
+        // Show toast notification with appropriate style
+        const toastFn = order.status === 'READY' ? toast.success : toast.info;
+        toastFn(notification.title, {
+          description: `Order #${orderNumber} - ${notification.description}`,
+          duration: order.status === 'READY' ? 15000 : 8000, // Longer for READY
         });
 
         // Show browser notification
         if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('🍽️ Order Ready!', {
-            body: `Order #${orderNumber} is ready for pickup!`,
+          new Notification(`${notification.emoji} ${notification.title}`, {
+            body: `Order #${orderNumber}\n${notification.description}`,
             icon: '/icon.png',
             tag: `order-${order.id}`,
-            requireInteraction: true,
+            requireInteraction: order.status === 'READY', // Only require interaction for READY
           });
         }
+
+        // Play sound and vibrate
+        notificationManager.notify(notification.type);
       }
 
       // Update the previous status
