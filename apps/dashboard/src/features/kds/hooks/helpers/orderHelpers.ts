@@ -51,3 +51,20 @@ export const formatOrderTime = (dateString: string): string => {
 export const formatOrderTotal = (total: number): string => {
   return `₱${total.toFixed(2)}`;
 };
+
+export const getTimeElapsed = (dateString: string): string => {
+  const now = new Date();
+  const orderTime = new Date(dateString);
+  const elapsedMs = now.getTime() - orderTime.getTime();
+  const elapsedMinutes = Math.floor(elapsedMs / 60000);
+  
+  if (elapsedMinutes < 1) {
+    return "Just now";
+  } else if (elapsedMinutes < 60) {
+    return `${elapsedMinutes} min ago`;
+  } else {
+    const hours = Math.floor(elapsedMinutes / 60);
+    const minutes = elapsedMinutes % 60;
+    return minutes > 0 ? `${hours}h ${minutes}m ago` : `${hours}h ago`;
+  }
+};

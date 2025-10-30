@@ -1,7 +1,7 @@
-import React from "react";
-import { ClockIcon, UserIcon } from "@heroicons/react/24/outline";
+import React, { useState, useEffect } from "react";
+import { ClockIcon, UserIcon, UserGroupIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useUpdateOrderStatus } from "../hooks/mutations/useUpdateOrderStatus";
-import { getStatusColor, getNextStatus, formatOrderTime, formatOrderTotal } from "../hooks/helpers/orderHelpers";
+import { getStatusColor, getNextStatus, formatOrderTime, formatOrderTotal, getTimeElapsed } from "../hooks/helpers/orderHelpers";
 import type { Order } from "../types/kds.types";
 
 interface OrderCardProps {
@@ -12,6 +12,16 @@ interface OrderCardProps {
 export const OrderCard: React.FC<OrderCardProps> = ({ order, venueId }) => {
   const updateOrderStatusMutation = useUpdateOrderStatus(venueId);
   const nextStatus = getNextStatus(order.status);
+  const [timeElapsed, setTimeElapsed] = useState(getTimeElapsed(order.createdAt));
+
+  // Update elapsed time every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeElapsed(getTimeElapsed(order.createdAt));
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [order.createdAt]);
 
   const handleStatusUpdate = (newStatus: string) => {
     updateOrderStatusMutation.mutate({
@@ -26,9 +36,14 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, venueId }) => {
       <div className="flex justify-between items-start mb-3">
         <div>
           <h3 className="font-semibold text-gray-900">Order #{order.id.slice(0, 8)}</h3>
-          <div className="flex items-center text-sm text-gray-600 mt-1">
-            <ClockIcon className="w-4 h-4 mr-1" />
-            {formatOrderTime(order.createdAt)}
+          <div className="flex items-center gap-3 text-sm text-gray-600 mt-1">
+            <div className="flex items-center">
+              <ClockIcon className="w-4 h-4 mr-1" />
+              {formatOrderTime(order.createdAt)}
+            </div>
+            <div className="text-xs font-medium text-orange-600">
+              {timeElapsed}
+            </div>
           </div>
         </div>
         <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}>
@@ -36,11 +51,30 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, venueId }) => {
         </span>
       </div>
 
-      {/* Table/Device Info */}
-      <div className="flex items-center text-sm text-gray-600 mb-3">
-        <UserIcon className="w-4 h-4 mr-1" />
-        {order.tableId ? `Table ${order.tableId}` : `Device ${order.deviceId.slice(0, 8)}`}
+      {/* Table/Device Info and Pax */}
+      <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
+        <div className="flex items-center">
+          <UserIcon className="w-4 h-4 mr-1" />
+          {order.tableLabel || (order.tableId ? `Table ${order.tableId}` : `Device ${order.deviceId.slice(0, 8)}`)}
+        </div>
+        {order.pax && (
+          <div className="flex items-center">
+            <UserGroupIcon className="w-4 h-4 mr-1" />
+            {order.pax} {order.pax === 1 ? 'guest' : 'guests'}
+          </div>
+        )}
       </div>
+
+      {/* Order Notes */}
+      {order.notes && (
+        <div className="mb-3 p-2 bg-blue-50 rounded border border-blue-200">
+          <div className="flex items-start text-sm">
+            <DocumentTextIcon className="w-4 h-4 mr-1 text-blue-600 flex-shrink-0 mt-0.5" />
+            <span className="text-blue-900 font-medium">Order Note: </span>
+            <span className="text-blue-800 ml-1">{order.notes}</span>
+          </div>
+        </div>
+      )}
 
       {/* Items */}
       <div className="space-y-3 mb-4">

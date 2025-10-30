@@ -38,6 +38,7 @@
     "react-currency-input-field": "^4.0.3",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.9.4",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^2.6.0",
     "zustand": "^4.5.0"
   },

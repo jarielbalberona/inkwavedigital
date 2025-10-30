@@ -2,10 +2,13 @@ export interface Order {
   id: string;
   venueId: string;
   tableId?: string;
+  tableLabel?: string;
   deviceId: string;
   status: "NEW" | "PREPARING" | "READY" | "SERVED" | "CANCELLED";
   total: number;
   items: OrderItem[];
+  pax?: number;
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 }

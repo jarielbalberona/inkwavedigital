@@ -6,8 +6,10 @@ export function useDeviceOrdersQuery(deviceId: string, venueId?: string) {
     queryKey: ["device-orders", deviceId, venueId],
     queryFn: () => orderApi.getDeviceOrders(deviceId, venueId),
     enabled: !!deviceId,
-    // Removed polling - WebSocket will invalidate this query on updates
+    refetchInterval: 10000, // Fallback polling every 10 seconds (WebSocket is primary)
     staleTime: 0, // Always consider data stale to ensure fresh updates
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 }
 

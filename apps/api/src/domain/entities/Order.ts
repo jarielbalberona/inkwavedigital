@@ -16,6 +16,7 @@ export interface OrderProps {
   id: string;
   venueId: string;
   tableId?: string;
+  tableLabel?: string;
   status: OrderStatus;
   items: OrderItem[];
   deviceId?: string;
@@ -153,6 +154,7 @@ export class Order {
       id: this.props.id,
       venueId: this.props.venueId,
       tableId: this.props.tableId,
+      tableLabel: this.props.tableLabel,
       status: this.props.status.toString(),
       items: this.props.items.map((item) => ({
         ...item,

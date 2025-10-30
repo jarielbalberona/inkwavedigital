@@ -27,6 +27,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
   const { venueId, tableId, deviceId, pax } = useSessionStore();
   const createOrderMutation = useCreateOrder();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<string>('');
   const total = getTotal();
 
   const handleCheckout = async () => {
@@ -35,12 +36,17 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
     setIsSubmitting(true);
     
     try {
+      // Combine payment method with order notes if payment method is selected
+      const notesWithPayment = paymentMethod
+        ? `${orderNotes ? orderNotes + '\n\n' : ''}Payment Method: ${paymentMethod}`
+        : orderNotes || undefined;
+
       const orderData = {
         venueId,
         tableId: tableId || undefined,
         deviceId,
         pax: pax || undefined,
-        notes: orderNotes || undefined,
+        notes: notesWithPayment,
         items: items.map(item => ({
           itemId: item.itemId,
           quantity: item.quantity,
@@ -54,6 +60,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
       
       if (result) {
         clearCart();
+        setPaymentMethod('');
         // Pass the order data to the callback
         onCheckout(result);
         onClose();
@@ -108,27 +115,70 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
           )}
         </div>
 
-        {/* Order Notes */}
+        {/* Order Notes and Payment Method */}
         {items.length > 0 && (
-          <div className="border-t border-border p-4">
-            <Label htmlFor="order-notes" className="mb-2">
-              Order Notes (Optional)
-            </Label>
-            <Textarea
-              id="order-notes"
-              value={orderNotes}
-              onChange={(e) => setOrderNotes(e.target.value)}
-              placeholder="Any special requests or notes for your order..."
-              rows={3}
-              maxLength={500}
-            />
-            <div className="flex justify-between items-center mt-2">
-              <div className="text-sm text-muted-foreground">
-                {pax && `${pax} ${pax === 1 ? 'person' : 'people'}`}
+          <div className="border-t border-border p-4 space-y-4">
+            {/* Payment Method Selection */}
+            <div>
+              <Label htmlFor="payment-method" className="mb-2">
+                Payment Method
+              </Label>
+              <div className="flex gap-2 mt-2">
+                <Button
+                  type="button"
+                  variant={paymentMethod === 'Cash' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPaymentMethod('Cash')}
+                  className="flex-1"
+                >
+                  Cash
+                </Button>
+                <Button
+                  type="button"
+                  variant={paymentMethod === 'GCash' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setPaymentMethod('GCash')}
+                  className="flex-1"
+                >
+                  GCash
+                </Button>
               </div>
-              <div className="text-xs text-muted-foreground">
-                {orderNotes.length}/500 characters
+              {paymentMethod && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Selected: {paymentMethod}
+                </p>
+              )}
+            </div>
+
+            {/* Order Notes */}
+            <div>
+              <Label htmlFor="order-notes" className="mb-2">
+                Order Notes (Optional)
+              </Label>
+              <Textarea
+                id="order-notes"
+                value={orderNotes}
+                onChange={(e) => setOrderNotes(e.target.value)}
+                placeholder="Any special requests or notes for your order..."
+                rows={3}
+                maxLength={500}
+              />
+              <div className="flex justify-between items-center mt-2">
+                <div className="text-sm text-muted-foreground">
+                  {pax && `${pax} ${pax === 1 ? 'person' : 'people'}`}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {orderNotes.length}/500 characters
+                </div>
               </div>
+            </div>
+
+            {/* Payment Instructions */}
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-900 font-medium mb-1">Payment Instructions</p>
+              <p className="text-xs text-blue-800">
+                Please proceed to the counter for payment before your order will be processed.
+              </p>
             </div>
           </div>
         )}

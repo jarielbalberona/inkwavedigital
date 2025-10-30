@@ -1,9 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { wsClient } from "../../../lib/websocket";
 import { useOrdersQuery } from "../hooks/queries/useOrdersQuery";
 import { OrderStatusColumn } from "./OrderStatusColumn";
 import { groupOrdersByStatus } from "../hooks/helpers/orderHelpers";
+import type { Order } from "../types/kds.types";
 
 interface KDSPageProps {
   venueId: string;
@@ -15,6 +17,16 @@ export const KDSPage: React.FC<KDSPageProps> = ({ venueId }) => {
   
   const orders = ordersData || [];
   const ordersByStatus = groupOrdersByStatus(orders);
+
+  // Track previous order IDs to detect new orders
+  const previousOrderIdsRef = useRef<Set<string>>(new Set());
+
+  // Request notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
 
   // WebSocket integration for real-time updates
   useEffect(() => {
@@ -34,6 +46,44 @@ export const KDSPage: React.FC<KDSPageProps> = ({ venueId }) => {
       wsClient.disconnect();
     };
   }, [venueId, queryClient]);
+
+  // Detect new orders and show notifications
+  useEffect(() => {
+    if (!orders || orders.length === 0) return;
+
+    const currentOrderIds = new Set(orders.map((o: Order) => o.id));
+
+    // Find new orders (orders that weren't in the previous set)
+    const newOrders = orders.filter((order: Order) => 
+      !previousOrderIdsRef.current.has(order.id) && order.status === 'NEW'
+    );
+
+    // Show notification for each new order
+    newOrders.forEach((order: Order) => {
+      const orderNumber = order.id.slice(0, 8);
+      const tableInfo = order.tableLabel || (order.tableId ? `Table ${order.tableId}` : `Device ${order.deviceId.slice(0, 8)}`);
+      const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
+
+      // Show toast notification
+      toast.info('New Order Received!', {
+        description: `Order #${orderNumber} from ${tableInfo} - ${itemCount} ${itemCount === 1 ? 'item' : 'items'}`,
+        duration: 10000,
+      });
+
+      // Show browser notification
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('🔔 New Order!', {
+          body: `Order #${orderNumber} from ${tableInfo}\n${itemCount} ${itemCount === 1 ? 'item' : 'items'}`,
+          icon: '/icon.png',
+          tag: `order-${order.id}`,
+          requireInteraction: true,
+        });
+      }
+    });
+
+    // Update the previous order IDs set
+    previousOrderIdsRef.current = currentOrderIds;
+  }, [orders]);
 
   if (isLoading) {
     return (

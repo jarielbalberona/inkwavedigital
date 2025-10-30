@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import { CategorySidebar } from "./CategorySidebar";
 import { MenuGrid } from "./MenuGrid";
 import { FloatingCartButton } from "../../cart/components/FloatingCartButton";
@@ -17,7 +18,7 @@ import { useSessionStore } from "../hooks/stores/useSessionStore";
 import { useCartStore } from "../../cart/hooks/stores/useCartStore";
 import { getCategoriesFromItems } from "../hooks/helpers/menuHelpers";
 import { venueApi } from "../api/venueApi";
-import type { OrderConfirmation as OrderConfirmationType } from "../../order/types/order.types";
+import type { OrderConfirmation as OrderConfirmationType, ActiveOrder } from "../../order/types/order.types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { wsClient } from "@/lib/websocket";
 import { applyTenantTheme } from "@/lib/themeLoader";
@@ -146,6 +147,57 @@ export const MenuPage: React.FC = () => {
       wsClient.disconnect();
     };
   }, [venueId, deviceId, queryClient]);
+
+  // Track previous orders to detect status changes
+  const previousOrdersRef = useRef<Map<string, string>>(new Map());
+
+  // Request notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Detect order status changes and show notifications
+  useEffect(() => {
+    if (!activeOrders || activeOrders.length === 0) return;
+
+    activeOrders.forEach((order: ActiveOrder) => {
+      const previousStatus = previousOrdersRef.current.get(order.id);
+      
+      // If order status changed to READY
+      if (previousStatus && previousStatus !== 'READY' && order.status === 'READY') {
+        const orderNumber = order.id.slice(0, 8);
+        
+        // Show toast notification
+        toast.success('Order Ready!', {
+          description: `Order #${orderNumber} is ready for pickup!`,
+          duration: 10000,
+        });
+
+        // Show browser notification
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('🍽️ Order Ready!', {
+            body: `Order #${orderNumber} is ready for pickup!`,
+            icon: '/icon.png',
+            tag: `order-${order.id}`,
+            requireInteraction: true,
+          });
+        }
+      }
+
+      // Update the previous status
+      previousOrdersRef.current.set(order.id, order.status);
+    });
+
+    // Clean up orders that are no longer active
+    const activeOrderIds = new Set(activeOrders.map((o: ActiveOrder) => o.id));
+    Array.from(previousOrdersRef.current.keys()).forEach((orderId) => {
+      if (!activeOrderIds.has(orderId)) {
+        previousOrdersRef.current.delete(orderId);
+      }
+    });
+  }, [activeOrders]);
 
   const handleCategorySelect = (categoryId: string) => {
     setActiveCategoryId(categoryId);

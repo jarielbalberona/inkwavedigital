@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
+import { Toaster } from "sonner";
 import { KDSPage } from "./features/kds/components/KDSPage";
 import { MenuManagementPage } from "./features/menu-management/components/MenuManagementPage";
 import { TableManagementPage } from "./features/table-management/components/TableManagementPage";
@@ -56,6 +57,7 @@ function App() {
   return (
     <AuthProvider>
       <div className="min-h-screen bg-background">
+        <Toaster position="top-center" richColors />
         <SignedOut>
         <Routes>
           <Route path="*" element={

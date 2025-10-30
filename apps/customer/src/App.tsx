@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { QRLandingPage } from './components/QRLandingPage';
 import { MenuPage } from './features/menu/components/MenuPage';
 // import { SentryTestButton } from './components/SentryTestButton';
@@ -6,6 +7,7 @@ import { MenuPage } from './features/menu/components/MenuPage';
 function App() {
   return (
     <>
+      <Toaster position="top-center" richColors />
       <Routes>
         <Route path="/" element={<QRLandingPage />} />
         {/* New slug-based route */}

@@ -1,7 +1,7 @@
 import { injectable, inject } from "tsyringe";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import type { Database } from "@inkwave/db";
-import { orders, orderItems, menuItems } from "@inkwave/db";
+import { orders, orderItems, menuItems, tables } from "@inkwave/db";
 import type { IOrderRepository } from "../../domain/repositories/IOrderRepository.js";
 import { Order } from "../../domain/entities/Order.js";
 import type { OrderItem } from "../../domain/entities/Order.js";
@@ -108,12 +108,27 @@ export class DrizzleOrderRepository implements IOrderRepository {
       conditions.push(eq(orders.status, options.status));
     }
 
-    const orderResults = await this.db.query.orders.findMany({
-      where: and(...conditions),
-      limit: options?.limit ?? 50,
-      offset: options?.offset ?? 0,
-      orderBy: [desc(orders.createdAt)],
-    });
+    // Fetch orders with table labels
+    const orderResults = await this.db
+      .select({
+        id: orders.id,
+        venueId: orders.venueId,
+        tableId: orders.tableId,
+        tableLabel: tables.label,
+        status: orders.status,
+        total: orders.total,
+        deviceId: orders.deviceId,
+        pax: orders.pax,
+        notes: orders.notes,
+        createdAt: orders.createdAt,
+        updatedAt: orders.updatedAt,
+      })
+      .from(orders)
+      .leftJoin(tables, eq(orders.tableId, tables.id))
+      .where(and(...conditions))
+      .limit(options?.limit ?? 50)
+      .offset(options?.offset ?? 0)
+      .orderBy(desc(orders.createdAt));
 
     // Fetch all order items for these orders with menu item names
     const orderIds = orderResults.map((o) => o.id);
@@ -236,6 +251,7 @@ export class DrizzleOrderRepository implements IOrderRepository {
       id: orderData.id,
       venueId: orderData.venueId,
       tableId: orderData.tableId || undefined,
+      tableLabel: orderData.tableLabel || undefined,
       status: OrderStatus.fromString(orderData.status),
       items,
       deviceId: orderData.deviceId || undefined,
