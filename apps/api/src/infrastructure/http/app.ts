@@ -11,6 +11,7 @@ import { authRouter } from "./routes/auth.routes.js";
 import { imagesRouter } from "./routes/images.routes.js";
 import { webhookRouter } from "./routes/webhook.routes.js";
 import { testRouter } from "./routes/test.routes.js";
+import pushRouter from "./routes/push.routes.js";
 import { errorHandler } from "../../interfaces/middlewares/error-handler.middleware.js";
 import { performanceMiddleware } from "../../interfaces/middlewares/performance.middleware.js";
 
@@ -47,6 +48,7 @@ app.use("/api/v1/venues", venuesRouter);
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/images", imagesRouter);
+app.use("/api/v1/push", pushRouter);
 
 // Test endpoints - only available in development and staging
 if (process.env.NODE_ENV !== "production") {

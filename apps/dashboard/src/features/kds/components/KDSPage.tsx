@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { wsClient } from "../../../lib/websocket";
+import { notificationManager } from "../../../lib/notifications";
 import { useOrdersQuery } from "../hooks/queries/useOrdersQuery";
 import { OrderStatusColumn } from "./OrderStatusColumn";
 import { groupOrdersByStatus } from "../hooks/helpers/orderHelpers";
@@ -21,11 +22,9 @@ export const KDSPage: React.FC<KDSPageProps> = ({ venueId }) => {
   // Track previous order IDs to detect new orders
   const previousOrderIdsRef = useRef<Set<string>>(new Set());
 
-  // Request notification permission on mount
+  // Request notification permissions on mount (browser + audio)
   useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission();
-    }
+    notificationManager.requestPermissions();
   }, []);
 
   // WebSocket integration for real-time updates
@@ -79,6 +78,9 @@ export const KDSPage: React.FC<KDSPageProps> = ({ venueId }) => {
           requireInteraction: true,
         });
       }
+
+      // Play sound and vibrate
+      notificationManager.notify('new-order');
     });
 
     // Update the previous order IDs set

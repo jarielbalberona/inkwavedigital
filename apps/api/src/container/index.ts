@@ -12,8 +12,10 @@ import { DrizzleSuperAdminRepository } from "../infrastructure/persistence/Drizz
 import { DrizzleUserRepository } from "../infrastructure/persistence/DrizzleUserRepository.js";
 import { DrizzleVenueStaffRepository } from "../infrastructure/persistence/DrizzleVenueStaffRepository.js";
 import { DrizzleImageLibraryRepository } from "../infrastructure/persistence/DrizzleImageLibraryRepository.js";
+import { DrizzlePushSubscriptionRepository } from "../infrastructure/persistence/DrizzlePushSubscriptionRepository.js";
 import { WebSocketManager } from "../infrastructure/websocket/WebSocketManager.js";
 import { R2StorageService } from "../infrastructure/storage/R2StorageService.js";
+import { PushNotificationService } from "../infrastructure/push/PushNotificationService.js";
 
 // Use Cases
 import { CreateOrderUseCase } from "../application/use-cases/CreateOrderUseCase.js";
@@ -50,6 +52,8 @@ import { UpdateItemOptionValueUseCase } from "../application/use-cases/UpdateIte
 import { DeleteItemOptionValueUseCase } from "../application/use-cases/DeleteItemOptionValueUseCase.js";
 import { GetActiveMenuUseCase } from "../application/use-cases/GetActiveMenuUseCase.js";
 import { CreateMenuUseCase } from "../application/use-cases/CreateMenuUseCase.js";
+import { SubscribeToPushNotificationsUseCase } from "../application/use-cases/SubscribeToPushNotificationsUseCase.js";
+import { UnsubscribeFromPushNotificationsUseCase } from "../application/use-cases/UnsubscribeFromPushNotificationsUseCase.js";
 
 // Controllers
 import { HealthController } from "../interfaces/controllers/health.controller.js";
@@ -107,9 +111,18 @@ container.register("IImageLibraryRepository", {
   useClass: DrizzleImageLibraryRepository,
 });
 
+container.register("PushSubscriptionRepository", {
+  useClass: DrizzlePushSubscriptionRepository,
+});
+
 // Register storage service
 container.register("R2StorageService", {
   useClass: R2StorageService,
+});
+
+// Register push notification service
+container.register("PushNotificationService", {
+  useClass: PushNotificationService,
 });
 
 // Register use cases
@@ -247,6 +260,14 @@ container.register("GetActiveMenuUseCase", {
 
 container.register("CreateMenuUseCase", {
   useClass: CreateMenuUseCase,
+});
+
+container.register("SubscribeToPushNotificationsUseCase", {
+  useClass: SubscribeToPushNotificationsUseCase,
+});
+
+container.register("UnsubscribeFromPushNotificationsUseCase", {
+  useClass: UnsubscribeFromPushNotificationsUseCase,
 });
 
 // Register controllers

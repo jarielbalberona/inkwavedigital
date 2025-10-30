@@ -9,6 +9,7 @@ import { OrderStatus } from "../../domain/value-objects/OrderStatus.js";
 import { NotFoundError, ValidationError } from "../../shared/errors/domain-error.js";
 import type { Logger } from "@inkwave/utils";
 import type { WebSocketManager } from "../../infrastructure/websocket/WebSocketManager.js";
+import type { PushNotificationService } from "../../infrastructure/push/PushNotificationService.js";
 
 export interface CreateOrderInput {
   venueId: string;
@@ -38,7 +39,8 @@ export class CreateOrderUseCase {
     @inject("IMenuRepository") private menuRepository: IMenuRepository,
     @inject("IVenueRepository") private venueRepository: IVenueRepository,
     @inject("Logger") private logger: Logger,
-    @inject("WebSocketManager") private wsManager: WebSocketManager
+    @inject("WebSocketManager") private wsManager: WebSocketManager,
+    @inject("PushNotificationService") private pushService: PushNotificationService
   ) {}
 
   async execute(input: CreateOrderInput): Promise<CreateOrderOutput> {
@@ -144,8 +146,29 @@ export class CreateOrderUseCase {
     // Save order
     await this.orderRepository.save(order);
 
-    // Broadcast order created event
+    // Broadcast order created event via WebSocket
     this.wsManager.broadcastOrderCreated(input.venueId, order.toJSON());
+
+    // Send push notification to venue staff
+    const orderNumber = order.id.slice(0, 8);
+    const itemCount = orderItems.reduce((sum, item) => sum + item.quantity, 0);
+    const tableInfo = input.tableId ? `Table ${input.tableId}` : (input.deviceId ? `Device ${input.deviceId.slice(0, 8)}` : 'Takeout');
+    
+    this.pushService.sendToVenue(input.venueId, {
+      title: '🔔 New Order!',
+      body: `Order #${orderNumber} from ${tableInfo} - ${itemCount} ${itemCount === 1 ? 'item' : 'items'}`,
+      icon: '/icon.png',
+      badge: '/badge.png',
+      tag: `order-${order.id}`,
+      requireInteraction: true,
+      data: {
+        orderId: order.id,
+        venueId: input.venueId,
+        url: `/orders/${order.id}`,
+      },
+    }).catch((error) => {
+      this.logger.error({ error, orderId: order.id }, "Failed to send push notification to venue");
+    });
 
     this.logger.info({ orderId: order.id, total: order.total.toNumber() }, "Order created successfully");
 

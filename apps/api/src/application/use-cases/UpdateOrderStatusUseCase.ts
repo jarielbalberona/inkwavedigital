@@ -4,6 +4,7 @@ import { OrderStatus } from "../../domain/value-objects/OrderStatus.js";
 import { NotFoundError, ValidationError } from "../../shared/errors/domain-error.js";
 import type { Logger } from "@inkwave/utils";
 import type { WebSocketManager } from "../../infrastructure/websocket/WebSocketManager.js";
+import type { PushNotificationService } from "../../infrastructure/push/PushNotificationService.js";
 
 export interface UpdateOrderStatusInput {
   orderId: string;
@@ -22,7 +23,8 @@ export class UpdateOrderStatusUseCase {
   constructor(
     @inject("IOrderRepository") private orderRepository: IOrderRepository,
     @inject("Logger") private logger: Logger,
-    @inject("WebSocketManager") private wsManager: WebSocketManager
+    @inject("WebSocketManager") private wsManager: WebSocketManager,
+    @inject("PushNotificationService") private pushService: PushNotificationService
   ) {}
 
   async execute(input: UpdateOrderStatusInput): Promise<UpdateOrderStatusOutput> {
@@ -48,8 +50,31 @@ export class UpdateOrderStatusUseCase {
     // Save updated order
     await this.orderRepository.save(order);
 
-    // Broadcast order status change
+    // Broadcast order status change via WebSocket
     this.wsManager.broadcastOrderStatusChanged(order.venueId, order.id, order.status.toString());
+
+    // Send push notification to customer if they have a deviceId
+    if (order.deviceId) {
+      const orderNumber = order.id.slice(0, 8);
+      const statusEmoji = this.getStatusEmoji(order.status.toString());
+      const statusMessage = this.getStatusMessage(order.status.toString());
+      
+      this.pushService.sendToDevice(order.deviceId, {
+        title: `${statusEmoji} ${statusMessage}`,
+        body: `Order #${orderNumber} - ${this.getStatusDescription(order.status.toString())}`,
+        icon: '/icon.png',
+        badge: '/badge.png',
+        tag: `order-${order.id}`,
+        requireInteraction: order.status.toString() === 'READY',
+        data: {
+          orderId: order.id,
+          status: order.status.toString(),
+          url: `/orders/${order.id}`,
+        },
+      }).catch((error) => {
+        this.logger.error({ error, orderId: order.id }, "Failed to send push notification");
+      });
+    }
 
     this.logger.info(
       { orderId: order.id, status: order.status.toString() },
@@ -61,6 +86,36 @@ export class UpdateOrderStatusUseCase {
       status: order.status.toString(),
       updatedAt: order.updatedAt.toISOString(),
     };
+  }
+
+  private getStatusEmoji(status: string): string {
+    switch (status) {
+      case 'NEW': return '📝';
+      case 'PREPARING': return '👨‍🍳';
+      case 'READY': return '🍽️';
+      case 'SERVED': return '✅';
+      default: return '🔔';
+    }
+  }
+
+  private getStatusMessage(status: string): string {
+    switch (status) {
+      case 'NEW': return 'Order Received';
+      case 'PREPARING': return 'Order Being Prepared';
+      case 'READY': return 'Order Ready!';
+      case 'SERVED': return 'Order Served';
+      default: return 'Order Updated';
+    }
+  }
+
+  private getStatusDescription(status: string): string {
+    switch (status) {
+      case 'NEW': return 'Your order has been received';
+      case 'PREPARING': return 'Your order is being prepared';
+      case 'READY': return 'Your order is ready for pickup!';
+      case 'SERVED': return 'Enjoy your meal!';
+      default: return 'Your order status has been updated';
+    }
   }
 }
 
