@@ -20,6 +20,7 @@ export interface GetVenueInfoOutput {
       id: string;
       name: string;
       slug: string;
+      settings?: Record<string, any> | null;
     };
   };
 }
@@ -60,6 +61,7 @@ export class GetVenueInfoUseCase {
           id: tenant.id,
           name: tenant.name,
           slug: tenant.slug,
+          settings: tenant.settingsJson,
         },
       },
     };

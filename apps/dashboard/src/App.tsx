@@ -6,6 +6,7 @@ import { MenuManagementPage } from "./features/menu-management/components/MenuMa
 import { TableManagementPage } from "./features/table-management/components/TableManagementPage";
 import { TenantManagementPage } from "./features/admin/components/TenantManagementPage";
 import { VenueManagementPage } from "./features/venue-management/components/VenueManagementPage";
+import { SettingsPage } from "./features/settings/components/SettingsPage";
 import { useSuperAdmin } from "./hooks/useSuperAdmin";
 import { useUserRole } from "./hooks/useUserRole";
 import { useTenantInfo } from "./hooks/useTenantInfo";
@@ -19,6 +20,7 @@ import {
   TableCellsIcon,
   BuildingOfficeIcon,
   HomeIcon,
+  Cog8ToothIcon,
 } from "@heroicons/react/24/outline";
 import { UserButton } from "@clerk/clerk-react";
 
@@ -44,6 +46,7 @@ function App() {
     { icon: QueueListIcon, label: 'KDS', path: '/kds', id: 'kds' },
     { icon: Cog6ToothIcon, label: 'Menu', path: '/menu', id: 'menu' },
     { icon: TableCellsIcon, label: 'Tables', path: '/tables', id: 'tables' },
+    { icon: Cog8ToothIcon, label: 'Settings', path: '/settings', id: 'settings' },
   ];
 
   const isActive = (path: string) => {
@@ -170,6 +173,7 @@ function App() {
               </div>
             )
           } />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </SignedIn>
       </div>

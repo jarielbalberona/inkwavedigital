@@ -56,70 +56,28 @@ inkwavedigital/
 
 ### Prerequisites
 
-- Node.js >= 20
-- pnpm >= 8
-- Docker & Docker Compose
-- Sentry account (optional, for error tracking)
-- Slack workspace (optional, for notifications)
+- **Node.js** >= 20.0.0
+- **pnpm** >= 8.0.0
+- **Docker Desktop** (for local PostgreSQL)
+- **Clerk account** (for authentication - get free account at [clerk.com](https://clerk.com))
+- **Cloudflare R2** (optional for image uploads)
+- **Sentry account** (optional for error tracking)
+- **Slack workspace** (optional for notifications)
 
-### Installation
+### Step-by-Step Installation
 
+#### 1. Install Dependencies
 ```bash
-# Install dependencies
 pnpm install
-
-# Create root .env file (centralized configuration)
-cp .env.example .env
-# Edit .env with your credentials (see Environment Variables section)
-
-# Start services with Docker Compose
-docker-compose up -d
-
-# OR run locally in development:
-
-# Generate and run database migrations
-pnpm --filter @inkwave/db drizzle:generate
-pnpm --filter @inkwave/db drizzle:migrate
-
-# Seed database with demo data
-pnpm --filter @inkwave/db seed
 ```
 
-### Development (Local)
-
-Run all services in separate terminals:
-
+#### 2. Start PostgreSQL Database
 ```bash
-# Terminal 1: API
-cd apps/api && pnpm dev
-
-# Terminal 2: Customer PWA
-cd apps/customer && pnpm dev
-
-# Terminal 3: Dashboard
-cd apps/dashboard && pnpm dev
+docker compose up -d
 ```
+This starts PostgreSQL on port 5432.
 
-Access:
-- **API**: http://localhost:3000
-- **Customer PWA**: http://localhost:5173
-- **Dashboard**: http://localhost:5174
-
-### Development (Docker)
-
-```bash
-# Start all services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Rebuild after changes
-docker-compose build
-docker-compose up -d
-```
-
-## 🔧 Environment Variables
+#### 3. Configure Environment Variables
 
 Create a `.env` file in the project root:
 
@@ -130,12 +88,12 @@ NODE_ENV=development
 # Database
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/inkwave
 
-# Clerk Authentication
+# Clerk Authentication (required - get from https://dashboard.clerk.com)
 VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
 CLERK_WEBHOOK_SECRET=whsec_...
 
-# Cloudflare R2 Storage
+# Cloudflare R2 (optional for local dev)
 R2_ACCOUNT_ID=...
 R2_ACCESS_KEY_ID=...
 R2_SECRET_ACCESS_KEY=...
@@ -143,26 +101,98 @@ R2_BUCKET_NAME=inkwave-images
 R2_PUBLIC_URL=https://pub-....r2.dev
 
 # WebSocket
-VITE_WS_URL=ws://localhost:3000/ws
+VITE_WS_URL=ws://localhost:3000
 
-# Sentry Error Tracking
-SENTRY_DSN=https://...@o....ingest.us.sentry.io/...          # Backend
-VITE_SENTRY_DSN=https://...@o....ingest.us.sentry.io/...     # Frontend
+# Sentry (optional for local dev)
+SENTRY_DSN=https://...@sentry.io/...
+VITE_SENTRY_DSN=https://...@sentry.io/...
 SENTRY_ENVIRONMENT=development
 
-# Slack Notifications
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...       # Error alerts
-SLACK_ALERTS_ENABLED=true
-SLACK_OPERATIONS_ENABLED=false                                # Optional: order notifications
+# Slack (optional for local dev)
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
+SLACK_ALERTS_ENABLED=false
 
-# Performance
-SLOW_REQUEST_THRESHOLD_MS=1000
-
-# Super Admins
-SUPER_ADMIN_EMAIL_1=admin@example.com
+# Super Admin (use your Clerk account email)
+SUPER_ADMIN_EMAIL_1=your-email@example.com
 ```
 
 > **Note**: Vite requires `VITE_` prefix for environment variables to be exposed to the frontend.
+
+#### 4. Setup Database
+
+Generate and run migrations:
+```bash
+pnpm --filter @inkwave/db drizzle:generate
+pnpm --filter @inkwave/db drizzle:migrate
+```
+
+Seed with demo data (optional):
+```bash
+pnpm --filter @inkwave/db seed
+```
+
+#### 5. Start Development Servers
+
+Open 3 terminal windows:
+
+**Terminal 1 - API:**
+```bash
+pnpm dev:api
+```
+
+**Terminal 2 - Customer App:**
+```bash
+pnpm dev:customer
+```
+
+**Terminal 3 - Dashboard:**
+```bash
+pnpm dev:dashboard
+```
+
+Access:
+- **API**: http://localhost:3000
+- **Customer App**: http://localhost:5173
+- **Dashboard**: http://localhost:5174
+
+#### 6. Verify Setup & Test
+
+1. **Check API health:**
+   ```bash
+   curl http://localhost:3000/health
+   # Should return: {"status":"ok","timestamp":"..."}
+   ```
+
+2. **Sign in to Dashboard** (http://localhost:5174)
+   - Sign in with your Clerk account
+   - If your email matches `SUPER_ADMIN_EMAIL_1`, you'll see tenant management
+   - Otherwise, you'll see your tenant's dashboard
+
+3. **Test the Complete Flow:**
+   - In dashboard, create a venue and menu items
+   - Go to Tables tab and create a table
+   - Download the QR code
+   - Scan QR code with your phone (or copy/paste URL to browser)
+   - Browse the menu and add items to cart
+   - Place an order
+   - See the order appear in KDS in real-time! ✨
+
+### Alternative: Docker Compose
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Rebuild after changes
+docker-compose build && docker-compose up -d
+```
+
+## 🔧 Environment Variables
+
+See the Quick Start section above for the complete `.env` configuration. All environment variables are documented inline with descriptions.
 
 ## 🧪 Testing
 
@@ -335,13 +365,27 @@ Key entities:
 
 ## 📚 Documentation
 
-Detailed guides available:
-- `WEBHOOK_IMPLEMENTATION_COMPLETE.md` - Clerk webhook setup
-- `MONITORING_SETUP.md` - Sentry and Slack configuration
-- `SLACK_SETUP_GUIDE.md` - Slack app creation
-- `WEBSOCKET_MONITORING_IMPLEMENTATION.md` - Real-time features
-- `MENU_IMPLEMENTATION_STATUS.md` - Menu system details
-- `QR_CODE_SLUG_IMPLEMENTATION_COMPLETE.md` - URL structure
+Comprehensive documentation is organized in the [`docs/`](docs/) folder:
+
+### Quick Links
+- **[Documentation Index](docs/README.md)** - Complete navigation guide
+- **[Current System Status](docs/CURRENT_STATE.md)** - What's working and what needs attention
+- **[Roadmap](docs/ROADMAP.md)** - Planned features and priorities
+
+### Feature Documentation
+- **[Authentication](docs/features/authentication.md)** - Clerk auth, webhooks, roles
+- **[Menu Management](docs/features/menu-management.md)** - Menus, categories, items, options
+- **[Tables & QR Codes](docs/features/table-qr-management.md)** - Table management and QR generation
+- **[Orders & KDS](docs/features/orders-kds.md)** - Order lifecycle and Kitchen Display
+- **[Tenant Settings](docs/features/tenant-settings.md)** - Branding and theming
+- **[Monitoring](docs/features/monitoring-operations.md)** - WebSocket monitoring and Slack alerts
+
+### Deployment Guides
+- **[General Deployment](docs/deployment/deployment.md)** - Deployment overview
+- **[Docker Setup](docs/deployment/docker.md)** - Docker configuration
+- **[Render Deployment](docs/deployment/render.md)** - Render.com guide
+
+> **Tip**: All documentation is AI-friendly with comprehensive context in each file.
 
 ## 🚢 Deployment
 
@@ -386,25 +430,75 @@ pnpm --filter @inkwave/db drizzle:studio
 
 ## 🐛 Troubleshooting
 
-### API won't start
-- Check `.env` file exists and has correct DATABASE_URL
-- Ensure PostgreSQL is running: `docker-compose up -d postgres`
-- Check logs: `docker-compose logs api`
+### Database Connection Issues
+```bash
+# Check if PostgreSQL is running
+docker ps
 
-### WebSocket not connecting
-- Verify `VITE_WS_URL` in `.env`
-- Check API is running on port 3000
-- Look for WebSocket errors in browser console
+# View PostgreSQL logs
+docker logs inkwave-postgres
 
-### Sentry not capturing errors
-- Verify DSN values in `.env` are correct
-- Check API logs for "Sentry initialized" message
-- Test with `/api/v1/test/debug-sentry` endpoint
+# Restart database
+docker compose down && docker compose up -d
+```
 
-### Docker build fails
-- Clear cache: `docker-compose build --no-cache`
-- Remove volumes: `docker-compose down -v`
-- Check disk space
+### Port Already in Use
+- **API (3000)**: Change `PORT` in `.env`
+- **Customer (5173)**: Change port in `apps/customer/vite.config.ts`
+- **Dashboard (5174)**: Change port in `apps/dashboard/vite.config.ts`
+
+### API Won't Start
+- Verify `.env` file exists with correct `DATABASE_URL`
+- Ensure PostgreSQL is running
+- Check migrations ran successfully
+- View logs: `docker-compose logs api`
+
+### Clerk Authentication Issues
+- Verify `VITE_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` are correct
+- Ensure webhook secret (`CLERK_WEBHOOK_SECRET`) matches Clerk dashboard
+- Check your email is set as `SUPER_ADMIN_EMAIL_1`
+- Clear browser cache and hard refresh
+
+### WebSocket Not Connecting
+- Verify `VITE_WS_URL` in `.env` (default: `ws://localhost:3000`)
+- Ensure API is running
+- Check browser console for WebSocket errors
+- Try refreshing the page
+
+### Orders Not Appearing in Real-Time
+- Check WebSocket connection status in browser console
+- Verify venue ID matches between customer app and dashboard
+- Refresh both customer app and dashboard
+- Check API logs for WebSocket errors
+
+### Images Not Uploading
+- Verify Cloudflare R2 credentials in `.env`
+- Check R2 bucket exists and is accessible
+- View API logs for upload errors
+- For local dev, R2 is optional (will show errors but won't break)
+
+### pnpm Install Issues
+```bash
+# Clear cache and reinstall
+pnpm store prune
+rm -rf node_modules
+rm pnpm-lock.yaml
+pnpm install
+```
+
+### Docker Build Fails
+```bash
+# Clear cache and rebuild
+docker-compose build --no-cache
+docker-compose down -v
+docker-compose up -d
+```
+
+### Still Having Issues?
+1. Check [docs/features/](docs/features/) for feature-specific troubleshooting
+2. Review [docs/CURRENT_STATE.md](docs/CURRENT_STATE.md) for known issues
+3. Check API health: `curl http://localhost:3000/health`
+4. View detailed health: `curl http://localhost:3000/health/detailed`
 
 ## 📝 License
 

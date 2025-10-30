@@ -1,11 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@clerk/clerk-react";
 import { api } from "../lib/api";
+import { applyTenantTheme } from "../lib/themeLoader";
+import type { TenantSettings } from "@inkwave/types";
+import { useEffect } from "react";
 
 interface TenantInfo {
   id: string;
   name: string;
   slug: string;
+  settings?: TenantSettings | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,6 +41,13 @@ export function useTenantInfo() {
     enabled: !!user && !!user.primaryEmailAddress?.emailAddress,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
+
+  // Apply tenant theme when tenant info is loaded
+  useEffect(() => {
+    if (data?.settings) {
+      applyTenantTheme(data.settings);
+    }
+  }, [data]);
 
   return { 
     tenantInfo: data ?? null, 

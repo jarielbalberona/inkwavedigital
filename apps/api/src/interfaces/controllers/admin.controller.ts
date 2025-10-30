@@ -1,12 +1,16 @@
 import { injectable, inject } from "tsyringe";
 import type { Request, Response, NextFunction } from "express";
 import { CreateTenantUseCase } from "../../application/use-cases/admin/CreateTenantUseCase.js";
+import { UpdateTenantSettingsUseCase } from "../../application/use-cases/admin/UpdateTenantSettingsUseCase.js";
+import { GetTenantSettingsUseCase } from "../../application/use-cases/admin/GetTenantSettingsUseCase.js";
 import type { ITenantRepository } from "../../domain/repositories/ITenantRepository.js";
 
 @injectable()
 export class AdminController {
   constructor(
     @inject(CreateTenantUseCase) private createTenantUseCase: CreateTenantUseCase,
+    @inject(UpdateTenantSettingsUseCase) private updateTenantSettingsUseCase: UpdateTenantSettingsUseCase,
+    @inject(GetTenantSettingsUseCase) private getTenantSettingsUseCase: GetTenantSettingsUseCase,
     @inject("ITenantRepository") private tenantRepository: ITenantRepository
   ) {}
 
@@ -74,6 +78,42 @@ export class AdminController {
       res.json({
         success: true,
         message: "Tenant deleted successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getTenantSettings(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+
+      const result = await this.getTenantSettingsUseCase.execute({
+        tenantId: id,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateTenantSettings(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { settings } = req.body;
+
+      const result = await this.updateTenantSettingsUseCase.execute({
+        tenantId: id,
+        settings,
+      });
+
+      res.json({
+        success: true,
+        data: result,
       });
     } catch (error) {
       next(error);

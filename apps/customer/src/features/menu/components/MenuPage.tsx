@@ -20,6 +20,7 @@ import { venueApi } from "../api/venueApi";
 import type { OrderConfirmation as OrderConfirmationType } from "../../order/types/order.types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { wsClient } from "@/lib/websocket";
+import { applyTenantTheme } from "@/lib/themeLoader";
 
 export const MenuPage: React.FC = () => {
   const navigate = useNavigate();
@@ -113,6 +114,13 @@ export const MenuPage: React.FC = () => {
       setActiveCategoryId(categories[0].id);
     }
   }, [categories, activeCategoryId]);
+
+  // Apply tenant theme when venue data is loaded
+  useEffect(() => {
+    if (venueBySlugData?.tenant?.settings) {
+      applyTenantTheme(venueBySlugData.tenant.settings);
+    }
+  }, [venueBySlugData]);
 
   // WebSocket integration for real-time order updates
   useEffect(() => {

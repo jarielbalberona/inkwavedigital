@@ -26,6 +26,7 @@ export interface GetVenueBySlugOutput {
     id: string;
     name: string;
     slug: string;
+    settings?: Record<string, any> | null;
   };
 }
 
@@ -59,6 +60,7 @@ export class GetVenueBySlugUseCase {
         id: tenant.id,
         name: tenant.name,
         slug: tenant.slug,
+        settings: tenant.settingsJson,
       },
     };
   }

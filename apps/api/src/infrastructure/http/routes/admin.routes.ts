@@ -18,3 +18,7 @@ adminRouter.get("/tenants", adminController.getTenants.bind(adminController));
 adminRouter.get("/tenants/:id", adminController.getTenant.bind(adminController));
 adminRouter.delete("/tenants/:id", adminController.deleteTenant.bind(adminController));
 
+// Tenant settings
+adminRouter.get("/tenants/:id/settings", adminController.getTenantSettings.bind(adminController));
+adminRouter.patch("/tenants/:id/settings", adminController.updateTenantSettings.bind(adminController));
+
