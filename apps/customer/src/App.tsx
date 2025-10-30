@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { QRLandingPage } from './components/QRLandingPage';
 import { MenuPage } from './features/menu/components/MenuPage';
-import { SentryTestButton } from './components/SentryTestButton';
+// import { SentryTestButton } from './components/SentryTestButton';
 
 function App() {
   return (
@@ -14,7 +14,7 @@ function App() {
         <Route path="/menu" element={<MenuPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      <SentryTestButton />
+      {/* <SentryTestButton /> */}
     </>
   );
 }

@@ -9,7 +9,9 @@ import {
 
 export function initializeSentry(): void {
   const dsn = import.meta.env.VITE_SENTRY_DSN;
-  
+  console.log("dsn", dsn);
+  console.log("environment", import.meta.env.VITE_SENTRY_ENVIRONMENT);
+  console.log("mode", import.meta.env.MODE);
   if (!dsn) {
     console.warn("VITE_SENTRY_DSN not configured, skipping Sentry initialization");
     return;

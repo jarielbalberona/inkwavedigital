@@ -44,10 +44,28 @@ docker-compose*.yml
 
 # Database
 drizzle
-migrations
 
 # Temp
 temp
 tmp
 *.log
+
+# Documentation (large, not needed in containers)
+docs
+
+# Log files
+logs
+api-output.log
+customer-output.log
+dashboard-output.log
+
+# Scripts not needed in containers
+restart-dev.sh
+Makefile
+setup_super_admin.sql
+slack-app-manifest*.yaml
+render.yaml
+
+# README files
+README.md
 

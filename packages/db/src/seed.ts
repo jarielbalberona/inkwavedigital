@@ -376,7 +376,7 @@ const createMenuData = async (db: any, venueId: string) => {
         name: itemData.name,
         description: itemData.description,
         price: itemData.price,
-        imageUrl: itemData.imageUrl,
+        imageUrls: itemData.imageUrl ? [itemData.imageUrl] : [],
         isAvailable: itemData.isAvailable,
       })
       .returning();

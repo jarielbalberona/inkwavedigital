@@ -13,7 +13,7 @@ import { useTenantInfo } from "./hooks/useTenantInfo";
 import { VenueSelector } from "./components/VenueSelector";
 import { AuthProvider } from "./components/AuthProvider";
 import { Button } from "./components/ui/button";
-import { SentryTestButton } from "./components/SentryTestButton";
+// import { SentryTestButton } from "./components/SentryTestButton";
 import { 
   QueueListIcon, 
   Cog6ToothIcon, 
@@ -177,7 +177,7 @@ function App() {
         </Routes>
       </SignedIn>
       </div>
-      <SentryTestButton />
+      {/* <SentryTestButton /> */}
     </AuthProvider>
   );
 }

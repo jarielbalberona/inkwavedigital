@@ -19,7 +19,8 @@
     "drizzle:migrate": "tsx src/migrate.ts",
     "migrate:prod": "drizzle-kit migrate",
     "drizzle:studio": "drizzle-kit studio",
-    "seed": "tsx src/seed.ts"
+    "seed": "tsx src/seed.ts",
+    "seed:superadmin": "tsx src/seedSuperAdmin.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.30.0",

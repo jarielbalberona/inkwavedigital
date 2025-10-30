@@ -17,6 +17,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@slack/webhook": "^7.0.2",
     "pino": "^8.18.0",
     "pino-pretty": "^10.3.1"
   },

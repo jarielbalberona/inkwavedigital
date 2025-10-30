@@ -1,4 +1,9 @@
 packages:
-  - 'apps/*'
-  - 'packages/*'
-
+  - apps/*
+  - packages/*
+onlyBuiltDependencies:
+  - '@clerk/shared'
+  - esbuild
+  - sharp
+ignoredBuiltDependencies:
+  - '@sentry-internal/node-cpu-profiler'

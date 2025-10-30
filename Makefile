@@ -1,4 +1,4 @@
-.PHONY: help build up down restart logs clean migrate seed
+.PHONY: help build up down restart logs clean clean-all migrate seed reset-db
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -7,7 +7,7 @@ help: ## Show this help message
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 build: ## Build all Docker images
-	docker-compose build
+	COMPOSE_BAKE=true docker-compose build
 
 up: ## Start all services
 	docker-compose up -d
@@ -42,8 +42,25 @@ migrate: ## Run database migrations
 seed: ## Seed the database
 	docker-compose exec api pnpm --filter @inkwave/db seed
 
-clean: ## Remove all containers, volumes, and images
+seed-superadmin: ## Seed super admin users
+	docker-compose exec api pnpm --filter @inkwave/db seed:superadmin
+
+reset-db: ## Reset database (migrate + seed)
+	@echo "🔄 Resetting database..."
+	docker-compose exec api pnpm --filter @inkwave/db drizzle:migrate
+	docker-compose exec api pnpm --filter @inkwave/db seed
+	@echo "✅ Database reset complete"
+
+clean: ## Remove containers and images (keeps database data)
+	docker-compose down --rmi all
+	@echo "✅ Containers and images removed (database preserved)"
+
+clean-all: ## ⚠️  DANGER: Remove everything including database data
+	@echo "⚠️  WARNING: This will delete ALL data including the database!"
+	@echo "Press Ctrl+C within 5 seconds to cancel..."
+	@sleep 5
 	docker-compose down -v --rmi all
+	@echo "🗑️  Everything removed including database volumes"
 
 ps: ## Show running containers
 	docker-compose ps
