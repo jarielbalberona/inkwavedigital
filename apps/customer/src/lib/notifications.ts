@@ -160,6 +160,9 @@ export class NotificationManager {
   private vibration: NotificationVibration;
   private soundEnabled: boolean = true;
   private vibrationEnabled: boolean = true;
+  private pushEnabled: boolean = true;
+  private serviceWorkerRegistration: ServiceWorkerRegistration | null = null;
+  private pushSubscription: PushSubscription | null = null;
 
   constructor() {
     this.sound = new NotificationSound();
@@ -167,6 +170,37 @@ export class NotificationManager {
     
     // Load preferences from localStorage
     this.loadPreferences();
+    
+    // Register service worker
+    this.registerServiceWorker();
+  }
+
+  /**
+   * Register service worker for push notifications
+   */
+  private async registerServiceWorker(): Promise<void> {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      console.warn('[NotificationManager] Push notifications not supported');
+      return;
+    }
+
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/',
+      });
+      
+      this.serviceWorkerRegistration = registration;
+      console.log('[NotificationManager] Service worker registered');
+      
+      // Check for existing subscription
+      const existingSubscription = await registration.pushManager.getSubscription();
+      if (existingSubscription) {
+        this.pushSubscription = existingSubscription;
+        console.log('[NotificationManager] Existing push subscription found');
+      }
+    } catch (error) {
+      console.error('[NotificationManager] Service worker registration failed:', error);
+    }
   }
 
   /**
@@ -176,6 +210,7 @@ export class NotificationManager {
     try {
       const soundPref = localStorage.getItem('notifications_sound_enabled');
       const vibrationPref = localStorage.getItem('notifications_vibration_enabled');
+      const pushPref = localStorage.getItem('notifications_push_enabled');
       
       if (soundPref !== null) {
         this.soundEnabled = soundPref === 'true';
@@ -185,6 +220,10 @@ export class NotificationManager {
       if (vibrationPref !== null) {
         this.vibrationEnabled = vibrationPref === 'true';
         this.vibration.setEnabled(this.vibrationEnabled);
+      }
+
+      if (pushPref !== null) {
+        this.pushEnabled = pushPref === 'true';
       }
     } catch (e) {
       console.error('Failed to load notification preferences', e);
@@ -198,6 +237,7 @@ export class NotificationManager {
     try {
       localStorage.setItem('notifications_sound_enabled', String(this.soundEnabled));
       localStorage.setItem('notifications_vibration_enabled', String(this.vibrationEnabled));
+      localStorage.setItem('notifications_push_enabled', String(this.pushEnabled));
     } catch (e) {
       console.error('Failed to save notification preferences', e);
     }
@@ -244,9 +284,107 @@ export class NotificationManager {
   }
 
   /**
-   * Request notification permissions (both browser and audio)
+   * Subscribe to push notifications
    */
-  async requestPermissions(): Promise<void> {
+  async subscribeToPush(deviceId: string, venueId?: string): Promise<boolean> {
+    if (!this.serviceWorkerRegistration || !this.pushEnabled) {
+      console.warn('[NotificationManager] Service worker not registered or push disabled');
+      return false;
+    }
+
+    try {
+      // Get VAPID public key from API
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+      const response = await fetch(`${apiUrl}/api/v1/push/vapid-public-key`);
+      const { publicKey } = await response.json();
+
+      // Subscribe to push
+      const subscription = await this.serviceWorkerRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: this.urlBase64ToUint8Array(publicKey),
+      });
+
+      this.pushSubscription = subscription;
+
+      // Send subscription to server
+      await fetch(`${apiUrl}/api/v1/push/subscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          deviceId,
+          venueId,
+          subscription: subscription.toJSON(),
+          userAgent: navigator.userAgent,
+        }),
+      });
+
+      console.log('[NotificationManager] Push subscription successful');
+      return true;
+    } catch (error) {
+      console.error('[NotificationManager] Push subscription failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Unsubscribe from push notifications
+   */
+  async unsubscribeFromPush(): Promise<boolean> {
+    if (!this.pushSubscription) {
+      return true;
+    }
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+      await fetch(`${apiUrl}/api/v1/push/unsubscribe`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          endpoint: this.pushSubscription.endpoint,
+        }),
+      });
+
+      await this.pushSubscription.unsubscribe();
+      this.pushSubscription = null;
+
+      console.log('[NotificationManager] Push unsubscription successful');
+      return true;
+    } catch (error) {
+      console.error('[NotificationManager] Push unsubscription failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Enable or disable push notifications
+   */
+  setPushEnabled(enabled: boolean): void {
+    this.pushEnabled = enabled;
+    this.savePreferences();
+  }
+
+  /**
+   * Get current push enabled state
+   */
+  isPushEnabled(): boolean {
+    return this.pushEnabled;
+  }
+
+  /**
+   * Check if push is supported
+   */
+  isPushSupported(): boolean {
+    return 'serviceWorker' in navigator && 'PushManager' in window;
+  }
+
+  /**
+   * Request notification permissions (browser, audio, and push)
+   */
+  async requestPermissions(deviceId?: string, venueId?: string): Promise<void> {
     // Request browser notification permission
     if ('Notification' in window && Notification.permission === 'default') {
       await Notification.requestPermission();
@@ -260,6 +398,25 @@ export class NotificationManager {
         console.warn('Failed to resume audio context', e);
       }
     }
+
+    // Subscribe to push notifications if permission granted and we have deviceId
+    if (Notification.permission === 'granted' && deviceId && this.pushEnabled) {
+      await this.subscribeToPush(deviceId, venueId);
+    }
+  }
+
+  /**
+   * Convert base64 VAPID key to Uint8Array
+   */
+  private urlBase64ToUint8Array(base64String: string): Uint8Array {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
   }
 }
 

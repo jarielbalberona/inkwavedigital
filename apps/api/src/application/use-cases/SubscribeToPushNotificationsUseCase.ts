@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
-import { PushSubscriptionRepository } from "../../domain/repositories/PushSubscriptionRepository.js";
-import { PushSubscription } from "../../domain/entities/PushSubscription.js";
+import type { PushSubscriptionRepository } from "../../domain/repositories/PushSubscriptionRepository.js";
+import type { PushSubscription } from "../../domain/entities/PushSubscription.js";
 
 export interface SubscribeToPushNotificationsInput {
   deviceId?: string;

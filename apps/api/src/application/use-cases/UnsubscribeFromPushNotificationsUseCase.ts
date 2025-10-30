@@ -1,4 +1,4 @@
-import { PushSubscriptionRepository } from "../../domain/repositories/PushSubscriptionRepository.js";
+import type { PushSubscriptionRepository } from "../../domain/repositories/PushSubscriptionRepository.js";
 
 export interface UnsubscribeFromPushNotificationsInput {
   endpoint: string;

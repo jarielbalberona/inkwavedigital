@@ -1,11 +1,13 @@
 import { and, eq, or } from "drizzle-orm";
-import { PushSubscriptionRepository } from "../../domain/repositories/PushSubscriptionRepository.js";
-import { PushSubscription } from "../../domain/entities/PushSubscription.js";
+import { injectable, inject } from "tsyringe";
+import type { PushSubscriptionRepository } from "../../domain/repositories/PushSubscriptionRepository.js";
+import type { PushSubscription } from "../../domain/entities/PushSubscription.js";
 import { pushSubscriptions } from "@inkwave/db";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
+@injectable()
 export class DrizzlePushSubscriptionRepository implements PushSubscriptionRepository {
-  constructor(private db: PostgresJsDatabase<Record<string, never>>) {}
+  constructor(@inject("Database") private db: PostgresJsDatabase<Record<string, never>>) {}
 
   async save(subscription: PushSubscription): Promise<void> {
     const existing = await this.db

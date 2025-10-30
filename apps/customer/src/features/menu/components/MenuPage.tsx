@@ -152,10 +152,12 @@ export const MenuPage: React.FC = () => {
   // Track previous orders to detect status changes
   const previousOrdersRef = useRef<Map<string, string>>(new Map());
 
-  // Request notification permissions on mount (browser + audio)
+  // Request notification permissions on mount (browser + audio + push)
   useEffect(() => {
-    notificationManager.requestPermissions();
-  }, []);
+    if (deviceId && venueId) {
+      notificationManager.requestPermissions(deviceId, venueId);
+    }
+  }, [deviceId, venueId]);
 
   // Helper function to get status-specific notification messages
   const getStatusNotification = (status: string) => {

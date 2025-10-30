@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { container } from "tsyringe";
 import { SubscribeToPushNotificationsUseCase } from "../application/use-cases/SubscribeToPushNotificationsUseCase.js";
 import { UnsubscribeFromPushNotificationsUseCase } from "../application/use-cases/UnsubscribeFromPushNotificationsUseCase.js";

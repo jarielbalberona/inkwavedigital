@@ -1,6 +1,7 @@
 import webPush from "web-push";
-import { PushSubscriptionRepository } from "../../domain/repositories/PushSubscriptionRepository.js";
-import { PushSubscription } from "../../domain/entities/PushSubscription.js";
+import { injectable, inject } from "tsyringe";
+import type { PushSubscriptionRepository } from "../../domain/repositories/PushSubscriptionRepository.js";
+import type { PushSubscription } from "../../domain/entities/PushSubscription.js";
 
 export interface PushNotificationPayload {
   title: string;
@@ -17,12 +18,15 @@ export interface PushNotificationPayload {
   }>;
 }
 
+@injectable()
 export class PushNotificationService {
   private vapidPublicKey: string;
   private vapidPrivateKey: string;
   private vapidSubject: string;
 
-  constructor(private pushSubscriptionRepository: PushSubscriptionRepository) {
+  constructor(
+    @inject("PushSubscriptionRepository") private pushSubscriptionRepository: PushSubscriptionRepository
+  ) {
     // Get VAPID keys from environment
     this.vapidPublicKey = process.env.VAPID_PUBLIC_KEY || "";
     this.vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || "";

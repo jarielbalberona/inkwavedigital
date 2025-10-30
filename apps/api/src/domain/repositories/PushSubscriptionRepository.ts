@@ -1,4 +1,4 @@
-import { PushSubscription } from "../entities/PushSubscription.js";
+import type { PushSubscription } from "../entities/PushSubscription.js";
 
 export interface PushSubscriptionRepository {
   save(subscription: PushSubscription): Promise<void>;

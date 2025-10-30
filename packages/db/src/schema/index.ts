@@ -19,4 +19,5 @@ export * from "./superAdmins.js";
 export * from "./auditLogs.js";
 export * from "./venueStaff.js";
 export * from "./images.js";
+export * from "./pushSubscriptions.js";
 

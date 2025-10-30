@@ -63,6 +63,10 @@ services:
       - SLACK_OPERATIONS_WEBHOOK_ORDER_UPDATES=${SLACK_OPERATIONS_WEBHOOK_ORDER_UPDATES:-}
       - SLACK_OPERATIONS_WEBHOOK_HIGH_VALUE=${SLACK_OPERATIONS_WEBHOOK_HIGH_VALUE:-}
       - HIGH_VALUE_ORDER_THRESHOLD=${HIGH_VALUE_ORDER_THRESHOLD:-1000}
+      # Web Push Notifications
+      - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-}
+      - VAPID_SUBJECT=${VAPID_SUBJECT:-mailto:support@inkwave.digital}
       # Performance
       - SLOW_REQUEST_THRESHOLD_MS=${SLOW_REQUEST_THRESHOLD_MS:-1000}
       # PNPM Store
@@ -75,6 +79,7 @@ services:
       - /app/apps/api/node_modules
       - pnpm-store:/pnpm-store
     entrypoint: ["/bin/sh", "/app/entrypoint.sh"]
+    command: ["pnpm", "-C", "apps/api", "dev"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -103,6 +108,7 @@ services:
       - /app/apps/customer/node_modules
       - pnpm-store:/pnpm-store
     entrypoint: ["/bin/sh", "/app/entrypoint.sh"]
+    command: ["pnpm", "-C", "apps/customer", "dev", "--host", "0.0.0.0"]
     networks:
       - inkwave-network
     restart: unless-stopped
@@ -116,6 +122,7 @@ services:
     container_name: inkwave-dashboard
     environment:
       - VITE_API_BASE_URL=http://localhost:3000
+      - VITE_WS_URL=${VITE_WS_URL:-ws://localhost:3000/ws}
       - VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY:-}
       - VITE_SENTRY_DSN=${VITE_SENTRY_DSN:-}
       - VITE_SENTRY_ENVIRONMENT=${VITE_SENTRY_ENVIRONMENT:-development}
@@ -128,6 +135,7 @@ services:
       - /app/apps/dashboard/node_modules
       - pnpm-store:/pnpm-store
     entrypoint: ["/bin/sh", "/app/entrypoint.sh"]
+    command: ["pnpm", "-C", "apps/dashboard", "dev", "--host", "0.0.0.0"]
     networks:
       - inkwave-network
     restart: unless-stopped
