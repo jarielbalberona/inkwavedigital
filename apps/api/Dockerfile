@@ -7,18 +7,15 @@ WORKDIR /app
 
 # Development stage
 FROM base AS development
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/api/package.json ./apps/api/package.json
 COPY packages/db/package.json ./packages/db/package.json
 COPY packages/types/package.json ./packages/types/package.json
 COPY packages/utils/package.json ./packages/utils/package.json
-# Install dependencies first (better caching)
 RUN pnpm install --frozen-lockfile
-# Copy source code after installation
-COPY apps/api ./apps/api
-COPY packages ./packages
-WORKDIR /app/apps/api
-CMD ["pnpm", "dev"]
+ENV PNPM_STORE_PATH=/pnpm-store
+WORKDIR /app
+CMD ["pnpm", "-C", "apps/api", "dev"]
 
 # Build stage
 FROM base AS build

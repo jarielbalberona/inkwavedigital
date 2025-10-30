@@ -65,13 +65,16 @@ services:
       - HIGH_VALUE_ORDER_THRESHOLD=${HIGH_VALUE_ORDER_THRESHOLD:-1000}
       # Performance
       - SLOW_REQUEST_THRESHOLD_MS=${SLOW_REQUEST_THRESHOLD_MS:-1000}
+      # PNPM Store
+      - PNPM_STORE_PATH=/pnpm-store
     ports:
       - '3000:3000'
     volumes:
-      - ./apps/api/src:/app/apps/api/src
-      - ./packages:/app/packages
+      - .:/app:delegated
       - /app/node_modules
       - /app/apps/api/node_modules
+      - pnpm-store:/pnpm-store
+    entrypoint: ["/bin/sh", "/app/entrypoint.sh"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -91,15 +94,15 @@ services:
       - VITE_WS_URL=${VITE_WS_URL:-ws://localhost:3000/ws}
       - VITE_SENTRY_DSN=${VITE_SENTRY_DSN:-}
       - VITE_SENTRY_ENVIRONMENT=${VITE_SENTRY_ENVIRONMENT:-development}
+      - PNPM_STORE_PATH=/pnpm-store
     ports:
       - '5173:5173'
     volumes:
-      - ./apps/customer/src:/app/apps/customer/src
-      - ./apps/customer/index.html:/app/apps/customer/index.html
-      - ./apps/customer/vite.config.ts:/app/apps/customer/vite.config.ts
-      - ./packages:/app/packages
+      - .:/app:delegated
       - /app/node_modules
       - /app/apps/customer/node_modules
+      - pnpm-store:/pnpm-store
+    entrypoint: ["/bin/sh", "/app/entrypoint.sh"]
     networks:
       - inkwave-network
     restart: unless-stopped
@@ -116,15 +119,15 @@ services:
       - VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY:-}
       - VITE_SENTRY_DSN=${VITE_SENTRY_DSN:-}
       - VITE_SENTRY_ENVIRONMENT=${VITE_SENTRY_ENVIRONMENT:-development}
+      - PNPM_STORE_PATH=/pnpm-store
     ports:
       - '5174:5174'
     volumes:
-      - ./apps/dashboard/src:/app/apps/dashboard/src
-      - ./apps/dashboard/index.html:/app/apps/dashboard/index.html
-      - ./apps/dashboard/vite.config.ts:/app/apps/dashboard/vite.config.ts
-      - ./packages:/app/packages
+      - .:/app:delegated
       - /app/node_modules
       - /app/apps/dashboard/node_modules
+      - pnpm-store:/pnpm-store
+    entrypoint: ["/bin/sh", "/app/entrypoint.sh"]
     networks:
       - inkwave-network
     restart: unless-stopped
@@ -135,4 +138,5 @@ networks:
 
 volumes:
   postgres_data:
+  pnpm-store:
 

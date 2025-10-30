@@ -13,18 +13,15 @@ RUN pnpm install --frozen-lockfile
 
 # Development stage
 FROM base AS development
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/dashboard/package.json ./apps/dashboard/
 COPY packages/types/package.json ./packages/types/
 COPY packages/ui/package.json ./packages/ui/
-COPY --from=dependencies /app/node_modules ./node_modules
-COPY --from=dependencies /app/apps/dashboard/node_modules ./apps/dashboard/node_modules
-# Copy source code last for better layer caching
-COPY apps/dashboard ./apps/dashboard
-COPY packages ./packages
-WORKDIR /app/apps/dashboard
+RUN pnpm install --frozen-lockfile
+ENV PNPM_STORE_PATH=/pnpm-store
+WORKDIR /app
 EXPOSE 5174
-CMD ["pnpm", "dev", "--host", "0.0.0.0"]
+CMD ["pnpm", "-C", "apps/dashboard", "dev", "--host", "0.0.0.0"]
 
 # Build stage
 FROM base AS build

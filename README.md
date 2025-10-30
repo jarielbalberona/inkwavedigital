@@ -181,13 +181,39 @@ Access:
 
 ```bash
 # Start all services
-docker-compose up -d
+docker compose up -d
 
 # View logs
-docker-compose logs -f
+docker compose logs -f
 
-# Rebuild after changes
-docker-compose build && docker-compose up -d
+# Rebuild after code changes
+docker compose up -d --build
+```
+
+## 📦 Package Management (Docker)
+
+When using Docker Compose, packages must be installed inside the containers:
+
+```bash
+# Customer app
+docker compose exec customer pnpm -F customer add <package>
+
+# Dashboard app
+docker compose exec dashboard pnpm -F dashboard add <package>
+
+# API
+docker compose exec api pnpm -F api add <package>
+```
+
+The `entrypoint.sh` automatically detects `pnpm-lock.yaml` changes and reinstalls dependencies. No manual rebuild or restart needed.
+
+**Example:**
+```bash
+# Install sonner for customer app
+docker compose exec customer pnpm -F customer add sonner
+
+# The container automatically picks up the change
+# Start using the package in your code immediately
 ```
 
 ## 🔧 Environment Variables
