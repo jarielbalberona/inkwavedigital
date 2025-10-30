@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { XMarkIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useCreateItemOption, useCreateOptionValue, useDeleteOptionValue } from "../hooks";
 import type { MenuItemOption, CreateItemOptionInput, CreateOptionValueInput } from "../types/menuManagement.types";
 import { Input } from "../../../components/ui/input";
@@ -7,6 +7,13 @@ import { Label } from "../../../components/ui/label";
 import { Checkbox } from "../../../components/ui/checkbox";
 import { Button } from "../../../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../../components/ui/dialog";
 import CurrencyInput from "react-currency-input-field";
 
 interface ItemOptionFormProps {
@@ -109,43 +116,35 @@ export const ItemOptionForm: React.FC<ItemOptionFormProps> = ({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-0 gap-0">
+        <DialogHeader className="p-6 border-b border-border">
+          <DialogTitle>
+            {option ? "Edit Option" : "Add Option"}
+          </DialogTitle>
+        </DialogHeader>
 
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
-            <h2 className="text-lg font-semibold text-gray-900">
-              {option ? "Edit Option" : "Add Option"}
-            </h2>
-            <button type="button" onClick={onClose} className="p-1 rounded-md hover:bg-gray-100">
-              <XMarkIcon className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="p-6 space-y-6" onKeyDown={handleKeyDown}>
-            {/* Error Message */}
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-800">{error}</p>
-              </div>
-            )}
-
-            {/* Option Name */}
-            <div className="space-y-2">
-              <Label htmlFor="name">Option Name</Label>
-              <Input
-                id="name"
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Size, Type, Sugar Level"
-                required
-              />
+        <div className="overflow-y-auto max-h-[calc(90vh-12rem)] p-6 space-y-6" onKeyDown={handleKeyDown}>
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 bg-destructive/10 border border-destructive rounded-lg">
+              <p className="text-sm text-destructive">{error}</p>
             </div>
+          )}
+
+          {/* Option Name */}
+          <div className="space-y-2">
+            <Label htmlFor="name">Option Name</Label>
+            <Input
+              id="name"
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="e.g., Size, Type, Sugar Level"
+              required
+            />
+          </div>
 
             {/* Option Type */}
             <div className="space-y-2">
@@ -241,28 +240,27 @@ export const ItemOptionForm: React.FC<ItemOptionFormProps> = ({
               </div>
             </div>
 
-            {/* Form Actions */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleSubmit}
-                disabled={!formData.name || values.length === 0 || isSubmitting}
-              >
-                {isSubmitting ? "Creating..." : option ? "Update Option" : "Create Option"}
-              </Button>
-            </div>
-          </div>
         </div>
-      </div>
-    </div>
+
+        <DialogFooter className="p-6 border-t border-border">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!formData.name || values.length === 0 || isSubmitting}
+          >
+            {isSubmitting ? "Creating..." : option ? "Update Option" : "Create Option"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

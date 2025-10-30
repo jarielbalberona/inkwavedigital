@@ -1,0 +1,69 @@
+# Slack App Manifest for Inkwave Digital Operations
+# Use this manifest to set up operational notifications at https://api.slack.com/apps
+
+display_information:
+  name: Inkwave Digital Operations
+  description: Real-time business and operational notifications for Inkwave Digital
+  background_color: "#10b981"
+  long_description: |
+    Inkwave Digital Operations sends real-time notifications about business events and operations to your Slack workspace.
+    
+    Features:
+    - New order notifications with customer details
+    - Order status updates (preparing, ready, completed)
+    - Payment confirmations
+    - High-value order alerts
+    - Daily/weekly sales summaries
+    - Inventory alerts
+    - Staff activity notifications
+    - Customer feedback alerts
+    
+    Perfect for:
+    - Restaurant managers monitoring incoming orders
+    - Kitchen staff receiving new order notifications
+    - Sales teams tracking business metrics
+    - Support teams getting customer feedback
+
+features:
+  bot_user:
+    display_name: Inkwave Operations
+    always_online: true
+
+oauth_config:
+  scopes:
+    bot:
+      - incoming-webhook
+      - chat:write
+      - chat:write.public
+      - files:write
+
+settings:
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false
+
+# Recommended Channel Structure:
+# ================================
+# #orders-new        - New orders placed by customers
+# #orders-updates    - Order status changes (preparing, ready, completed)
+# #orders-high-value - Orders above certain threshold (e.g., $100+)
+# #sales-daily       - Daily sales summaries
+# #sales-weekly      - Weekly performance reports
+# #inventory-alerts  - Low stock warnings
+# #customer-feedback - Reviews and ratings
+# #staff-activity    - Staff login/logout, shift changes
+
+# Multiple Webhooks Configuration:
+# ==================================
+# After creating the app, you can add multiple webhooks for different channels:
+# 1. Go to "Incoming Webhooks" in the app settings
+# 2. Click "Add New Webhook to Workspace" for each channel
+# 3. Configure your environment variables:
+#
+# Example .env configuration:
+# SLACK_OPERATIONS_WEBHOOK_NEW_ORDERS=https://hooks.slack.com/services/T00/B01/XXX
+# SLACK_OPERATIONS_WEBHOOK_ORDER_UPDATES=https://hooks.slack.com/services/T00/B02/YYY
+# SLACK_OPERATIONS_WEBHOOK_HIGH_VALUE=https://hooks.slack.com/services/T00/B03/ZZZ
+# SLACK_OPERATIONS_WEBHOOK_DAILY_SALES=https://hooks.slack.com/services/T00/B04/AAA
+# SLACK_OPERATIONS_ENABLED=true
+

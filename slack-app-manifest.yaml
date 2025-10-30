@@ -1,0 +1,48 @@
+# Slack App Manifest for Inkwave Digital Monitoring
+# Use this manifest to quickly create your Slack app at https://api.slack.com/apps
+
+display_information:
+  name: Ink Wave Digital Monitor
+  description: Real-time error and alert notifications for Ink Wave Digital platform
+  background_color: "#3b82f6"
+  long_description: |
+    Ink Wave Digital Monitor sends real-time notifications about system errors, performance issues, and critical alerts to your Slack workspace.
+    
+    Features:
+    - Automatic error notifications from API, Dashboard, and Customer PWA
+    - Color-coded messages (red for errors, purple for critical issues)
+    - Detailed error context and stack traces
+    - Links to Sentry for detailed error analysis
+    - Smart throttling to prevent notification spam
+    - Environment-aware notifications (development, staging, production)
+
+features:
+  bot_user:
+    display_name: Inkwave Monitor
+    always_online: true
+
+oauth_config:
+  scopes:
+    bot:
+      - incoming-webhook
+      - chat:write
+      - chat:write.public
+
+settings:
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false
+
+# Incoming webhooks configuration
+# After creating the app:
+# 1. Go to "Incoming Webhooks" in the app settings
+# 2. Activate incoming webhooks
+# 3. Click "Add New Webhook to Workspace"
+# 4. Select the channel (recommended: #errors or #monitoring)
+# 5. Copy the webhook URL to your .env file as SLACK_WEBHOOK_URL
+
+# Example .env configuration after setup:
+# SLACK_WEBHOOK_URL=https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX
+# SLACK_ERROR_CHANNEL=#errors
+# SLACK_ALERTS_ENABLED=true
+

@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { UserGroupIcon } from '@heroicons/react/24/outline';
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '../../../components/ui/dialog';
 
 interface PaxPromptProps {
   tableId: string;
@@ -20,19 +27,19 @@ export const PaxPrompt: React.FC<PaxPromptProps> = ({ tableId, onConfirm, onSkip
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
-        <div className="text-center mb-6">
-          <UserGroupIcon className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome!</h2>
-          <p className="text-gray-600">
+    <Dialog open={true} onOpenChange={onSkip}>
+      <DialogContent className="max-w-md" showCloseButton={false}>
+        <DialogHeader className="text-center">
+          <UserGroupIcon className="w-16 h-16 text-primary mx-auto mb-4" />
+          <DialogTitle className="text-2xl font-bold">Welcome!</DialogTitle>
+          <DialogDescription>
             You're seated at <span className="font-semibold">{tableId}</span>
-          </p>
-        </div>
+          </DialogDescription>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           <div>
-            <label htmlFor="pax" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="pax" className="block text-sm font-medium text-foreground mb-2">
               How many people are dining?
             </label>
             <div className="flex items-center space-x-4">
@@ -55,9 +62,9 @@ export const PaxPrompt: React.FC<PaxPromptProps> = ({ tableId, onConfirm, onSkip
                   max="20"
                   value={pax}
                   onChange={(e) => setPax(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-20 text-center text-2xl font-bold border-none outline-none"
+                  className="w-20 text-center text-2xl font-bold border-none outline-none mx-auto"
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   {pax === 1 ? 'person' : 'people'}
                 </p>
               </div>
@@ -93,10 +100,10 @@ export const PaxPrompt: React.FC<PaxPromptProps> = ({ tableId, onConfirm, onSkip
           </div>
         </form>
 
-        <p className="text-xs text-gray-500 text-center mt-4">
+        <p className="text-xs text-muted-foreground text-center mt-4">
           This helps us prepare the right portions and serve you better
         </p>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

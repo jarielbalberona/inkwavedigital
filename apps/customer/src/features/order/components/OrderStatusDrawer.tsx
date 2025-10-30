@@ -1,7 +1,12 @@
 import React from "react";
-import { XMarkIcon, ClockIcon, CheckCircleIcon, FireIcon } from "@heroicons/react/24/outline";
-import { Button } from "@/components/ui/button";
+import { ClockIcon, CheckCircleIcon, FireIcon } from "@heroicons/react/24/outline";
 import { Card } from "@/components/ui/card";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import type { ActiveOrder } from "../types/order.types";
 import { formatPrice } from "../../menu/hooks/helpers/menuHelpers";
 
@@ -45,8 +50,6 @@ export const OrderStatusDrawer: React.FC<OrderStatusDrawerProps> = ({
   orders,
   isLoading,
 }) => {
-  if (!isOpen) return null;
-
   const getStatusConfig = (status: string) => {
     return STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.NEW;
   };
@@ -70,27 +73,12 @@ export const OrderStatusDrawer: React.FC<OrderStatusDrawerProps> = ({
   };
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity"
-        onClick={onClose}
-      />
-
-      {/* Drawer */}
-      <div className="fixed inset-y-0 right-0 w-full sm:w-96 bg-card shadow-xl z-50 flex flex-col">
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent side="right" className="w-full sm:max-w-md flex flex-col p-0">
         {/* Header */}
-        <div className="bg-primary text-primary-foreground p-4 flex justify-between items-center">
-          <h2 className="text-xl font-bold">My Orders</h2>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="text-primary-foreground hover:bg-primary/90"
-          >
-            <XMarkIcon className="w-6 h-6" />
-          </Button>
-        </div>
+        <SheetHeader className="bg-primary text-primary-foreground p-4">
+          <SheetTitle className="text-xl font-bold text-primary-foreground">My Orders</SheetTitle>
+        </SheetHeader>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4">
@@ -193,8 +181,8 @@ export const OrderStatusDrawer: React.FC<OrderStatusDrawerProps> = ({
             </p>
           </div>
         )}
-      </div>
-    </>
+      </SheetContent>
+    </Sheet>
   );
 };
 

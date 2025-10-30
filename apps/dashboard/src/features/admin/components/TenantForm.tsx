@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useMutation } from "@tanstack/react-query";
 import { tenantsApi } from "../api/tenantsApi";
 import type { Tenant, CreateTenantInput } from "../types/admin.types";
 import { slugify } from "../../../lib/slugify";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../../components/ui/dialog";
+import { Button } from "../../../components/ui/button";
 
 interface TenantFormProps {
   isOpen: boolean;
@@ -82,24 +89,17 @@ export const TenantForm: React.FC<TenantFormProps> = ({
     await createMutation.mutateAsync(input);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-0 gap-0">
+        <DialogHeader className="p-6 border-b border-border">
+          <DialogTitle>
+            {tenant ? "Edit Tenant" : "Create Tenant"}
+          </DialogTitle>
+        </DialogHeader>
 
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">
-              {tenant ? "Edit Tenant" : "Create Tenant"}
-            </h2>
-            <button onClick={onClose} className="p-1 rounded-md hover:bg-gray-100">
-              <XMarkIcon className="w-5 h-5" />
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(90vh-12rem)]">
+          <div className="p-6 space-y-4">
             {/* Tenant Information */}
             <div>
               <h3 className="text-md font-medium text-gray-900 mb-4">Tenant Information</h3>
@@ -260,27 +260,26 @@ export const TenantForm: React.FC<TenantFormProps> = ({
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="flex justify-end space-x-3 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={createMutation.isPending}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {createMutation.isPending ? "Creating..." : "Create Tenant"}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          <DialogFooter className="p-6 border-t border-border">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={createMutation.isPending}
+            >
+              {createMutation.isPending ? "Creating..." : "Create Tenant"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

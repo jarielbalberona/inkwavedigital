@@ -1,6 +1,7 @@
 import express, { type Application } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import * as Sentry from "@sentry/node";
 import { healthRouter } from "./routes/health.routes.js";
 import { ordersRouter } from "./routes/orders.routes.js";
 import { menuRouter } from "./routes/menu.routes.js";
@@ -9,9 +10,14 @@ import { adminRouter } from "./routes/admin.routes.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { imagesRouter } from "./routes/images.routes.js";
 import { webhookRouter } from "./routes/webhook.routes.js";
+import { testRouter } from "./routes/test.routes.js";
 import { errorHandler } from "../../interfaces/middlewares/error-handler.middleware.js";
+import { performanceMiddleware } from "../../interfaces/middlewares/performance.middleware.js";
 
 export const app: Application = express();
+
+// Performance monitoring
+app.use(performanceMiddleware);
 
 // Security middleware
 app.use(helmet());
@@ -41,6 +47,14 @@ app.use("/api/v1/venues", venuesRouter);
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/images", imagesRouter);
+
+// Test endpoints - only available in development and staging
+if (process.env.NODE_ENV !== "production") {
+  app.use("/api/v1/test", testRouter);
+}
+
+// Sentry error handler must be before custom error handler but after all routes
+Sentry.setupExpressErrorHandler(app);
 
 // Error handling (must be last)
 app.use(errorHandler);

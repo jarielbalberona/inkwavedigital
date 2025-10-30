@@ -1,7 +1,15 @@
 import React, { useState } from "react";
-import { XMarkIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import type { ImageLibraryItem } from "../types/image.types";
 import { useDeleteImage } from "../hooks/useDeleteImage";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../../components/ui/dialog";
+import { Button } from "../../../components/ui/button";
 
 interface ImageLibraryModalProps {
   images: ImageLibraryItem[];
@@ -31,88 +39,75 @@ export const ImageLibraryModal: React.FC<ImageLibraryModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="max-w-4xl max-h-[80vh] p-0 gap-0">
+        <DialogHeader className="p-6 border-b border-border">
+          <DialogTitle>Image Library</DialogTitle>
+        </DialogHeader>
 
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[80vh] overflow-hidden flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Image Library</h2>
-            <button
-              onClick={onClose}
-              className="p-1 rounded-md hover:bg-gray-100"
-            >
-              <XMarkIcon className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Image Grid */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {images.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                No images uploaded yet
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {images.map((image) => (
-                  <div
-                    key={image.id}
-                    className={`relative group cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedImage === image.url
-                        ? "border-blue-500 ring-2 ring-blue-200"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                    onClick={() => setSelectedImage(image.url)}
-                  >
-                    <div className="aspect-square bg-gray-100">
-                      <img
-                        src={image.thumbnailUrl || image.url}
-                        alt={image.originalName}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-
-                    {/* Delete button */}
-                    <button
-                      onClick={(e) => handleDelete(e, image.id)}
-                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-
-                    {/* Image info */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-xs p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <p className="truncate">{image.originalName}</p>
-                      <p className="text-gray-300">
-                        {(image.size / 1024).toFixed(0)} KB
-                      </p>
-                    </div>
+        {/* Image Grid */}
+        <div className="flex-1 overflow-y-auto p-6 max-h-[calc(80vh-10rem)]">
+          {images.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              No images uploaded yet
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {images.map((image) => (
+                <div
+                  key={image.id}
+                  className={`relative group cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
+                    selectedImage === image.url
+                      ? "border-primary ring-2 ring-primary/20"
+                      : "border-border hover:border-border/80"
+                  }`}
+                  onClick={() => setSelectedImage(image.url)}
+                >
+                  <div className="aspect-square bg-muted">
+                    <img
+                      src={image.thumbnailUrl || image.url}
+                      alt={image.originalName}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
 
-          {/* Footer */}
-          <div className="flex items-center justify-end gap-2 p-6 border-t border-gray-200">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSelect}
-              disabled={!selectedImage}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Select Image
-            </button>
-          </div>
+                  {/* Delete button */}
+                  <button
+                    onClick={(e) => handleDelete(e, image.id)}
+                    className="absolute top-2 right-2 p-1.5 bg-destructive text-destructive-foreground rounded-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/90"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                  </button>
+
+                  {/* Image info */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm text-foreground text-xs p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="truncate">{image.originalName}</p>
+                    <p className="text-muted-foreground">
+                      {(image.size / 1024).toFixed(0)} KB
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+
+        <DialogFooter className="p-6 border-t border-border">
+          <Button
+            variant="outline"
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSelect}
+            disabled={!selectedImage}
+          >
+            Select Image
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

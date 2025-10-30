@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useCreateMenuItem, useUpdateMenuItem } from "../hooks/mutations";
 import type { MenuItem, CreateMenuItemInput, UpdateMenuItemInput } from "../types/menuManagement.types";
 import { MultipleImagePicker } from "../../image-library/components/MultipleImagePicker";
@@ -9,6 +8,13 @@ import { Label } from "../../../components/ui/label";
 import { Textarea } from "../../../components/ui/textarea";
 import { Checkbox } from "../../../components/ui/checkbox";
 import { Button } from "../../../components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../../components/ui/dialog";
 import CurrencyInput from "react-currency-input-field";
 
 interface MenuItemFormProps {
@@ -79,27 +85,17 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
     onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
-      
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
-            <h2 className="text-lg font-semibold text-gray-900">
-              {item ? "Edit Menu Item" : "Add Menu Item"}
-            </h2>
-            <button
-              onClick={onClose}
-              className="p-1 rounded-md hover:bg-gray-100"
-            >
-              <XMarkIcon className="w-5 h-5" />
-            </button>
-          </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-0 gap-0">
+        <DialogHeader className="p-6 border-b border-border">
+          <DialogTitle>
+            {item ? "Edit Menu Item" : "Add Menu Item"}
+          </DialogTitle>
+        </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(90vh-8rem)]">
+          <div className="p-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Item Name</Label>
               <Input
@@ -160,48 +156,48 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
             </div>
 
             {/* Options Section */}
-            <div className="border-t border-gray-200 pt-6">
+            <div className="border-t border-border pt-6">
               {item ? (
                 <ItemOptionsManager itemId={item.id} />
               ) : (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-gray-900">Item Options / Modifiers</h3>
+                    <h3 className="text-sm font-medium text-foreground">Item Options / Modifiers</h3>
                   </div>
-                  <div className="text-center py-8 bg-blue-50 rounded-lg border-2 border-dashed border-blue-300">
-                    <p className="text-sm text-gray-700 mb-1">
+                  <div className="text-center py-8 bg-primary/10 rounded-lg border-2 border-dashed border-primary/30">
+                    <p className="text-sm text-foreground mb-1">
                       Options can be added after creating the item
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       Save this item first, then edit it to add options like Size, Add-ons, or Customizations
                     </p>
                   </div>
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={createMenuItemMutation.isPending || updateMenuItemMutation.isPending}
-              >
-                {createMenuItemMutation.isPending || updateMenuItemMutation.isPending
-                  ? "Saving..."
-                  : item
-                  ? "Update"
-                  : "Create"}
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          <DialogFooter className="p-6 border-t border-border">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={createMenuItemMutation.isPending || updateMenuItemMutation.isPending}
+            >
+              {createMenuItemMutation.isPending || updateMenuItemMutation.isPending
+                ? "Saving..."
+                : item
+                ? "Update"
+                : "Create"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };

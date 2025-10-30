@@ -77,9 +77,9 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
               >
                 <div className="flex items-start gap-3">
                   {/* Item Image Thumbnail */}
-                  {item.imageUrl && (
+                  {item.imageUrls && item.imageUrls.length > 0 && (
                     <img
-                      src={item.imageUrl}
+                      src={item.imageUrls[0]}
                       alt={item.name}
                       className="w-12 h-12 object-cover rounded flex-shrink-0"
                     />

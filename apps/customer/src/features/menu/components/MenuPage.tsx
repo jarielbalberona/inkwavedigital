@@ -18,10 +18,12 @@ import { useCartStore } from "../../cart/hooks/stores/useCartStore";
 import { getCategoriesFromItems } from "../hooks/helpers/menuHelpers";
 import { venueApi } from "../api/venueApi";
 import type { OrderConfirmation as OrderConfirmationType } from "../../order/types/order.types";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { wsClient } from "@/lib/websocket";
 
 export const MenuPage: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const pathParams = useParams<{ tenantSlug?: string; venueSlug?: string }>();
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
@@ -111,6 +113,31 @@ export const MenuPage: React.FC = () => {
       setActiveCategoryId(categories[0].id);
     }
   }, [categories, activeCategoryId]);
+
+  // WebSocket integration for real-time order updates
+  useEffect(() => {
+    if (!venueId) return;
+
+    console.log("[MenuPage] Connecting to WebSocket for venue:", venueId);
+    wsClient.connect(venueId);
+
+    // Subscribe to WebSocket messages
+    const unsubscribe = wsClient.subscribe((message) => {
+      console.log("[MenuPage] WebSocket message received:", message.type);
+      
+      if (message.type === "order_created" || message.type === "order_status_changed") {
+        // Invalidate device orders query to refetch with fresh data
+        queryClient.invalidateQueries({ queryKey: ["device-orders", deviceId, venueId] });
+      }
+    });
+
+    // Cleanup on unmount or venueId change
+    return () => {
+      console.log("[MenuPage] Cleaning up WebSocket connection");
+      unsubscribe();
+      wsClient.disconnect();
+    };
+  }, [venueId, deviceId, queryClient]);
 
   const handleCategorySelect = (categoryId: string) => {
     setActiveCategoryId(categoryId);
