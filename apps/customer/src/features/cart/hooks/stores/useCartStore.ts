@@ -26,7 +26,7 @@ export const useCartStore = create<CartStore>()(
           name: item.name,
           basePrice: item.price,
           quantity,
-          imageUrl: item.imageUrl,
+          imageUrl: item.imageUrls[0],
           selectedOptions,
           notes,
           totalPrice,

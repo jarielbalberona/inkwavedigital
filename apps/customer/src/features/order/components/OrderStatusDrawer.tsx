@@ -8,6 +8,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import type { ActiveOrder } from "../types/order.types";
+import type { SelectedOption } from "../../cart/types/cart.types";
 import { formatPrice } from "../../menu/hooks/helpers/menuHelpers";
 
 interface OrderStatusDrawerProps {
@@ -63,12 +64,12 @@ export const OrderStatusDrawer: React.FC<OrderStatusDrawerProps> = ({
     });
   };
 
-  const parseOptions = (optionsJson?: string) => {
-    if (!optionsJson) return null;
+  const parseOptions = (optionsJson?: string): SelectedOption[] => {
+    if (!optionsJson) return [];
     try {
-      return JSON.parse(optionsJson);
+      return JSON.parse(optionsJson) as SelectedOption[];
     } catch {
-      return null;
+      return [];
     }
   };
 
@@ -127,11 +128,22 @@ export const OrderStatusDrawer: React.FC<OrderStatusDrawerProps> = ({
                                 </span>
                                 <span className="text-foreground">{item.itemName}</span>
                               </div>
-                              {options && Object.keys(options).length > 0 && (
+                              {options && options.length > 0 && (
                                 <div className="ml-8 text-xs text-muted-foreground mt-1">
-                                  {Object.entries(options).map(([key, values]) => (
-                                    <div key={key}>
-                                      {Array.isArray(values) ? values.join(", ") : values}
+                                  {options.map((option) => (
+                                    <div key={option.optionId}>
+                                      <span className="font-medium">{option.optionName}:</span>{" "}
+                                      {option.values.map((v, idx) => (
+                                        <span key={v.valueId}>
+                                          {v.valueLabel}
+                                          {v.priceDelta !== 0 && (
+                                            <span className="text-success">
+                                              {" "}(+{formatPrice(v.priceDelta)})
+                                            </span>
+                                          )}
+                                          {idx < option.values.length - 1 && ", "}
+                                        </span>
+                                      ))}
                                     </div>
                                   ))}
                                 </div>
