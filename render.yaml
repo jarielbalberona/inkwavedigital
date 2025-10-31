@@ -42,7 +42,7 @@ services:
         sync: false
       - key: R2_PUBLIC_URL
         sync: false
-    customDomains:
+    domains:
       - api.dumadive.com
     buildFilter:
       paths:
@@ -74,7 +74,7 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
-    customDomains:
+    domains:
       - dumadive.com
     buildFilter:
       paths:
@@ -108,7 +108,7 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
-    customDomains:
+    domains:
       - dashboard.dumadive.com
     buildFilter:
       paths:
