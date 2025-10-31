@@ -6,8 +6,6 @@ services:
     plan: starter
     region: oregon
     ipAllowList: []
-    databaseName: inkwave
-    databaseUser: inkwave
 
   # API Service
   - type: web
