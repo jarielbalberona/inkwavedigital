@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, numeric, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, numeric, integer, jsonb, boolean } from "drizzle-orm/pg-core";
 import { venues, tables } from "./venues.js";
 import { menuItems } from "./menus.js";
 
@@ -12,6 +12,7 @@ export const orders = pgTable("orders", {
   total: numeric("total", { precision: 10, scale: 2 }).notNull(),
   deviceId: text("device_id"),
   pax: integer("pax"), // number of people
+  isToGo: boolean("is_to_go").default(false), // true for To Go, false for Dine In
   notes: text("notes"), // order notes (from customer)
   staffNotes: text("staff_notes"), // staff notes (internal, dashboard only)
   cancellationReason: text("cancellation_reason"), // reason for order cancellation

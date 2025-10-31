@@ -16,6 +16,7 @@ export interface CreateOrderInput {
   tableId?: string;
   deviceId?: string;
   pax?: number;
+  isToGo?: boolean;
   notes?: string;
   items: Array<{
     itemId: string;
@@ -138,6 +139,7 @@ export class CreateOrderUseCase {
       tableId: input.tableId,
       deviceId: input.deviceId,
       pax: input.pax,
+      isToGo: input.isToGo,
       notes: input.notes,
       status: OrderStatus.new(),
       items: orderItems,

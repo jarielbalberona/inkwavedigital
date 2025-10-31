@@ -36,7 +36,7 @@ export const MenuPage: React.FC = () => {
   const [orderConfirmation, setOrderConfirmation] = useState<OrderConfirmationType | null>(null);
   const [showPaxPrompt, setShowPaxPrompt] = useState(false);
   
-  const { venueId, tableId, tableLabel, pax, deviceId, clearSession, setSession, setPax } = useSessionStore();
+  const { venueId, tableId, tableLabel, pax, isToGo, deviceId, clearSession, setSession, setPax, setIsToGo } = useSessionStore();
 
   // Fetch venue by slugs if using new URL format
   const { data: venueBySlugData, isLoading: isLoadingVenueBySlug } = useQuery({
@@ -252,8 +252,9 @@ export const MenuPage: React.FC = () => {
     setActiveCategoryId(categoryId);
   };
 
-  const handlePaxConfirm = (confirmedPax: number) => {
+  const handlePaxConfirm = (confirmedPax: number, isToGo: boolean) => {
     setPax(confirmedPax);
+    setIsToGo(isToGo);
     setShowPaxPrompt(false);
   };
 
@@ -375,7 +376,7 @@ export const MenuPage: React.FC = () => {
                       onClick={() => setShowPaxPrompt(true)}
                       className="text-sm md:text-base h-auto p-0"
                     >
-                      • {pax} {pax === 1 ? 'person' : 'people'}
+                      • {pax} {pax === 1 ? 'person' : 'people'} • {isToGo ? 'To Go' : 'Dine In'}
                     </Button>
                   )}
                   {tableId && !pax && (

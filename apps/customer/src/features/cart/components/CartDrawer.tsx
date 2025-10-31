@@ -25,7 +25,7 @@ interface CartDrawerProps {
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheckout }) => {
   const { items, orderNotes, updateQuantity, removeItem, getTotal, clearCart, setOrderNotes } = useCartStore();
-  const { venueId, tableId, deviceId, pax } = useSessionStore();
+  const { venueId, tableId, deviceId, pax, isToGo } = useSessionStore();
   const createOrderMutation = useCreateOrder();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
@@ -47,6 +47,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
         tableId: tableId || undefined,
         deviceId,
         pax: pax || undefined,
+        isToGo: isToGo ?? undefined,
         notes: notesWithPayment,
         items: items.map(item => ({
           itemId: item.itemId,

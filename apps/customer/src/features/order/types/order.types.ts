@@ -2,6 +2,8 @@ export interface CreateOrderInput {
   venueId: string;
   tableId?: string;
   deviceId: string;
+  pax?: number;
+  isToGo?: boolean;
   items: OrderItemInput[];
 }
 
@@ -51,6 +53,7 @@ export interface ActiveOrder {
   total: number;
   deviceId: string;
   pax?: number;
+  isToGo?: boolean;
   notes?: string;
   items: OrderItem[];
   createdAt: string;

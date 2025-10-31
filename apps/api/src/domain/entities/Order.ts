@@ -21,6 +21,7 @@ export interface OrderProps {
   items: OrderItem[];
   deviceId?: string;
   pax?: number;
+  isToGo?: boolean;
   notes?: string;
   staffNotes?: string;
   cancellationReason?: string;
@@ -86,6 +87,10 @@ export class Order {
 
   get pax(): number | undefined {
     return this.props.pax;
+  }
+
+  get isToGo(): boolean | undefined {
+    return this.props.isToGo;
   }
 
   get notes(): string | undefined {
@@ -180,6 +185,7 @@ export class Order {
       })),
       deviceId: this.props.deviceId,
       pax: this.props.pax,
+      isToGo: this.props.isToGo,
       notes: this.props.notes,
       staffNotes: this.props.staffNotes,
       cancellationReason: this.props.cancellationReason,

@@ -9,20 +9,22 @@ import {
   DialogTitle,
   DialogDescription,
 } from '../../../components/ui/dialog';
+import { RadioGroup, RadioGroupItem } from '../../../components/ui/radio-group';
 
 interface PaxPromptProps {
   tableId: string;
-  onConfirm: (pax: number) => void;
+  onConfirm: (pax: number, isToGo: boolean) => void;
   onSkip: () => void;
 }
 
 export const PaxPrompt: React.FC<PaxPromptProps> = ({ tableId, onConfirm, onSkip }) => {
   const [pax, setPax] = useState<number>(1);
+  const [orderType, setOrderType] = useState<'dine-in' | 'to-go'>('dine-in');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (pax > 0) {
-      onConfirm(pax);
+      onConfirm(pax, orderType === 'to-go');
     }
   };
 
@@ -38,6 +40,40 @@ export const PaxPrompt: React.FC<PaxPromptProps> = ({ tableId, onConfirm, onSkip
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-3">
+              Order Type
+            </label>
+            <RadioGroup
+              value={orderType}
+              onValueChange={(value) => setOrderType(value as 'dine-in' | 'to-go')}
+              className="grid grid-cols-2 gap-3"
+            >
+              <label
+                htmlFor="dine-in"
+                className={`flex items-center justify-center px-4 py-3 rounded-lg border-2 cursor-pointer transition-all ${
+                  orderType === 'dine-in'
+                    ? 'border-primary bg-primary/10 text-primary font-semibold'
+                    : 'border-border bg-background hover:border-primary/50'
+                }`}
+              >
+                <RadioGroupItem value="dine-in" id="dine-in" className="sr-only" />
+                <span>Dine In</span>
+              </label>
+              <label
+                htmlFor="to-go"
+                className={`flex items-center justify-center px-4 py-3 rounded-lg border-2 cursor-pointer transition-all ${
+                  orderType === 'to-go'
+                    ? 'border-primary bg-primary/10 text-primary font-semibold'
+                    : 'border-border bg-background hover:border-primary/50'
+                }`}
+              >
+                <RadioGroupItem value="to-go" id="to-go" className="sr-only" />
+                <span>To Go</span>
+              </label>
+            </RadioGroup>
+          </div>
+
           <div>
             <label htmlFor="pax" className="block text-sm font-medium text-foreground mb-2">
               How many people are dining?

@@ -8,6 +8,7 @@ export interface Order {
   total: number;
   items: OrderItem[];
   pax?: number;
+  isToGo?: boolean;
   notes?: string;
   staffNotes?: string;
   cancellationReason?: string;
