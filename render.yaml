@@ -2,7 +2,7 @@ databases:
   - name: inkwave-db
     databaseName: inkwave
     user: inkwave
-    plan: starter
+    plan: free
     region: singapore
 
 services:
