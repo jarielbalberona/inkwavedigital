@@ -43,7 +43,7 @@ services:
       - key: R2_PUBLIC_URL
         sync: false
     domains:
-      - api.dumadive.com
+      - api.dumadine.com
     buildFilter:
       paths:
         - apps/api/**
@@ -75,7 +75,7 @@ services:
         source: /*
         destination: /index.html
     domains:
-      - dumadive.com
+      - dumadine.com
     buildFilter:
       paths:
         - apps/customer/**
@@ -109,7 +109,7 @@ services:
         source: /*
         destination: /index.html
     domains:
-      - dashboard.dumadive.com
+      - dashboard.dumadine.com
     buildFilter:
       paths:
         - apps/dashboard/**
