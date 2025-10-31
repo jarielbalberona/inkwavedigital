@@ -2,7 +2,6 @@ services:
   # PostgreSQL Database
   - type: pserv
     name: inkwave-db
-    env: docker
     plan: starter
     region: oregon
 
