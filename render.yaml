@@ -15,7 +15,6 @@ services:
     branch: main
     dockerfilePath: ./apps/api/Dockerfile
     dockerContext: .
-    dockerCommand: node dist/server.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
@@ -46,7 +45,6 @@ services:
       paths:
         - apps/api/**
         - packages/**
-    preDeployCommand: sh -c "cd packages/db && pnpm install && pnpm run migrate:prod"
 
   # Customer PWA (Static Site)
   - type: web

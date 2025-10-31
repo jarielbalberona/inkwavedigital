@@ -47,6 +47,9 @@ COPY --from=build /app/packages/utils/dist ./packages/utils/dist
 # Copy migrations for runtime
 COPY --from=build /app/packages/db/migrations ./packages/db/migrations
 COPY --from=build /app/packages/db/drizzle.config.ts ./packages/db/drizzle.config.ts
+# Copy startup script
+COPY apps/api/startup.sh /app/startup.sh
+RUN chmod +x /app/startup.sh
 WORKDIR /app/apps/api
 EXPOSE 3000
-CMD ["node", "dist/server.js"]
+CMD ["/app/startup.sh"]
