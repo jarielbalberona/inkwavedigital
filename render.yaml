@@ -1,15 +1,16 @@
-services:
-  # PostgreSQL Database
-  - type: pserv
-    name: inkwave-db
+databases:
+  - name: inkwave-db
+    databaseName: inkwave
+    user: inkwave
     plan: starter
-    region: oregon
+    region: singapore
 
+services:
   # API Service
   - type: web
     name: inkwave-api
     env: docker
-    region: oregon
+    region: singapore
     plan: starter
     branch: main
     dockerfilePath: ./apps/api/Dockerfile
