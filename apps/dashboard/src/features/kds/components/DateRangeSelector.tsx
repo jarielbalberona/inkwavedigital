@@ -114,6 +114,7 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
             variant={selectedRange === 'custom' ? 'default' : 'outline'}
             size="sm"
             className={cn("gap-2")}
+            disabled={true}
           >
             <CalendarIcon className="h-4 w-4" />
             {selectedRange === 'custom' ? formatDateDisplay(dateFrom) : 'Custom Date'}
