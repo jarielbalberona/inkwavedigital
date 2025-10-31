@@ -2,6 +2,7 @@ import { injectable, inject } from "tsyringe";
 import type { Request, Response, NextFunction } from "express";
 import { CreateOrderUseCase } from "../../application/use-cases/CreateOrderUseCase.js";
 import { UpdateOrderStatusUseCase } from "../../application/use-cases/UpdateOrderStatusUseCase.js";
+import { UpdateOrderStaffNotesUseCase } from "../../application/use-cases/UpdateOrderStaffNotesUseCase.js";
 import { GetVenueOrdersUseCase } from "../../application/use-cases/GetVenueOrdersUseCase.js";
 import { GetDeviceOrdersUseCase } from "../../application/use-cases/GetDeviceOrdersUseCase.js";
 import { ValidationError } from "../../shared/errors/domain-error.js";
@@ -11,6 +12,7 @@ export class OrderController {
   constructor(
     @inject(CreateOrderUseCase) private createOrderUseCase: CreateOrderUseCase,
     @inject(UpdateOrderStatusUseCase) private updateOrderStatusUseCase: UpdateOrderStatusUseCase,
+    @inject(UpdateOrderStaffNotesUseCase) private updateOrderStaffNotesUseCase: UpdateOrderStaffNotesUseCase,
     @inject(GetVenueOrdersUseCase) private getVenueOrdersUseCase: GetVenueOrdersUseCase,
     @inject(GetDeviceOrdersUseCase) private getDeviceOrdersUseCase: GetDeviceOrdersUseCase
   ) {}
@@ -44,7 +46,7 @@ export class OrderController {
   async updateStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
-      const { status } = req.body;
+      const { status, cancellationReason } = req.body;
 
       if (!status) {
         throw new ValidationError("Status is required");
@@ -53,6 +55,30 @@ export class OrderController {
       const result = await this.updateOrderStatusUseCase.execute({
         orderId: id,
         newStatus: status,
+        cancellationReason,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateStaffNotes(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { staffNotes } = req.body;
+
+      if (staffNotes === undefined) {
+        throw new ValidationError("Staff notes is required");
+      }
+
+      const result = await this.updateOrderStaffNotesUseCase.execute({
+        orderId: id,
+        staffNotes,
       });
 
       res.json({

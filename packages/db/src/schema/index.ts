@@ -20,4 +20,9 @@ export * from "./auditLogs.js";
 export * from "./venueStaff.js";
 export * from "./images.js";
 export * from "./pushSubscriptions.js";
+// Google Business Page-like features
+export * from "./venueReviews.js";
+export * from "./venuePhotos.js";
+export * from "./venueBusinessHours.js";
+export * from "./venueAttributes.js";
 

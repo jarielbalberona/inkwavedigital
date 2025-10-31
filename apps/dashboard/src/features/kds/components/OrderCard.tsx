@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { ClockIcon, UserIcon, UserGroupIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
 import { useUpdateOrderStatus } from "../hooks/mutations/useUpdateOrderStatus";
+import { useUpdateStaffNotes } from "../hooks/mutations/useUpdateStaffNotes";
 import { getStatusColor, getNextStatus, formatOrderTime, formatOrderTotal, getTimeElapsed } from "../hooks/helpers/orderHelpers";
-import type { Order } from "../types/kds.types";
+import type { Order, SelectedOption } from "../types/kds.types";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../../components/ui/dialog";
 
 interface OrderCardProps {
   order: Order;
@@ -11,8 +13,12 @@ interface OrderCardProps {
 
 export const OrderCard: React.FC<OrderCardProps> = ({ order, venueId }) => {
   const updateOrderStatusMutation = useUpdateOrderStatus(venueId);
+  const updateStaffNotesMutation = useUpdateStaffNotes(venueId);
   const nextStatus = getNextStatus(order.status);
   const [timeElapsed, setTimeElapsed] = useState(getTimeElapsed(order.createdAt));
+  const [staffNotes, setStaffNotes] = useState(order.staffNotes || "");
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [cancellationReason, setCancellationReason] = useState("");
 
   // Update elapsed time every minute
   useEffect(() => {
@@ -23,10 +29,32 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, venueId }) => {
     return () => clearInterval(interval);
   }, [order.createdAt]);
 
+  // Update staff notes state when order changes
+  useEffect(() => {
+    setStaffNotes(order.staffNotes || "");
+  }, [order.staffNotes]);
+
   const handleStatusUpdate = (newStatus: string) => {
     updateOrderStatusMutation.mutate({
       orderId: order.id,
       newStatus,
+    });
+  };
+
+  const handleCancelOrder = () => {
+    updateOrderStatusMutation.mutate({
+      orderId: order.id,
+      newStatus: "CANCELLED",
+      cancellationReason: cancellationReason || undefined,
+    });
+    setShowCancelDialog(false);
+    setCancellationReason("");
+  };
+
+  const handleSaveStaffNotes = () => {
+    updateStaffNotesMutation.mutate({
+      orderId: order.id,
+      staffNotes,
     });
   };
 
@@ -79,40 +107,58 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, venueId }) => {
       {/* Items */}
       <div className="space-y-3 mb-4">
         {order.items.map((item) => {
-          let parsedOptions: any[] = [];
+          let parsedOptions: SelectedOption[] = [];
           try {
             if (item.optionsJson) {
-              parsedOptions = JSON.parse(item.optionsJson);
+              // Handle multiple possible formats
+              if (typeof item.optionsJson === 'string') {
+                // If it's a JSON string, parse it
+                parsedOptions = JSON.parse(item.optionsJson);
+              } else if (Array.isArray(item.optionsJson)) {
+                // If it's already an array, use it directly
+                parsedOptions = item.optionsJson as SelectedOption[];
+              } else if (typeof item.optionsJson === 'object') {
+                // If it's an object but not an array, it might be a single option
+                // or malformed data - wrap it in an array
+                console.warn('Unexpected optionsJson format:', item.optionsJson);
+              }
             }
           } catch (e) {
-            console.error("Failed to parse options JSON", e);
+            console.error("Failed to parse options JSON", e, item.optionsJson);
+          }
+
+          // Ensure parsedOptions is always an array
+          if (!Array.isArray(parsedOptions)) {
+            parsedOptions = [];
           }
 
           return (
             <div key={item.id} className="border-b border-gray-100 pb-2 last:border-b-0">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <span className="text-gray-900 font-medium">
+                  <div className="text-gray-900 font-medium text-base">
                     {item.quantity}x {item.name}
-                  </span>
+                  </div>
                   
-                  {/* Display selected options */}
+                  {/* Display selected options/modifiers */}
                   {parsedOptions.length > 0 && (
-                    <div className="mt-1 space-y-0.5">
-                      {parsedOptions.map((option: any, idx: number) => (
-                        <div key={idx} className="text-xs text-gray-600">
-                          <span className="font-medium">{option.optionName}:</span>{" "}
-                          {option.values?.map((value: any, vIdx: number) => (
-                            <span key={vIdx}>
-                              {value.valueLabel}
-                              {value.priceDelta !== 0 && (
-                                <span className="text-green-600">
-                                  {" "}(+₱{value.priceDelta.toFixed(2)})
-                                </span>
-                              )}
-                              {vIdx < option.values.length - 1 && ", "}
-                            </span>
-                          ))}
+                    <div className="mt-1.5 ml-4 space-y-1">
+                      {parsedOptions.map((option, idx) => (
+                        <div key={idx} className="text-sm text-gray-700">
+                          <span className="font-medium text-gray-600">{option.optionName}:</span>{" "}
+                          <span className="text-gray-800">
+                            {option.values.map((value, vIdx) => (
+                              <span key={vIdx}>
+                                {value.valueLabel}
+                                {value.priceDelta !== 0 && (
+                                  <span className="text-green-700 font-medium">
+                                    {" "}(+₱{value.priceDelta.toFixed(2)})
+                                  </span>
+                                )}
+                                {vIdx < option.values.length - 1 && ", "}
+                              </span>
+                            ))}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -120,12 +166,15 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, venueId }) => {
                   
                   {/* Display item notes */}
                   {item.notes && (
-                    <div className="mt-1 text-xs text-gray-500 italic">
-                      Note: {item.notes}
+                    <div className="mt-1.5 ml-4 p-2 bg-yellow-50 rounded border border-yellow-200">
+                      <div className="text-sm text-yellow-900">
+                        <span className="font-medium">Special Instructions: </span>
+                        <span className="italic">{item.notes}</span>
+                      </div>
                     </div>
                   )}
                 </div>
-                <span className="font-medium text-gray-900 ml-2">
+                <span className="font-medium text-gray-900 ml-3 text-base whitespace-nowrap">
                   {formatOrderTotal(item.totalPrice)}
                 </span>
               </div>
@@ -144,6 +193,27 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, venueId }) => {
         </div>
       </div>
 
+      {/* Staff Notes */}
+      <div className="border-t border-gray-200 pt-4 mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Staff Notes (Internal)
+        </label>
+        <textarea
+          value={staffNotes}
+          onChange={(e) => setStaffNotes(e.target.value)}
+          placeholder="Add internal notes about this order..."
+          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          rows={3}
+        />
+        <button
+          onClick={handleSaveStaffNotes}
+          disabled={updateStaffNotesMutation.isPending || staffNotes === order.staffNotes}
+          className="mt-2 w-full bg-gray-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          {updateStaffNotesMutation.isPending ? "Saving..." : "Save Staff Notes"}
+        </button>
+      </div>
+
       {/* Actions */}
       <div className="flex space-x-2">
         {nextStatus && (
@@ -156,9 +226,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, venueId }) => {
           </button>
         )}
         
-        {order.status !== "CANCELLED" && (
+        {order.status !== "CANCELLED" && order.status !== "READY" && order.status !== "SERVED" && (
           <button
-            onClick={() => handleStatusUpdate("CANCELLED")}
+            onClick={() => setShowCancelDialog(true)}
             disabled={updateOrderStatusMutation.isPending}
             className="bg-red-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
@@ -166,6 +236,50 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, venueId }) => {
           </button>
         )}
       </div>
+
+      {/* Cancel Confirmation Dialog */}
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Order</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel this order? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Cancellation Reason (Optional)
+            </label>
+            <textarea
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+              placeholder="Enter reason for cancellation..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              rows={3}
+            />
+          </div>
+
+          <DialogFooter>
+            <button
+              onClick={() => {
+                setShowCancelDialog(false);
+                setCancellationReason("");
+              }}
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Keep Order
+            </button>
+            <button
+              onClick={handleCancelOrder}
+              disabled={updateOrderStatusMutation.isPending}
+              className="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {updateOrderStatusMutation.isPending ? "Cancelling..." : "Cancel Order"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

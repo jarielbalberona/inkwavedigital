@@ -43,6 +43,13 @@
       "when": 1761592470628,
       "tag": "0005_robust_longshot",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1730404800000,
+      "tag": "0009_add_venue_enhancements",
+      "breakpoints": true
     }
   ]
 }

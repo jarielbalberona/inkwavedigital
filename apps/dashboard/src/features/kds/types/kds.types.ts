@@ -9,6 +9,8 @@ export interface Order {
   items: OrderItem[];
   pax?: number;
   notes?: string;
+  staffNotes?: string;
+  cancellationReason?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,7 +23,19 @@ export interface OrderItem {
   unitPrice: number;
   totalPrice: number;
   notes?: string;
-  optionsJson?: string;
+  options?: SelectedOption[]; // Parsed array of selected options
+  optionsJson?: any; // Raw data from API (can be various formats)
+}
+
+export interface SelectedOption {
+  optionId: string;
+  optionName: string;
+  valueIds: string[];
+  values: Array<{
+    valueId: string;
+    valueLabel: string;
+    priceDelta: number;
+  }>;
 }
 
 export interface OrdersResponse {
@@ -32,6 +46,7 @@ export interface OrdersResponse {
 export interface UpdateOrderStatusInput {
   orderId: string;
   newStatus: string;
+  cancellationReason?: string;
 }
 
 export interface UpdateOrderStatusResponse {
@@ -39,6 +54,20 @@ export interface UpdateOrderStatusResponse {
   data: {
     orderId: string;
     status: string;
+    updatedAt: string;
+  };
+}
+
+export interface UpdateStaffNotesInput {
+  orderId: string;
+  staffNotes: string;
+}
+
+export interface UpdateStaffNotesResponse {
+  success: boolean;
+  data: {
+    orderId: string;
+    staffNotes: string;
     updatedAt: string;
   };
 }

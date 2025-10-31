@@ -16,3 +16,6 @@ ordersRouter.get("/device/:deviceId", orderController.getDeviceOrders.bind(order
 // PROTECTED - Update order status (KDS/staff only)
 ordersRouter.patch("/:id/status", requireAuth, orderController.updateStatus.bind(orderController));
 
+// PROTECTED - Update order staff notes (KDS/staff only)
+ordersRouter.patch("/:id/staff-notes", requireAuth, orderController.updateStaffNotes.bind(orderController));
+

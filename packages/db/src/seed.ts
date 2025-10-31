@@ -48,7 +48,11 @@ const seed = async () => {
         tenantId: tenant.id,
         name: "Demo Café Branch 1",
         slug: "branch-1",
-        address: "123 Main Street, Bacolod City",
+        formattedAddress: "123 Main Street, Bacolod City",
+        addressLine1: "123 Main Street",
+        city: "Bacolod City",
+        state: "Negros Occidental",
+        country: "Philippines",
         timezone: "Asia/Manila",
       })
       .returning();

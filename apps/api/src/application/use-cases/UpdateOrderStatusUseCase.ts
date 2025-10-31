@@ -9,6 +9,7 @@ import type { PushNotificationService } from "../../infrastructure/push/PushNoti
 export interface UpdateOrderStatusInput {
   orderId: string;
   newStatus: string;
+  cancellationReason?: string;
   updatedBy?: string;
 }
 
@@ -45,7 +46,12 @@ export class UpdateOrderStatusUseCase {
     }
 
     // Update order status (domain logic validates transition)
-    order.updateStatus(newStatus);
+    if (newStatus.toString() === 'CANCELLED') {
+      // Use the cancel method which accepts a cancellationReason
+      order.cancel(input.cancellationReason);
+    } else {
+      order.updateStatus(newStatus);
+    }
 
     // Save updated order
     await this.orderRepository.save(order);

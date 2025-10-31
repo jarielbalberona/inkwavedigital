@@ -22,6 +22,8 @@ export interface OrderProps {
   deviceId?: string;
   pax?: number;
   notes?: string;
+  staffNotes?: string;
+  cancellationReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -90,6 +92,19 @@ export class Order {
     return this.props.notes;
   }
 
+  get staffNotes(): string | undefined {
+    return this.props.staffNotes;
+  }
+
+  get cancellationReason(): string | undefined {
+    return this.props.cancellationReason;
+  }
+
+  updateStaffNotes(staffNotes: string): void {
+    this.props.staffNotes = staffNotes;
+    this.props.updatedAt = new Date();
+  }
+
   get createdAt(): Date {
     return this.props.createdAt;
   }
@@ -115,11 +130,14 @@ export class Order {
     this.props.updatedAt = new Date();
   }
 
-  cancel(): void {
+  cancel(cancellationReason?: string): void {
     if (this.props.status.isFinal()) {
       throw new ValidationError("Cannot cancel a finalized order");
     }
     this.props.status = OrderStatus.cancelled();
+    if (cancellationReason) {
+      this.props.cancellationReason = cancellationReason;
+    }
     this.props.updatedAt = new Date();
   }
 
@@ -163,6 +181,8 @@ export class Order {
       deviceId: this.props.deviceId,
       pax: this.props.pax,
       notes: this.props.notes,
+      staffNotes: this.props.staffNotes,
+      cancellationReason: this.props.cancellationReason,
       total: this.total.toNumber(),
       createdAt: this.props.createdAt.toISOString(),
       updatedAt: this.props.updatedAt.toISOString(),

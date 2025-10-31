@@ -1,10 +1,8 @@
 {
-  "id": "ea5c5210-91dd-49cb-b794-adeedc4c283c",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "5",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "health_check": {
+    "public.health_check": {
       "name": "health_check",
       "schema": "",
       "columns": {
@@ -33,9 +31,12 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "tenants": {
+    "public.tenants": {
       "name": "tenants",
       "schema": "",
       "columns": {
@@ -85,14 +86,17 @@
       "uniqueConstraints": {
         "tenants_slug_unique": {
           "name": "tenants_slug_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "slug"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
-      }
+      },
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "tables": {
+    "public.tables": {
       "name": "tables",
       "schema": "",
       "columns": {
@@ -148,21 +152,24 @@
         "tables_venue_id_venues_id_fk": {
           "name": "tables_venue_id_venues_id_fk",
           "tableFrom": "tables",
-          "tableTo": "venues",
           "columnsFrom": [
             "venue_id"
           ],
+          "tableTo": "venues",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "venues": {
+    "public.venues": {
       "name": "venues",
       "schema": "",
       "columns": {
@@ -224,21 +231,24 @@
         "venues_tenant_id_tenants_id_fk": {
           "name": "venues_tenant_id_tenants_id_fk",
           "tableFrom": "venues",
-          "tableTo": "tenants",
           "columnsFrom": [
             "tenant_id"
           ],
+          "tableTo": "tenants",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "item_option_values": {
+    "public.item_option_values": {
       "name": "item_option_values",
       "schema": "",
       "columns": {
@@ -288,21 +298,24 @@
         "item_option_values_option_id_item_options_id_fk": {
           "name": "item_option_values_option_id_item_options_id_fk",
           "tableFrom": "item_option_values",
-          "tableTo": "item_options",
           "columnsFrom": [
             "option_id"
           ],
+          "tableTo": "item_options",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "item_options": {
+    "public.item_options": {
       "name": "item_options",
       "schema": "",
       "columns": {
@@ -358,21 +371,24 @@
         "item_options_item_id_menu_items_id_fk": {
           "name": "item_options_item_id_menu_items_id_fk",
           "tableFrom": "item_options",
-          "tableTo": "menu_items",
           "columnsFrom": [
             "item_id"
           ],
+          "tableTo": "menu_items",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "menu_categories": {
+    "public.menu_categories": {
       "name": "menu_categories",
       "schema": "",
       "columns": {
@@ -422,21 +438,24 @@
         "menu_categories_menu_id_menus_id_fk": {
           "name": "menu_categories_menu_id_menus_id_fk",
           "tableFrom": "menu_categories",
-          "tableTo": "menus",
           "columnsFrom": [
             "menu_id"
           ],
+          "tableTo": "menus",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "menu_items": {
+    "public.menu_items": {
       "name": "menu_items",
       "schema": "",
       "columns": {
@@ -504,21 +523,24 @@
         "menu_items_category_id_menu_categories_id_fk": {
           "name": "menu_items_category_id_menu_categories_id_fk",
           "tableFrom": "menu_items",
-          "tableTo": "menu_categories",
           "columnsFrom": [
             "category_id"
           ],
+          "tableTo": "menu_categories",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "menus": {
+    "public.menus": {
       "name": "menus",
       "schema": "",
       "columns": {
@@ -568,21 +590,24 @@
         "menus_venue_id_venues_id_fk": {
           "name": "menus_venue_id_venues_id_fk",
           "tableFrom": "menus",
-          "tableTo": "venues",
           "columnsFrom": [
             "venue_id"
           ],
+          "tableTo": "venues",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "order_events": {
+    "public.order_events": {
       "name": "order_events",
       "schema": "",
       "columns": {
@@ -624,21 +649,24 @@
         "order_events_order_id_orders_id_fk": {
           "name": "order_events_order_id_orders_id_fk",
           "tableFrom": "order_events",
-          "tableTo": "orders",
           "columnsFrom": [
             "order_id"
           ],
+          "tableTo": "orders",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "order_items": {
+    "public.order_items": {
       "name": "order_items",
       "schema": "",
       "columns": {
@@ -698,34 +726,37 @@
         "order_items_order_id_orders_id_fk": {
           "name": "order_items_order_id_orders_id_fk",
           "tableFrom": "order_items",
-          "tableTo": "orders",
           "columnsFrom": [
             "order_id"
           ],
+          "tableTo": "orders",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "order_items_item_id_menu_items_id_fk": {
           "name": "order_items_item_id_menu_items_id_fk",
           "tableFrom": "order_items",
-          "tableTo": "menu_items",
           "columnsFrom": [
             "item_id"
           ],
+          "tableTo": "menu_items",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "orders": {
+    "public.orders": {
       "name": "orders",
       "schema": "",
       "columns": {
@@ -787,34 +818,37 @@
         "orders_venue_id_venues_id_fk": {
           "name": "orders_venue_id_venues_id_fk",
           "tableFrom": "orders",
-          "tableTo": "venues",
           "columnsFrom": [
             "venue_id"
           ],
+          "tableTo": "venues",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "orders_table_id_tables_id_fk": {
           "name": "orders_table_id_tables_id_fk",
           "tableFrom": "orders",
-          "tableTo": "tables",
           "columnsFrom": [
             "table_id"
           ],
+          "tableTo": "tables",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "device_tokens": {
+    "public.device_tokens": {
       "name": "device_tokens",
       "schema": "",
       "columns": {
@@ -869,21 +903,24 @@
         "device_tokens_user_id_users_id_fk": {
           "name": "device_tokens_user_id_users_id_fk",
           "tableFrom": "device_tokens",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "users": {
+    "public.users": {
       "name": "users",
       "schema": "",
       "columns": {
@@ -938,29 +975,32 @@
         "users_tenant_id_tenants_id_fk": {
           "name": "users_tenant_id_tenants_id_fk",
           "tableFrom": "users",
-          "tableTo": "tenants",
           "columnsFrom": [
             "tenant_id"
           ],
+          "tableTo": "tenants",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "users_clerk_user_id_unique": {
           "name": "users_clerk_user_id_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "clerk_user_id"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
-      }
+      },
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "merchant_points": {
+    "public.merchant_points": {
       "name": "merchant_points",
       "schema": "",
       "columns": {
@@ -1003,34 +1043,37 @@
         "merchant_points_user_id_users_id_fk": {
           "name": "merchant_points_user_id_users_id_fk",
           "tableFrom": "merchant_points",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "merchant_points_venue_id_venues_id_fk": {
           "name": "merchant_points_venue_id_venues_id_fk",
           "tableFrom": "merchant_points",
-          "tableTo": "venues",
           "columnsFrom": [
             "venue_id"
           ],
+          "tableTo": "venues",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "point_rules": {
+    "public.point_rules": {
       "name": "point_rules",
       "schema": "",
       "columns": {
@@ -1088,21 +1131,24 @@
         "point_rules_venue_id_venues_id_fk": {
           "name": "point_rules_venue_id_venues_id_fk",
           "tableFrom": "point_rules",
-          "tableTo": "venues",
           "columnsFrom": [
             "venue_id"
           ],
+          "tableTo": "venues",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "point_transactions": {
+    "public.point_transactions": {
       "name": "point_transactions",
       "schema": "",
       "columns": {
@@ -1156,47 +1202,50 @@
         "point_transactions_user_id_users_id_fk": {
           "name": "point_transactions_user_id_users_id_fk",
           "tableFrom": "point_transactions",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "point_transactions_venue_id_venues_id_fk": {
           "name": "point_transactions_venue_id_venues_id_fk",
           "tableFrom": "point_transactions",
-          "tableTo": "venues",
           "columnsFrom": [
             "venue_id"
           ],
+          "tableTo": "venues",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "point_transactions_order_id_orders_id_fk": {
           "name": "point_transactions_order_id_orders_id_fk",
           "tableFrom": "point_transactions",
-          "tableTo": "orders",
           "columnsFrom": [
             "order_id"
           ],
+          "tableTo": "orders",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "wifi_sessions": {
+    "public.wifi_sessions": {
       "name": "wifi_sessions",
       "schema": "",
       "columns": {
@@ -1244,34 +1293,37 @@
         "wifi_sessions_venue_id_venues_id_fk": {
           "name": "wifi_sessions_venue_id_venues_id_fk",
           "tableFrom": "wifi_sessions",
-          "tableTo": "venues",
           "columnsFrom": [
             "venue_id"
           ],
+          "tableTo": "venues",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "wifi_sessions_token_id_wifi_tokens_id_fk": {
           "name": "wifi_sessions_token_id_wifi_tokens_id_fk",
           "tableFrom": "wifi_sessions",
-          "tableTo": "wifi_tokens",
           "columnsFrom": [
             "token_id"
           ],
+          "tableTo": "wifi_tokens",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "wifi_tokens": {
+    "public.wifi_tokens": {
       "name": "wifi_tokens",
       "schema": "",
       "columns": {
@@ -1332,47 +1384,56 @@
         "wifi_tokens_venue_id_venues_id_fk": {
           "name": "wifi_tokens_venue_id_venues_id_fk",
           "tableFrom": "wifi_tokens",
-          "tableTo": "venues",
           "columnsFrom": [
             "venue_id"
           ],
+          "tableTo": "venues",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "wifi_tokens_table_id_tables_id_fk": {
           "name": "wifi_tokens_table_id_tables_id_fk",
           "tableFrom": "wifi_tokens",
-          "tableTo": "tables",
           "columnsFrom": [
             "table_id"
           ],
+          "tableTo": "tables",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "wifi_tokens_token_unique": {
           "name": "wifi_tokens_token_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "token"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
-      }
+      },
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     }
   },
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "ea5c5210-91dd-49cb-b794-adeedc4c283c",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "sequences": {},
+  "policies": {},
+  "views": {},
+  "roles": {}
 }

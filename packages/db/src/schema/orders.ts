@@ -12,7 +12,9 @@ export const orders = pgTable("orders", {
   total: numeric("total", { precision: 10, scale: 2 }).notNull(),
   deviceId: text("device_id"),
   pax: integer("pax"), // number of people
-  notes: text("notes"), // order notes
+  notes: text("notes"), // order notes (from customer)
+  staffNotes: text("staff_notes"), // staff notes (internal, dashboard only)
+  cancellationReason: text("cancellation_reason"), // reason for order cancellation
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

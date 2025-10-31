@@ -1,5 +1,5 @@
 import { api } from "../../../lib/api";
-import type { Order, UpdateOrderStatusInput, UpdateOrderStatusResponse } from "../types/kds.types";
+import type { Order, UpdateOrderStatusInput, UpdateOrderStatusResponse, UpdateStaffNotesInput, UpdateStaffNotesResponse } from "../types/kds.types";
 import type { ApiResponse } from "../../menu-management/types/menuManagement.types";
 
 // API response types
@@ -17,9 +17,14 @@ interface ApiOrder {
   id: string;
   venueId: string;
   tableId?: string;
+  tableLabel?: string;
   status: string;
   items: ApiOrderItem[];
   deviceId?: string;
+  pax?: number;
+  notes?: string;
+  staffNotes?: string;
+  cancellationReason?: string;
   total: number;
   createdAt: string;
   updatedAt: string;
@@ -45,9 +50,14 @@ export const ordersApi = {
       id: order.id,
       venueId: order.venueId,
       tableId: order.tableId,
+      tableLabel: order.tableLabel,
       deviceId: order.deviceId || "",
       status: order.status as Order["status"],
       total: order.total,
+      pax: order.pax,
+      notes: order.notes,
+      staffNotes: order.staffNotes,
+      cancellationReason: order.cancellationReason,
       items: order.items.map(item => ({
         id: item.id,
         itemId: item.itemId,
@@ -56,11 +66,7 @@ export const ordersApi = {
         unitPrice: item.unitPrice,
         totalPrice: item.unitPrice * item.quantity, // Calculate totalPrice
         notes: item.notes,
-        options: item.optionsJson ? Object.keys(item.optionsJson).reduce((acc, key) => {
-          const value = item.optionsJson![key];
-          acc[key] = Array.isArray(value) ? value : [value];
-          return acc;
-        }, {} as Record<string, string[]>) : undefined,
+        optionsJson: item.optionsJson as any, // JSONB from DB is already parsed
       })),
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
@@ -72,6 +78,14 @@ export const ordersApi = {
   updateOrderStatus: async (input: UpdateOrderStatusInput): Promise<UpdateOrderStatusResponse['data']> => {
     const response = await api.patch<ApiResponse<UpdateOrderStatusResponse['data']>>(`/api/v1/orders/${input.orderId}/status`, {
       status: input.newStatus,
+      cancellationReason: input.cancellationReason,
+    });
+    return response.data;
+  },
+
+  updateStaffNotes: async (input: UpdateStaffNotesInput): Promise<UpdateStaffNotesResponse['data']> => {
+    const response = await api.patch<ApiResponse<UpdateStaffNotesResponse['data']>>(`/api/v1/orders/${input.orderId}/staff-notes`, {
+      staffNotes: input.staffNotes,
     });
     return response.data;
   },

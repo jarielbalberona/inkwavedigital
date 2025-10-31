@@ -18,6 +18,7 @@ export interface GetVenueOrdersOutput {
     id: string;
     venueId: string;
     tableId?: string;
+    tableLabel?: string;
     status: string;
     items: Array<{
       id: string;
@@ -29,6 +30,10 @@ export interface GetVenueOrdersOutput {
       optionsJson?: Record<string, unknown>;
     }>;
     deviceId?: string;
+    pax?: number;
+    notes?: string;
+    staffNotes?: string;
+    cancellationReason?: string;
     total: number;
     createdAt: string;
     updatedAt: string;

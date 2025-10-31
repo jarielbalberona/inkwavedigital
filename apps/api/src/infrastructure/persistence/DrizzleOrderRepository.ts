@@ -22,6 +22,8 @@ export class DrizzleOrderRepository implements IOrderRepository {
       deviceId: order.deviceId,
       pax: order.pax,
       notes: order.notes,
+      staffNotes: order.staffNotes,
+      cancellationReason: order.cancellationReason,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
     };
@@ -68,16 +70,33 @@ export class DrizzleOrderRepository implements IOrderRepository {
   }
 
   async findById(id: string): Promise<Order | null> {
-    const result = await this.db.query.orders.findFirst({
-      where: eq(orders.id, id),
-      with: {
-        // Note: Drizzle relations would need to be defined in schema
-      },
-    });
+    // Fetch order with table label
+    const orderResults = await this.db
+      .select({
+        id: orders.id,
+        venueId: orders.venueId,
+        tableId: orders.tableId,
+        tableLabel: tables.label,
+        status: orders.status,
+        total: orders.total,
+        deviceId: orders.deviceId,
+        pax: orders.pax,
+        notes: orders.notes,
+        staffNotes: orders.staffNotes,
+        cancellationReason: orders.cancellationReason,
+        createdAt: orders.createdAt,
+        updatedAt: orders.updatedAt,
+      })
+      .from(orders)
+      .leftJoin(tables, eq(orders.tableId, tables.id))
+      .where(eq(orders.id, id))
+      .limit(1);
 
-    if (!result) {
+    if (orderResults.length === 0) {
       return null;
     }
+
+    const result = orderResults[0];
 
     // Fetch order items with menu item names
     const items = await this.db
@@ -128,6 +147,8 @@ export class DrizzleOrderRepository implements IOrderRepository {
         deviceId: orders.deviceId,
         pax: orders.pax,
         notes: orders.notes,
+        staffNotes: orders.staffNotes,
+        cancellationReason: orders.cancellationReason,
         createdAt: orders.createdAt,
         updatedAt: orders.updatedAt,
       })
@@ -166,14 +187,32 @@ export class DrizzleOrderRepository implements IOrderRepository {
   }
 
   async findByTableId(tableId: string): Promise<Order[]> {
-    const results = await this.db.query.orders.findMany({
-      where: eq(orders.tableId, tableId),
-      orderBy: [desc(orders.createdAt)],
-    });
+    // Fetch orders with table labels
+    const orderResults = await this.db
+      .select({
+        id: orders.id,
+        venueId: orders.venueId,
+        tableId: orders.tableId,
+        tableLabel: tables.label,
+        status: orders.status,
+        total: orders.total,
+        deviceId: orders.deviceId,
+        pax: orders.pax,
+        notes: orders.notes,
+        staffNotes: orders.staffNotes,
+        cancellationReason: orders.cancellationReason,
+        createdAt: orders.createdAt,
+        updatedAt: orders.updatedAt,
+      })
+      .from(orders)
+      .leftJoin(tables, eq(orders.tableId, tables.id))
+      .where(eq(orders.tableId, tableId))
+      .orderBy(desc(orders.createdAt));
 
-    return Promise.all(
-      results.map(async (order) => {
-        const items = await this.db
+    // Fetch all order items for these orders with menu item names
+    const orderIds = orderResults.map((o) => o.id);
+    const allItems = orderIds.length > 0
+      ? await this.db
           .select({
             id: orderItems.id,
             orderId: orderItems.orderId,
@@ -186,8 +225,13 @@ export class DrizzleOrderRepository implements IOrderRepository {
           })
           .from(orderItems)
           .leftJoin(menuItems, eq(orderItems.itemId, menuItems.id))
-          .where(eq(orderItems.orderId, order.id));
-        return this.mapToEntity(order, items);
+          .where(inArray(orderItems.orderId, orderIds))
+      : [];
+
+    return Promise.all(
+      orderResults.map((order) => {
+        const items = allItems.filter((item) => item.orderId === order.id);
+        return Promise.resolve(this.mapToEntity(order, items));
       })
     );
   }
@@ -197,14 +241,32 @@ export class DrizzleOrderRepository implements IOrderRepository {
       ? and(eq(orders.deviceId, deviceId), eq(orders.venueId, venueId))
       : eq(orders.deviceId, deviceId);
 
-    const results = await this.db.query.orders.findMany({
-      where: conditions,
-      orderBy: [desc(orders.createdAt)],
-    });
+    // Fetch orders with table labels
+    const orderResults = await this.db
+      .select({
+        id: orders.id,
+        venueId: orders.venueId,
+        tableId: orders.tableId,
+        tableLabel: tables.label,
+        status: orders.status,
+        total: orders.total,
+        deviceId: orders.deviceId,
+        pax: orders.pax,
+        notes: orders.notes,
+        staffNotes: orders.staffNotes,
+        cancellationReason: orders.cancellationReason,
+        createdAt: orders.createdAt,
+        updatedAt: orders.updatedAt,
+      })
+      .from(orders)
+      .leftJoin(tables, eq(orders.tableId, tables.id))
+      .where(conditions)
+      .orderBy(desc(orders.createdAt));
 
-    return Promise.all(
-      results.map(async (order) => {
-        const items = await this.db
+    // Fetch all order items for these orders with menu item names
+    const orderIds = orderResults.map((o) => o.id);
+    const allItems = orderIds.length > 0
+      ? await this.db
           .select({
             id: orderItems.id,
             orderId: orderItems.orderId,
@@ -217,8 +279,13 @@ export class DrizzleOrderRepository implements IOrderRepository {
           })
           .from(orderItems)
           .leftJoin(menuItems, eq(orderItems.itemId, menuItems.id))
-          .where(eq(orderItems.orderId, order.id));
-        return this.mapToEntity(order, items);
+          .where(inArray(orderItems.orderId, orderIds))
+      : [];
+
+    return Promise.all(
+      orderResults.map((order) => {
+        const items = allItems.filter((item) => item.orderId === order.id);
+        return Promise.resolve(this.mapToEntity(order, items));
       })
     );
   }
@@ -273,6 +340,8 @@ export class DrizzleOrderRepository implements IOrderRepository {
       deviceId: orderData.deviceId || undefined,
       pax: orderData.pax || undefined,
       notes: orderData.notes || undefined,
+      staffNotes: orderData.staffNotes || undefined,
+      cancellationReason: orderData.cancellationReason || undefined,
       createdAt: new Date(orderData.createdAt),
       updatedAt: new Date(orderData.updatedAt),
     });
