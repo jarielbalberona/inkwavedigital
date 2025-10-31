@@ -52,7 +52,8 @@ services:
     env: static
     branch: main
     region: singapore
-    buildCommand: pnpm install && pnpm --filter @inkwave/types build && pnpm run build:customer
+    installCommand: corepack enable && pnpm -v && pnpm install --frozen-lockfile
+    buildCommand: pnpm run build:types && pnpm run build:customer
     staticPublishPath: ./apps/customer/dist
     pullRequestPreviewsEnabled: true
     envVars:
@@ -72,6 +73,10 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+    buildFilter:
+      paths:
+        - apps/customer/**
+        - packages/**
 
   # Dashboard (Static Site)
   - type: web
@@ -79,7 +84,8 @@ services:
     env: static
     branch: main
     region: singapore
-    buildCommand: pnpm install && pnpm --filter @inkwave/types build && pnpm run build:dashboard
+    installCommand: corepack enable && pnpm -v && pnpm install --frozen-lockfile
+    buildCommand: pnpm run build:types && pnpm run build:dashboard
     staticPublishPath: ./apps/dashboard/dist
     pullRequestPreviewsEnabled: true
     envVars:
@@ -101,4 +107,8 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+    buildFilter:
+      paths:
+        - apps/dashboard/**
+        - packages/**
 

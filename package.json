@@ -8,6 +8,8 @@
     "build:api": "pnpm --filter @inkwave/db build && pnpm --filter api build",
     "build:customer": "pnpm --filter customer build",
     "build:dashboard": "pnpm --filter dashboard build",
+    "ci:setup": "corepack enable && pnpm -v && pnpm install --frozen-lockfile",
+    "build:types": "pnpm --filter @inkwave/types build",
     "dev": "pnpm -r --workspace-concurrency=1 dev",
     "typecheck": "pnpm -r typecheck",
     "dev:api": "pnpm --filter api dev",
