@@ -52,7 +52,7 @@ services:
     env: static
     branch: main
     region: singapore
-    buildCommand: pnpm install && pnpm run build:customer
+    buildCommand: pnpm install && pnpm --filter @inkwave/types build && pnpm run build:customer
     staticPublishPath: ./apps/customer/dist
     pullRequestPreviewsEnabled: true
     envVars:
@@ -79,7 +79,7 @@ services:
     env: static
     branch: main
     region: singapore
-    buildCommand: pnpm install && pnpm run build:dashboard
+    buildCommand: pnpm install && pnpm --filter @inkwave/types build && pnpm run build:dashboard
     staticPublishPath: ./apps/dashboard/dist
     pullRequestPreviewsEnabled: true
     envVars:
