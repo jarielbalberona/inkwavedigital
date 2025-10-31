@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { wsClient } from "../../../lib/websocket";
@@ -6,7 +6,10 @@ import { notificationManager } from "../../../lib/notifications";
 import { useOrdersQuery } from "../hooks/queries/useOrdersQuery";
 import { OrderStatusColumn } from "./OrderStatusColumn";
 import { groupOrdersByStatus } from "../hooks/helpers/orderHelpers";
-import type { Order } from "../types/kds.types";
+import { DateRangeSelector } from "./DateRangeSelector";
+import { KDSStats } from "./KDSStats";
+import { getToday, formatDateForAPI } from "../../../lib/dateUtils";
+import type { Order, DateRangeType } from "../types/kds.types";
 
 interface KDSPageProps {
   venueId: string;
@@ -14,10 +17,27 @@ interface KDSPageProps {
 
 export const KDSPage: React.FC<KDSPageProps> = ({ venueId }) => {
   const queryClient = useQueryClient();
-  const { data: ordersData, isLoading, error } = useOrdersQuery(venueId);
+  
+  // Date range state - default to today
+  const [selectedRange, setSelectedRange] = useState<DateRangeType>('today');
+  const [dateFrom, setDateFrom] = useState<Date>(() => getToday().from);
+  const [dateTo, setDateTo] = useState<Date>(() => getToday().to);
+  
+  // Format dates for API
+  const dateFromStr = formatDateForAPI(dateFrom);
+  const dateToStr = formatDateForAPI(dateTo);
+  
+  const { data: ordersData, isLoading, error } = useOrdersQuery(venueId, dateFromStr, dateToStr);
   
   const orders = ordersData || [];
   const ordersByStatus = groupOrdersByStatus(orders);
+  
+  // Handle date range changes
+  const handleRangeChange = (type: DateRangeType, from: Date, to: Date) => {
+    setSelectedRange(type);
+    setDateFrom(from);
+    setDateTo(to);
+  };
 
   // Track previous order IDs to detect new orders
   const previousOrderIdsRef = useRef<Set<string>>(new Set());
@@ -117,9 +137,21 @@ export const KDSPage: React.FC<KDSPageProps> = ({ venueId }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-6">
-        <h1 className="text-2xl font-bold text-gray-900">Kitchen Display System</h1>
-        <p className="text-gray-600">Manage orders in real-time</p>
+      <div className="bg-white border-b border-gray-200 p-6 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Kitchen Display System</h1>
+            <p className="text-gray-600">Manage orders in real-time</p>
+          </div>
+          <DateRangeSelector
+            selectedRange={selectedRange}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            onRangeChange={handleRangeChange}
+          />
+        </div>
+        
+        <KDSStats orders={orders} />
       </div>
 
       {/* Orders Grid */}

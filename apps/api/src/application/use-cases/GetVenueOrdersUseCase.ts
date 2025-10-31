@@ -7,6 +7,8 @@ import type { Logger } from "@inkwave/utils";
 export interface GetVenueOrdersInput {
   venueId: string;
   status?: string;
+  dateFrom?: Date;
+  dateTo?: Date;
   limit?: number;
   offset?: number;
 }
@@ -43,7 +45,7 @@ export class GetVenueOrdersUseCase {
   ) {}
 
   async execute(input: GetVenueOrdersInput): Promise<GetVenueOrdersOutput> {
-    this.logger.info({ venueId: input.venueId, status: input.status }, "Fetching orders for venue");
+    this.logger.info({ venueId: input.venueId, status: input.status, dateFrom: input.dateFrom, dateTo: input.dateTo }, "Fetching orders for venue");
 
     // Validate venue exists
     const venue = await this.venueRepository.findById(input.venueId);
@@ -54,6 +56,8 @@ export class GetVenueOrdersUseCase {
     // Fetch orders
     const orders = await this.orderRepository.findByVenueId(input.venueId, {
       status: input.status,
+      dateFrom: input.dateFrom,
+      dateTo: input.dateTo,
       limit: input.limit ?? 50,
       offset: input.offset ?? 0,
     });
@@ -61,6 +65,8 @@ export class GetVenueOrdersUseCase {
     // Get total count
     const total = await this.orderRepository.countByVenueId(input.venueId, {
       status: input.status,
+      dateFrom: input.dateFrom,
+      dateTo: input.dateTo,
     });
 
     this.logger.info(

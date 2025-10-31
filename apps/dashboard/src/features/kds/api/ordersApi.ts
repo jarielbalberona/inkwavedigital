@@ -31,8 +31,14 @@ interface ApiOrdersResponse {
 }
 
 export const ordersApi = {
-  getOrders: async (venueId: string): Promise<Order[]> => {
-    const response = await api.get<ApiResponse<ApiOrdersResponse>>(`/api/v1/venues/${venueId}/orders`);
+  getOrders: async (venueId: string, dateFrom?: string, dateTo?: string): Promise<Order[]> => {
+    const params = new URLSearchParams();
+    if (dateFrom) params.append('dateFrom', dateFrom);
+    if (dateTo) params.append('dateTo', dateTo);
+    
+    const queryString = params.toString();
+    const url = `/api/v1/venues/${venueId}/orders${queryString ? `?${queryString}` : ''}`;
+    const response = await api.get<ApiResponse<ApiOrdersResponse>>(url);
     
     // Transform API response to match KDS types
     const orders: Order[] = response.data.orders.map(order => ({

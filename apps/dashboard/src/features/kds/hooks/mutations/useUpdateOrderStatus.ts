@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ordersApi } from "../../api/ordersApi";
-import type { UpdateOrderStatusInput } from "../types/kds.types";
+import type { UpdateOrderStatusInput } from "../../types/kds.types";
 
 export const useUpdateOrderStatus = (venueId: string) => {
   const queryClient = useQueryClient();

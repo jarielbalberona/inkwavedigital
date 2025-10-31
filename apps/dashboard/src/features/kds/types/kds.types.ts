@@ -42,3 +42,11 @@ export interface UpdateOrderStatusResponse {
     updatedAt: string;
   };
 }
+
+export type DateRangeType = 'today' | 'yesterday' | 'week' | 'month' | 'year' | 'custom';
+
+export interface DateRange {
+  from: Date;
+  to: Date;
+  type: DateRangeType;
+}

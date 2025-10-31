@@ -16,6 +16,8 @@ export interface IOrderRepository {
    */
   findByVenueId(venueId: string, options?: {
     status?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
     limit?: number;
     offset?: number;
   }): Promise<Order[]>;
