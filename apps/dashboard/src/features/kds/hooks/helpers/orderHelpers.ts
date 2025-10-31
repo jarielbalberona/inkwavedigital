@@ -1,4 +1,4 @@
-import type { Order } from "../types/kds.types";
+import type { Order } from "../../types/kds.types";
 
 export const groupOrdersByStatus = (orders: Order[]) => {
   return orders.reduce((acc, order) => {

@@ -52,4 +52,5 @@ drizzle
 temp
 tmp
 *.log
+.pnpm-store
 

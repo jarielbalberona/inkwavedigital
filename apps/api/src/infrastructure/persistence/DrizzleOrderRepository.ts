@@ -1,5 +1,5 @@
 import { injectable, inject } from "tsyringe";
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, desc, inArray, gte, lte } from "drizzle-orm";
 import type { Database } from "@inkwave/db";
 import { orders, orderItems, menuItems, tables } from "@inkwave/db";
 import type { IOrderRepository } from "../../domain/repositories/IOrderRepository.js";
@@ -100,12 +100,20 @@ export class DrizzleOrderRepository implements IOrderRepository {
 
   async findByVenueId(
     venueId: string,
-    options?: { status?: string; limit?: number; offset?: number }
+    options?: { status?: string; dateFrom?: Date; dateTo?: Date; limit?: number; offset?: number }
   ): Promise<Order[]> {
     const conditions = [eq(orders.venueId, venueId)];
     
     if (options?.status) {
       conditions.push(eq(orders.status, options.status));
+    }
+
+    if (options?.dateFrom) {
+      conditions.push(gte(orders.createdAt, options.dateFrom));
+    }
+
+    if (options?.dateTo) {
+      conditions.push(lte(orders.createdAt, options.dateTo));
     }
 
     // Fetch orders with table labels
@@ -227,6 +235,14 @@ export class DrizzleOrderRepository implements IOrderRepository {
     
     if (options?.status) {
       conditions.push(eq(orders.status, options.status));
+    }
+
+    if (options?.dateFrom) {
+      conditions.push(gte(orders.createdAt, options.dateFrom));
+    }
+
+    if (options?.dateTo) {
+      conditions.push(lte(orders.createdAt, options.dateTo));
     }
 
     const results = await this.db.query.orders.findMany({

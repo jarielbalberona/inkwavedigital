@@ -67,11 +67,13 @@ export class OrderController {
   async getVenueOrders(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { venueId } = req.params;
-      const { status, limit, offset } = req.query;
+      const { status, limit, offset, dateFrom, dateTo } = req.query;
 
       const result = await this.getVenueOrdersUseCase.execute({
         venueId,
         status: status as string | undefined,
+        dateFrom: dateFrom ? new Date(dateFrom as string) : undefined,
+        dateTo: dateTo ? new Date(dateTo as string) : undefined,
         limit: limit ? parseInt(limit as string) : undefined,
         offset: offset ? parseInt(offset as string) : undefined,
       });
