@@ -16,6 +16,7 @@ services:
     dockerfilePath: ./apps/api/Dockerfile
     dockerContext: .
     healthCheckPath: /health
+    preDeployCommand: /app/predeploy.sh
     envVars:
       - key: NODE_ENV
         value: production
