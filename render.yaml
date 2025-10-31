@@ -46,7 +46,7 @@ services:
       paths:
         - apps/api/**
         - packages/**
-    preDeployCommand: cd packages/db && pnpm install && pnpm run migrate:prod
+    preDeployCommand: sh -c "cd packages/db && pnpm install && pnpm run migrate:prod"
 
   # Customer PWA (Static Site)
   - type: web
