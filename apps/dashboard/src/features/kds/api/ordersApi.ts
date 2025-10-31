@@ -22,6 +22,7 @@ interface ApiOrder {
   items: ApiOrderItem[];
   deviceId?: string;
   pax?: number;
+  isToGo?: boolean;
   notes?: string;
   staffNotes?: string;
   cancellationReason?: string;
@@ -55,6 +56,7 @@ export const ordersApi = {
       status: order.status as Order["status"],
       total: order.total,
       pax: order.pax,
+      isToGo: order.isToGo,
       notes: order.notes,
       staffNotes: order.staffNotes,
       cancellationReason: order.cancellationReason,

@@ -31,6 +31,7 @@ export interface GetVenueOrdersOutput {
     }>;
     deviceId?: string;
     pax?: number;
+    isToGo?: boolean;
     notes?: string;
     staffNotes?: string;
     cancellationReason?: string;

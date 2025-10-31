@@ -79,12 +79,20 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, venueId }) => {
         </span>
       </div>
 
-      {/* Table/Device Info and Pax */}
+      {/* Table/Device Info, Order Type, and Pax */}
       <div className="flex items-center gap-3 text-sm text-gray-600 mb-3">
         <div className="flex items-center">
           <UserIcon className="w-4 h-4 mr-1" />
           {order.tableLabel || (order.tableId ? `Table ${order.tableId}` : `Device ${order.deviceId.slice(0, 8)}`)}
         </div>
+        {/* Order Type Badge */}
+        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+          order.isToGo 
+            ? 'bg-purple-100 text-purple-700 border border-purple-300' 
+            : 'bg-green-100 text-green-700 border border-green-300'
+        }`}>
+          {order.isToGo ? '🥡 To Go' : '🍽️ Dine In'}
+        </span>
         {order.pax && (
           <div className="flex items-center">
             <UserGroupIcon className="w-4 h-4 mr-1" />
