@@ -53,8 +53,7 @@ services:
     env: static
     branch: main
     region: singapore
-    installCommand: corepack enable && pnpm -v && pnpm install --frozen-lockfile
-    buildCommand: pnpm --filter @inkwave/types build && test -f packages/types/dist/index.js && pnpm --filter customer build
+    buildCommand: pnpm --filter customer build
     staticPublishPath: ./apps/customer/dist
     pullRequestPreviewsEnabled: true
     envVars:
@@ -85,8 +84,7 @@ services:
     env: static
     branch: main
     region: singapore
-    installCommand: corepack enable && pnpm -v && pnpm install --frozen-lockfile
-    buildCommand: pnpm --filter @inkwave/types build && test -f packages/types/dist/index.js && pnpm --filter dashboard build
+    buildCommand: pnpm --filter dashboard build
     staticPublishPath: ./apps/dashboard/dist
     pullRequestPreviewsEnabled: true
     envVars:

@@ -4,6 +4,7 @@
   "private": true,
   "description": "Ink Wave Digital - QR-based café ordering platform",
   "scripts": {
+    "postinstall": "pnpm --filter @inkwave/types build",
     "build": "pnpm -r build",
     "build:api": "pnpm --filter @inkwave/db build && pnpm --filter api build",
     "build:customer": "pnpm --filter customer build",
@@ -29,7 +30,7 @@
     "typescript": "^5.7.3"
   },
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=20.11.0 <21.0.0",
     "pnpm": ">=8.0.0"
   }
 }
