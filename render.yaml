@@ -53,6 +53,7 @@ services:
     name: inkwave-customer
     env: static
     branch: main
+    region: singapore
     buildCommand: pnpm install && pnpm run build:customer
     staticPublishPath: ./apps/customer/dist
     pullRequestPreviewsEnabled: true
@@ -79,6 +80,7 @@ services:
     name: inkwave-dashboard
     env: static
     branch: main
+    region: singapore
     buildCommand: pnpm install && pnpm run build:dashboard
     staticPublishPath: ./apps/dashboard/dist
     pullRequestPreviewsEnabled: true

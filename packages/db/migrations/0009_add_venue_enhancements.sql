@@ -165,3 +165,4 @@ CREATE TABLE IF NOT EXISTS "venue_attributes" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 
+
