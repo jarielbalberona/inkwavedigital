@@ -13,9 +13,10 @@ export interface GetCategoriesInput {
 export interface GetCategoriesOutput {
   categories: Array<{
     id: string;
+    menuId: string;
     name: string;
     sortIndex: number;
-    iconUrl?: string;
+    iconUrl: string | null;
     createdAt: string;
     updatedAt: string;
   }>;
@@ -45,9 +46,10 @@ export class GetCategoriesUseCase {
     return {
       categories: categories.map((category) => ({
         id: category.id,
+        menuId: category.menuId,
         name: category.name,
         sortIndex: category.sortIndex,
-        iconUrl: category.iconUrl,
+        iconUrl: category.iconUrl ?? null,
         createdAt: category.createdAt.toISOString(),
         updatedAt: category.updatedAt.toISOString(),
       })),

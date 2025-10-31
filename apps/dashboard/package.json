@@ -23,6 +23,7 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-tabs": "^1.1.13",
     "@rolldown/pluginutils": "1.0.0-beta.45",
     "@sentry/react": "^10.22.0",
     "@tanstack/react-query": "^5.17.19",
@@ -48,6 +49,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.16",
+    "@tanstack/react-query-devtools": "^5.90.2",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react": "^4.7.0",

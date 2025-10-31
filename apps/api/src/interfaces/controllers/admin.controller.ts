@@ -1,6 +1,7 @@
 import { injectable, inject } from "tsyringe";
 import type { Request, Response, NextFunction } from "express";
 import { CreateTenantUseCase } from "../../application/use-cases/admin/CreateTenantUseCase.js";
+import { UpdateTenantUseCase } from "../../application/use-cases/admin/UpdateTenantUseCase.js";
 import { UpdateTenantSettingsUseCase } from "../../application/use-cases/admin/UpdateTenantSettingsUseCase.js";
 import { GetTenantSettingsUseCase } from "../../application/use-cases/admin/GetTenantSettingsUseCase.js";
 import type { ITenantRepository } from "../../domain/repositories/ITenantRepository.js";
@@ -9,6 +10,7 @@ import type { ITenantRepository } from "../../domain/repositories/ITenantReposit
 export class AdminController {
   constructor(
     @inject(CreateTenantUseCase) private createTenantUseCase: CreateTenantUseCase,
+    @inject(UpdateTenantUseCase) private updateTenantUseCase: UpdateTenantUseCase,
     @inject(UpdateTenantSettingsUseCase) private updateTenantSettingsUseCase: UpdateTenantSettingsUseCase,
     @inject(GetTenantSettingsUseCase) private getTenantSettingsUseCase: GetTenantSettingsUseCase,
     @inject("ITenantRepository") private tenantRepository: ITenantRepository
@@ -63,6 +65,26 @@ export class AdminController {
       res.json({
         success: true,
         data: tenant.toJSON(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateTenant(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { name, slug } = req.body;
+
+      const result = await this.updateTenantUseCase.execute({
+        tenantId: id,
+        name,
+        slug,
+      });
+
+      res.json({
+        success: true,
+        data: result,
       });
     } catch (error) {
       next(error);

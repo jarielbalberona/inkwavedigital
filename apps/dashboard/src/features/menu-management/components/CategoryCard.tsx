@@ -26,11 +26,31 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6">
       <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
-          <p className="text-sm text-gray-600">Sort: {category.sortIndex}</p>
+        <div className="flex items-start gap-3 flex-1">
+          {/* Category Icon/Photo */}
+          {category.iconUrl && (
+            category.iconUrl.startsWith('http') ? (
+              <img
+                src={category.iconUrl}
+                alt={category.name}
+                className="w-12 h-12 object-cover rounded-md flex-shrink-0"
+              />
+            ) : (
+              <div className="w-12 h-12 flex items-center justify-center text-2xl bg-gray-50 rounded-md flex-shrink-0">
+                {category.iconUrl}
+              </div>
+            )
+          )}
+          
+          {/* Category Name and Sort Index */}
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
+            <p className="text-sm text-gray-600">Sort: {category.sortIndex}</p>
+          </div>
         </div>
-        <div className="flex space-x-2">
+        
+        {/* Action Buttons */}
+        <div className="flex space-x-2 flex-shrink-0 ml-2">
           <button
             onClick={onEdit}
             className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
@@ -45,20 +65,6 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           </button>
         </div>
       </div>
-
-      {category.iconUrl && (
-        category.iconUrl.startsWith('http') ? (
-          <img
-            src={category.iconUrl}
-            alt={category.name}
-            className="w-full h-32 object-cover rounded-md mb-4"
-          />
-        ) : (
-          <div className="w-full h-32 flex items-center justify-center text-6xl mb-4 bg-gray-50 rounded-md">
-            {category.iconUrl}
-          </div>
-        )
-      )}
 
       <div className="space-y-2">
         {isLoading ? (

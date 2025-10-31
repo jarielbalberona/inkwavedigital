@@ -309,6 +309,7 @@ export class DrizzleMenuRepository implements IMenuRepository {
       menuId: category.menuId,
       name: category.name,
       sortIndex: category.sortIndex,
+      iconUrl: category.iconUrl,
       createdAt: category.createdAt,
       updatedAt: category.updatedAt,
     };
@@ -321,6 +322,7 @@ export class DrizzleMenuRepository implements IMenuRepository {
         set: {
           name: categoryData.name,
           sortIndex: categoryData.sortIndex,
+          iconUrl: categoryData.iconUrl,
           updatedAt: categoryData.updatedAt,
         },
       });

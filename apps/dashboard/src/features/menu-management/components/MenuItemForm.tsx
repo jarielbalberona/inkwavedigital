@@ -41,27 +41,29 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
   const createMenuItemMutation = useCreateMenuItem(categoryId);
   const updateMenuItemMutation = useUpdateMenuItem(categoryId);
 
-  // Update form data when item changes (for editing)
+  // Update form data when item changes (for editing) or dialog opens
   useEffect(() => {
-    if (item) {
-      setFormData({
-        name: item.name || "",
-        description: item.description || "",
-        price: item.price || 0,
-        imageUrls: item.imageUrls || [],
-        isAvailable: item.isAvailable ?? true,
-      });
-    } else {
-      // Reset form for new item
-      setFormData({
-        name: "",
-        description: "",
-        price: 0,
-        imageUrls: [],
-        isAvailable: true,
-      });
+    if (isOpen) {
+      if (item) {
+        setFormData({
+          name: item.name || "",
+          description: item.description || "",
+          price: item.price || 0,
+          imageUrls: item.imageUrls || [],
+          isAvailable: item.isAvailable ?? true,
+        });
+      } else {
+        // Reset form for new item
+        setFormData({
+          name: "",
+          description: "",
+          price: 0,
+          imageUrls: [],
+          isAvailable: true,
+        });
+      }
     }
-  }, [item]);
+  }, [item, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

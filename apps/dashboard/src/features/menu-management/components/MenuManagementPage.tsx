@@ -7,6 +7,7 @@ import { useCategoriesQuery } from "../hooks/queries/useCategoriesQuery";
 import { useDeleteCategory } from "../hooks/mutations";
 import { menuItemsApi } from "../api/menuItemsApi";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import type { MenuCategory, MenuItem } from "../types/menuManagement.types";
 
 interface MenuManagementPageProps {
@@ -63,7 +64,7 @@ export const MenuManagementPage: React.FC<MenuManagementPageProps> = ({ venueId 
         queryClient.invalidateQueries({ queryKey: ["menuItems", categoryId] });
       } catch (error) {
         console.error("Failed to delete menu item:", error);
-        alert("Failed to delete menu item. Please try again.");
+        toast.error("Failed to delete menu item. Please try again.");
       }
     }
   };

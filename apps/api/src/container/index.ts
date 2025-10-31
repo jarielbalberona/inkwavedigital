@@ -28,6 +28,9 @@ import { CreateTableUseCase } from "../application/use-cases/CreateTableUseCase.
 import { UpdateTableUseCase } from "../application/use-cases/UpdateTableUseCase.js";
 import { DeleteTableUseCase } from "../application/use-cases/DeleteTableUseCase.js";
 import { CreateTenantUseCase } from "../application/use-cases/admin/CreateTenantUseCase.js";
+import { UpdateTenantUseCase } from "../application/use-cases/admin/UpdateTenantUseCase.js";
+import { UpdateTenantSettingsUseCase } from "../application/use-cases/admin/UpdateTenantSettingsUseCase.js";
+import { GetTenantSettingsUseCase } from "../application/use-cases/admin/GetTenantSettingsUseCase.js";
 import { GetCategoriesUseCase } from "../application/use-cases/GetCategoriesUseCase.js";
 import { CreateCategoryUseCase } from "../application/use-cases/CreateCategoryUseCase.js";
 import { UpdateCategoryUseCase } from "../application/use-cases/UpdateCategoryUseCase.js";
@@ -164,6 +167,18 @@ container.register("DeleteTableUseCase", {
 
 container.register("CreateTenantUseCase", {
   useClass: CreateTenantUseCase,
+});
+
+container.register("UpdateTenantUseCase", {
+  useClass: UpdateTenantUseCase,
+});
+
+container.register("UpdateTenantSettingsUseCase", {
+  useClass: UpdateTenantSettingsUseCase,
+});
+
+container.register("GetTenantSettingsUseCase", {
+  useClass: GetTenantSettingsUseCase,
 });
 
 container.register("GetCategoriesUseCase", {

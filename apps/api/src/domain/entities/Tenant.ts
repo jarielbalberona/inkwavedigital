@@ -74,6 +74,18 @@ export class Tenant {
     this.props.updatedAt = new Date();
   }
 
+  updateSlug(slug: string): void {
+    if (!slug || slug.trim().length === 0) {
+      throw new ValidationError("Tenant slug cannot be empty");
+    }
+    // Validate slug format
+    if (!/^[a-z0-9-]+$/.test(slug)) {
+      throw new ValidationError("Tenant slug must contain only lowercase letters, numbers, and hyphens");
+    }
+    this.props.slug = slug.trim();
+    this.props.updatedAt = new Date();
+  }
+
   updateSettings(settings: Record<string, any>): void {
     this.validateSettings(settings);
     this.props.settingsJson = settings;

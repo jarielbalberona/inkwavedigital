@@ -28,7 +28,7 @@ export interface MenuItemOptionValue {
 export interface MenuCategory {
   id: string;
   name: string;
-  iconUrl?: string;
+  iconUrl?: string | null;
   sortIndex: number;
 }
 

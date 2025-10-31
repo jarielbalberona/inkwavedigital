@@ -1,3 +1,4 @@
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { QRLandingPage } from './components/QRLandingPage';
@@ -17,6 +18,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {/* <SentryTestButton /> */}
+      <ReactQueryDevtools initialIsOpen={true} />
     </>
   );
 }

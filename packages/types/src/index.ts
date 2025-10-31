@@ -87,6 +87,9 @@ export interface TenantSettings {
     colorThemeId: string;
     fontPairingId: string;
   };
+  branding?: {
+    logoUrl?: string;
+  };
 }
 
 // Predefined Color Themes

@@ -3,6 +3,7 @@ import { PhotoIcon, FolderOpenIcon, XMarkIcon } from "@heroicons/react/24/outlin
 import { useImagesQuery } from "../hooks/useImagesQuery";
 import { useUploadImage } from "../hooks/useUploadImage";
 import { ImageLibraryModal } from "./ImageLibraryModal";
+import { toast } from "sonner";
 
 interface MultipleImagePickerProps {
   value: string[]; // Array of image URLs
@@ -26,7 +27,7 @@ export const MultipleImagePicker: React.FC<MultipleImagePickerProps> = ({
 
     const remainingSlots = maxImages - value.length;
     if (remainingSlots <= 0) {
-      alert(`Maximum ${maxImages} images allowed`);
+      toast.warning(`Maximum ${maxImages} images allowed`);
       return;
     }
 
@@ -42,7 +43,7 @@ export const MultipleImagePicker: React.FC<MultipleImagePickerProps> = ({
       onChange([...value, ...uploadedUrls]);
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Failed to upload one or more images. Please try again.");
+      toast.error("Failed to upload one or more images. Please try again.");
     } finally {
       setUploading(false);
       // Reset input
@@ -52,7 +53,7 @@ export const MultipleImagePicker: React.FC<MultipleImagePickerProps> = ({
 
   const handleSelectFromLibrary = (url: string) => {
     if (value.length >= maxImages) {
-      alert(`Maximum ${maxImages} images allowed`);
+      toast.warning(`Maximum ${maxImages} images allowed`);
       return;
     }
     if (!value.includes(url)) {

@@ -6,7 +6,9 @@ export const useMenuQuery = (params: MenuQueryParams) => {
   return useQuery({
     queryKey: ["menu", params.venueId, params.availableOnly],
     queryFn: () => menuApi.getMenu(params),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 0, // Always fetch fresh - critical for availability and price changes
+    gcTime: 0, // Don't cache - always get latest menu data
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
   });
 };

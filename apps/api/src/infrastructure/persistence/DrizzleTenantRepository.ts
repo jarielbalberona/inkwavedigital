@@ -26,6 +26,7 @@ export class DrizzleTenantRepository implements ITenantRepository {
         target: tenants.id,
         set: {
           name: tenantData.name,
+          slug: tenantData.slug,
           settingsJson: tenantData.settingsJson,
           updatedAt: tenantData.updatedAt,
         },

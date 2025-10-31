@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCreateCategory, useUpdateCategory } from "../hooks/mutations";
 import type { MenuCategory, CreateCategoryInput, UpdateCategoryInput } from "../types/menuManagement.types";
 import { CategoryIconPicker } from "./CategoryIconPicker";
@@ -27,10 +27,21 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
   venueId,
 }) => {
   const [formData, setFormData] = useState({
-    name: category?.name || "",
-    iconUrl: category?.iconUrl || "",
-    sortIndex: category?.sortIndex || 0,
+    name: "",
+    iconUrl: "",
+    sortIndex: 0,
   });
+
+  // Update form data when category changes or dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        name: category?.name || "",
+        iconUrl: category?.iconUrl || "",
+        sortIndex: category?.sortIndex || 0,
+      });
+    }
+  }, [category, isOpen]);
 
   const createCategoryMutation = useCreateCategory(venueId);
   const updateCategoryMutation = useUpdateCategory(venueId);

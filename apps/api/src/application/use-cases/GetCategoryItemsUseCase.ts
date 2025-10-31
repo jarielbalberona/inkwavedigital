@@ -16,7 +16,7 @@ export interface GetCategoryItemsOutput {
     name: string;
     description?: string;
     price: number;
-    imageUrl?: string;
+    imageUrls: string[];
     isAvailable: boolean;
     options: any[];
     createdAt: string;

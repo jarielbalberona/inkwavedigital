@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 import { Toaster } from "sonner";
@@ -180,6 +181,7 @@ function App() {
       </SignedIn>
       </div>
       {/* <SentryTestButton /> */}
+      <ReactQueryDevtools initialIsOpen={true} />
     </AuthProvider>
   );
 }

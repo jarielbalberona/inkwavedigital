@@ -6,5 +6,9 @@ export const useCategoriesQuery = (venueId: string) => {
     queryKey: ["categories", venueId],
     queryFn: () => categoriesApi.getCategories(venueId),
     enabled: !!venueId,
+    staleTime: 0, // Always fetch fresh - reflect category changes immediately
+    gcTime: 0, // Don't cache - always get latest categories
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 };

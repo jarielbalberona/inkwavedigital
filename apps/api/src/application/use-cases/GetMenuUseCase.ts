@@ -16,7 +16,7 @@ export interface GetMenuOutput {
     name: string;
     description?: string;
     price: number;
-    imageUrl?: string;
+    imageUrls: string[];
     isAvailable: boolean;
     options: Array<{
       id: string;

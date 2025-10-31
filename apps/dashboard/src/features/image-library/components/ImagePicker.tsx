@@ -3,6 +3,7 @@ import { PhotoIcon, FolderOpenIcon } from "@heroicons/react/24/outline";
 import { useImagesQuery } from "../hooks/useImagesQuery";
 import { useUploadImage } from "../hooks/useUploadImage";
 import { ImageLibraryModal } from "./ImageLibraryModal";
+import { toast } from "sonner";
 
 interface ImagePickerProps {
   value?: string; // Current image URL
@@ -26,7 +27,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({ value, onChange, type 
       onChange(uploaded.url);
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Failed to upload image. Please try again.");
+      toast.error("Failed to upload image. Please try again.");
     } finally {
       setUploading(false);
     }

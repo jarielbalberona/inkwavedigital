@@ -16,6 +16,7 @@ adminRouter.use(requireAuth as any);
 adminRouter.post("/tenants", adminController.createTenant.bind(adminController));
 adminRouter.get("/tenants", adminController.getTenants.bind(adminController));
 adminRouter.get("/tenants/:id", adminController.getTenant.bind(adminController));
+adminRouter.patch("/tenants/:id", adminController.updateTenant.bind(adminController));
 adminRouter.delete("/tenants/:id", adminController.deleteTenant.bind(adminController));
 
 // Tenant settings

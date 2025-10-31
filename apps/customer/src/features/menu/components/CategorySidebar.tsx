@@ -32,17 +32,41 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
   venueId,
 }) => {
   const { data: venueInfo } = useVenueInfoQuery(venueId);
+  const [imageErrors, setImageErrors] = React.useState<Record<string, boolean>>({});
+  const [logoError, setLogoError] = React.useState(false);
+
+  const handleImageError = (categoryId: string) => {
+    setImageErrors(prev => ({ ...prev, [categoryId]: true }));
+  };
+
+  const logoUrl = venueInfo?.tenant?.settings?.branding?.logoUrl;
+  const tenantInitials = venueInfo?.tenant?.name
+    ?.split(" ")
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "IW";
+
   return (
     <div className={`bg-card border-r border-border transition-all duration-300 ${
       isCollapsed ? "w-20 md:w-20" : "w-20 md:w-64"
     }`}>
       {/* Header */}
-      <div className="p-3 md:p-4 border-b border-border">
-        <div className="flex items-center justify-center md:justify-start">
+      <div className="p-3 md:p-4 border-b border-border flex items-center justify-between min-h-22!">
+        <div className="flex items-center justify-center md:justify-start w-full justify-between">
           <div className="flex items-center space-x-2">
             {/* Logo */}
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">IW</span>
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center overflow-hidden">
+              {logoUrl && !logoError ? (
+                <img
+                  src={logoUrl}
+                  alt={venueInfo?.tenant?.name || "Logo"}
+                  className="w-full h-full object-cover"
+                  onError={() => setLogoError(true)}
+                />
+              ) : (
+                <span className="text-primary-foreground font-bold text-sm">{tenantInitials}</span>
+              )}
             </div>
             {/* Tenant Name - Desktop only when expanded */}
             <div className="hidden md:block">
@@ -84,7 +108,7 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
               key={category.id}
               variant={isActive ? "default" : "ghost"}
               onClick={() => onCategorySelect(category.id)}
-              className={`w-full justify-start rounded-none ${
+              className={`w-full justify-start rounded-none h-16 ${
                 isActive ? "border-r-2 border-primary" : ""
               }`}
             >
@@ -92,12 +116,15 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
                 // Collapsed view - Desktop only
                 <div className="hidden md:flex items-center justify-center w-full">
                   <div className="w-8 h-8 flex items-center justify-center text-xl">
-                    {category.iconUrl ? (
+                    {category.iconUrl && category.iconUrl.startsWith('http') && !imageErrors[category.id] ? (
                       <img
                         src={category.iconUrl}
                         alt={category.name}
                         className="w-8 h-8 rounded object-cover"
+                        onError={() => handleImageError(category.id)}
                       />
+                    ) : category.iconUrl && !category.iconUrl.startsWith('http') ? (
+                      category.iconUrl
                     ) : (
                       icon
                     )}
@@ -109,19 +136,17 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
                   <div className="flex flex-col md:flex-row md:items-center">
                     {/* Icon/Emoji */}
                     <div className="flex justify-center md:justify-start mb-1 md:mb-0">
-                      {category.iconUrl ? (
-                        // Check if it's a URL (starts with http) or emoji
-                        category.iconUrl.startsWith('http') ? (
-                          <img
-                            src={category.iconUrl}
-                            alt={category.name}
-                            className="w-6 h-6 md:w-8 md:h-8 rounded object-cover"
-                          />
-                        ) : (
-                          <div className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-lg md:text-xl">
-                            {category.iconUrl}
-                          </div>
-                        )
+                      {category.iconUrl && category.iconUrl.startsWith('http') && !imageErrors[category.id] ? (
+                        <img
+                          src={category.iconUrl}
+                          alt={category.name}
+                          className="w-6 h-6 md:w-8 md:h-8 rounded object-cover"
+                          onError={() => handleImageError(category.id)}
+                        />
+                      ) : category.iconUrl && !category.iconUrl.startsWith('http') ? (
+                        <div className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-lg md:text-xl">
+                          {category.iconUrl}
+                        </div>
                       ) : (
                         <div className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-lg md:text-xl">
                           {icon}

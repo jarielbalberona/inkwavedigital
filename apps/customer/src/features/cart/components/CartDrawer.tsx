@@ -12,6 +12,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { toast } from "sonner";
 import type { CartItem } from "../types/cart.types";
 
 import type { CreateOrderData } from "../../order/types/order.types";
@@ -67,7 +68,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheck
       }
     } catch (error) {
       console.error("Order submission failed:", error);
-      alert("Failed to place order. Please try again.");
+      toast.error("Failed to place order. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
