@@ -52,7 +52,6 @@ services:
     name: inkwave-customer
     env: static
     branch: main
-    region: singapore
     buildCommand: pnpm --filter customer build
     staticPublishPath: ./apps/customer/dist
     pullRequestPreviewsEnabled: true
@@ -83,7 +82,6 @@ services:
     name: inkwave-dashboard
     env: static
     branch: main
-    region: singapore
     buildCommand: pnpm --filter dashboard build
     staticPublishPath: ./apps/dashboard/dist
     pullRequestPreviewsEnabled: true
