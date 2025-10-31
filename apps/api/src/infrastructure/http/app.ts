@@ -1,5 +1,5 @@
 import express, { type Application } from "express";
-import cors from "cors";
+import cors, { type CorsOptions } from "cors";
 import helmet from "helmet";
 import * as Sentry from "@sentry/node";
 import { healthRouter } from "./routes/health.routes.js";
@@ -24,25 +24,34 @@ app.use(performanceMiddleware);
 app.use(helmet());
 
 // CORS
-const corsOrigins = process.env.CORS_ORIGINS
-  ? process.env.CORS_ORIGINS.split(",").map((origin) => origin.trim()).filter(Boolean)
-  : ["http://localhost:5173", "http://localhost:5174"];
+const allowed = new Set([
+  "https://dumadine.com",
+  "https://www.dumadine.com",
+  "https://dashboard.dumadine.com",
+  "https://www.dashboard.dumadine.com",
+]);
 
-// Log CORS origins in development for debugging
-if (process.env.NODE_ENV !== "production") {
-  console.log("CORS Origins configured:", corsOrigins);
-}
+const corsOptions: CorsOptions = {
+  origin(origin, cb) {
+    // allow curl/postman/no-origin and same-origin SSR
+    if (!origin) return cb(null, true);
+    if (allowed.has(origin)) return cb(null, true);
+    return cb(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  exposedHeaders: ["Content-Length"],
+  optionsSuccessStatus: 204,
+};
 
-app.use(
-  cors({
-    origin: corsOrigins,
-    credentials: true,
-  })
-);
-
+app.use(cors(corsOptions));
+// IMPORTANT: explicitly handle preflight for all routes
+app.options("*", cors(corsOptions));
 // Webhook routes MUST come before body parsing middleware
 // Webhooks need raw body for signature verification
 app.use("/api/v1/webhooks", webhookRouter);
+
 
 // Body parsing
 app.use(express.json());
