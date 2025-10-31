@@ -24,7 +24,15 @@ app.use(performanceMiddleware);
 app.use(helmet());
 
 // CORS
-const corsOrigins = process.env.CORS_ORIGINS?.split(",") || ["http://localhost:5173", "http://localhost:5174"];
+const corsOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(",").map((origin) => origin.trim()).filter(Boolean)
+  : ["http://localhost:5173", "http://localhost:5174"];
+
+// Log CORS origins in development for debugging
+if (process.env.NODE_ENV !== "production") {
+  console.log("CORS Origins configured:", corsOrigins);
+}
+
 app.use(
   cors({
     origin: corsOrigins,
