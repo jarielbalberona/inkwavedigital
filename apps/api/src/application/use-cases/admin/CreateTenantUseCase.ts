@@ -2,7 +2,9 @@ import { injectable, inject } from "tsyringe";
 import type { IVenueRepository } from "../../../domain/repositories/IVenueRepository.js";
 import type { ITenantRepository } from "../../../domain/repositories/ITenantRepository.js";
 import type { IUserRepository } from "../../../domain/repositories/IUserRepository.js";
+import type { IMenuRepository } from "../../../domain/repositories/IMenuRepository.js";
 import { Venue } from "../../../domain/entities/Venue.js";
+import { Menu } from "../../../domain/entities/Menu.js";
 import { Tenant } from "../../../domain/entities/Tenant.js";
 import { ValidationError } from "../../../shared/errors/domain-error.js";
 import { ClerkService } from "../../../infrastructure/clerk/ClerkService.js";
@@ -45,7 +47,8 @@ export class CreateTenantUseCase {
   constructor(
     @inject("ITenantRepository") private tenantRepository: ITenantRepository,
     @inject("IVenueRepository") private venueRepository: IVenueRepository,
-    @inject("IUserRepository") private userRepository: IUserRepository
+    @inject("IUserRepository") private userRepository: IUserRepository,
+    @inject("IMenuRepository") private menuRepository: IMenuRepository
   ) {
     this.clerkService = new ClerkService();
   }
@@ -132,6 +135,17 @@ export class CreateTenantUseCase {
       });
 
       await this.venueRepository.save(venue);
+
+      // Create default menu for the venue (set as active)
+      // This ensures categories can be created immediately
+      const defaultMenu = Menu.create({
+        venueId: venue.id,
+        name: "Main Menu",
+        isActive: true,
+      });
+
+      await this.menuRepository.saveMenu(defaultMenu);
+      logger.info({ venueId: venue.id, menuId: defaultMenu.id }, "Default menu created for initial venue");
     }
 
     return {

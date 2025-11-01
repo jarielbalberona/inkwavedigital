@@ -109,7 +109,8 @@ export const MenuPage: React.FC = () => {
 
   const items = menuData?.items || [];
   // Use API categories if available, otherwise fall back to generating from items
-  const categories = categoriesData || getCategoriesFromItems(items);
+  // If categoriesData is explicitly an empty array, don't fall back - respect the API response
+  const categories = categoriesData !== undefined ? categoriesData : getCategoriesFromItems(items);
   const isLoading = isMenuLoading || isCategoriesLoading || isLoadingVenueBySlug;
 
   // Set first category as active when data loads
@@ -305,12 +306,25 @@ export const MenuPage: React.FC = () => {
     );
   }
 
-  if (isLoading || !categories.length) {
+  // Show loading spinner only while data is still loading
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading menu...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show "Menu not available" message when loading is complete but categories are empty
+  if (!isLoading && categories.length === 0) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-muted-foreground mb-2">Menu is not available</p>
+          <p className="text-sm text-muted-foreground">Please check back later or contact the venue</p>
         </div>
       </div>
     );
