@@ -137,10 +137,25 @@ export class AuthController {
         });
       }
 
+      // Check if user is a super admin first (super admins may not exist in users table)
+      const admin = await this.superAdminRepo.findByEmail(email);
+      if (admin) {
+        // Super admins don't have assigned venues - they have access to all tenants
+        return void res.json({
+          success: true,
+          data: {
+            role: "super_admin",
+            assignedVenueIds: [],
+          },
+        });
+      }
+
       const user = await this.userRepository.findByEmail(email);
       
       if (!user) {
-        logger.warn({ email }, "User not found");
+        // User doesn't exist in database - may be a super admin who signed up directly in Clerk
+        // Log at info level instead of warn since this is expected for super admins
+        logger.info({ email }, "User not found in database (may be super admin without database record)");
         return void res.json({
           success: true,
           data: {
