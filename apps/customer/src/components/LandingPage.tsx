@@ -49,6 +49,53 @@ export function LandingPage() {
     }
   }
 
+  const renderScheduleDemoButton = () => {
+    return (
+      <Dialog open={showBetaDialog} onOpenChange={setShowBetaDialog}>
+      <DialogTrigger asChild>
+        <Button size="lg" className="gap-2">
+          Sign Up for Beta <ArrowRight className="size-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Join the Beta Program</DialogTitle>
+          <DialogDescription>
+            Be among the first to transform your café or restaurant. Limited spots available.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleBetaSubmit} className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="establishment">Establishment Name</Label>
+            <Input
+              id="establishment"
+              type="text"
+              placeholder="Your Café or Restaurant Name"
+              value={establishmentName}
+              onChange={(e) => setEstablishmentName(e.target.value)}
+              required
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Submitting..." : "Get Early Access"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
@@ -58,9 +105,7 @@ export function LandingPage() {
             <Coffee className="size-6 text-primary" />
             <span className="text-xl font-bold">Dumadine</span>
           </div>
-          <Button variant="default" size="sm">
-            Schedule Demo
-          </Button>
+            {renderScheduleDemoButton()}
         </div>
       </header>
 
@@ -75,48 +120,7 @@ export function LandingPage() {
             customers with Dumadine.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
-            <Dialog open={showBetaDialog} onOpenChange={setShowBetaDialog}>
-              <DialogTrigger asChild>
-                <Button size="lg" className="gap-2">
-                  Sign Up for Beta <ArrowRight className="size-4" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Join the Beta Program</DialogTitle>
-                  <DialogDescription>
-                    Be among the first to transform your café or restaurant. Limited spots available.
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleBetaSubmit} className="space-y-4 mt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="establishment">Establishment Name</Label>
-                    <Input
-                      id="establishment"
-                      type="text"
-                      placeholder="Your Café or Restaurant Name"
-                      value={establishmentName}
-                      onChange={(e) => setEstablishmentName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? "Submitting..." : "Get Early Access"}
-                  </Button>
-                </form>
-              </DialogContent>
-            </Dialog>
+            {renderScheduleDemoButton()}
             <Button variant="outline" size="lg" onClick={scrollToProblems}>
               Learn More
             </Button>
