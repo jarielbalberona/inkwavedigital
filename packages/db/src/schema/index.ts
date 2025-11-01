@@ -25,4 +25,5 @@ export * from "./venueReviews.js";
 export * from "./venuePhotos.js";
 export * from "./venueBusinessHours.js";
 export * from "./venueAttributes.js";
+export * from "./betaSignups.js";
 

@@ -13,6 +13,7 @@ import { DrizzleUserRepository } from "../infrastructure/persistence/DrizzleUser
 import { DrizzleVenueStaffRepository } from "../infrastructure/persistence/DrizzleVenueStaffRepository.js";
 import { DrizzleImageLibraryRepository } from "../infrastructure/persistence/DrizzleImageLibraryRepository.js";
 import { DrizzlePushSubscriptionRepository } from "../infrastructure/persistence/DrizzlePushSubscriptionRepository.js";
+import { DrizzleBetaSignupRepository } from "../infrastructure/persistence/DrizzleBetaSignupRepository.js";
 import { WebSocketManager } from "../infrastructure/websocket/WebSocketManager.js";
 import { R2StorageService } from "../infrastructure/storage/R2StorageService.js";
 import { PushNotificationService } from "../infrastructure/push/PushNotificationService.js";
@@ -57,6 +58,7 @@ import { GetActiveMenuUseCase } from "../application/use-cases/GetActiveMenuUseC
 import { CreateMenuUseCase } from "../application/use-cases/CreateMenuUseCase.js";
 import { SubscribeToPushNotificationsUseCase } from "../application/use-cases/SubscribeToPushNotificationsUseCase.js";
 import { UnsubscribeFromPushNotificationsUseCase } from "../application/use-cases/UnsubscribeFromPushNotificationsUseCase.js";
+import { CreateBetaSignupUseCase } from "../application/use-cases/CreateBetaSignupUseCase.js";
 
 // Controllers
 import { HealthController } from "../interfaces/controllers/health.controller.js";
@@ -116,6 +118,10 @@ container.register("IImageLibraryRepository", {
 
 container.register("PushSubscriptionRepository", {
   useClass: DrizzlePushSubscriptionRepository,
+});
+
+container.register("IBetaSignupRepository", {
+  useClass: DrizzleBetaSignupRepository,
 });
 
 // Register storage service
@@ -283,6 +289,10 @@ container.register("SubscribeToPushNotificationsUseCase", {
 
 container.register("UnsubscribeFromPushNotificationsUseCase", {
   useClass: UnsubscribeFromPushNotificationsUseCase,
+});
+
+container.register("CreateBetaSignupUseCase", {
+  useClass: CreateBetaSignupUseCase,
 });
 
 // Register controllers
