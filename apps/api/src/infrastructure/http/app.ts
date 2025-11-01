@@ -29,6 +29,8 @@ const allowed = new Set([
   "https://www.dumadine.com",
   "https://dashboard.dumadine.com",
   "https://www.dashboard.dumadine.com",
+  "https://admin.dumadine.com",
+  "https://www.admin.dumadine.com",
 ]);
 
 const corsOptions: CorsOptions = {
