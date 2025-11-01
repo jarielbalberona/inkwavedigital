@@ -1,5 +1,5 @@
 import { injectable, inject } from "tsyringe";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { Database } from "@inkwave/db";
 import { menuItems, itemOptions, itemOptionValues, menus, menuCategories } from "@inkwave/db";
 import type { IMenuRepository } from "../../domain/repositories/IMenuRepository.js";
@@ -8,7 +8,7 @@ import { MenuCategory } from "../../domain/entities/MenuCategory.js";
 import { ItemOption } from "../../domain/entities/ItemOption.js";
 import { ItemOptionValue } from "../../domain/entities/ItemOptionValue.js";
 import { Menu } from "../../domain/entities/Menu.js";
-import type { MenuItemOption, MenuItemOptionValue } from "../../domain/entities/MenuItem.js";
+import type { MenuItemOption } from "../../domain/entities/MenuItem.js";
 import { Money } from "../../domain/value-objects/Money.js";
 
 @injectable()
@@ -167,27 +167,80 @@ export class DrizzleMenuRepository implements IMenuRepository {
   }
 
   async findById(id: string): Promise<MenuItem | null> {
-    const result = await this.db.query.menuItems.findFirst({
-      where: eq(menuItems.id, id),
-    });
+    // Use raw SQL query to handle both image_url and image_urls columns
+    const client = (this.db as any).client;
+    
+    const results = await client`
+      SELECT 
+        id, 
+        category_id as "categoryId", 
+        name, 
+        description, 
+        price, 
+        COALESCE(
+          image_urls,
+          CASE 
+            WHEN image_url IS NOT NULL AND image_url != '' 
+            THEN jsonb_build_array(image_url)
+            ELSE '[]'::jsonb
+          END
+        ) as image_urls,
+        is_available as "isAvailable",
+        created_at as "createdAt",
+        updated_at as "updatedAt"
+      FROM menu_items
+      WHERE id = ${id}
+      LIMIT 1
+    `;
 
-    if (!result) {
+    if (results.length === 0) {
       return null;
     }
 
-    const options = await this.fetchItemOptions(id);
-    return this.mapToEntity(result, options);
+    const item = results[0];
+    const options = await this.fetchItemOptions(item.id);
+    const imageUrls = Array.isArray(item.image_urls) 
+      ? item.image_urls 
+      : (typeof item.image_urls === 'string' ? [item.image_urls] : []);
+    return this.mapToEntity({ ...item, imageUrls }, options);
   }
 
   async findByCategoryId(categoryId: string): Promise<MenuItem[]> {
-    const results = await this.db.query.menuItems.findMany({
-      where: eq(menuItems.categoryId, categoryId),
-    });
+    // Use raw SQL query that handles both image_url and image_urls columns
+    // This supports the migration period where the schema is being updated
+    // Access the underlying postgres client from drizzle
+    const client = (this.db as any).client;
+    
+    const rawResults = await client`
+      SELECT 
+        id, 
+        category_id as "categoryId", 
+        name, 
+        description, 
+        price, 
+        COALESCE(
+          image_urls,
+          CASE 
+            WHEN image_url IS NOT NULL AND image_url != '' 
+            THEN jsonb_build_array(image_url)
+            ELSE '[]'::jsonb
+          END
+        ) as image_urls,
+        is_available as "isAvailable",
+        created_at as "createdAt",
+        updated_at as "updatedAt"
+      FROM menu_items
+      WHERE category_id = ${categoryId}
+    `;
 
     return Promise.all(
-      results.map(async (item) => {
+      rawResults.map(async (item: any) => {
         const options = await this.fetchItemOptions(item.id);
-        return this.mapToEntity(item, options);
+        // Ensure imageUrls is always an array
+        const imageUrls = Array.isArray(item.image_urls) 
+          ? item.image_urls 
+          : (typeof item.image_urls === 'string' ? [item.image_urls] : []);
+        return this.mapToEntity({ ...item, imageUrls }, options);
       })
     );
   }
@@ -214,23 +267,76 @@ export class DrizzleMenuRepository implements IMenuRepository {
 
     const categoryIds = categories.map(cat => cat.id);
 
-    // Get all menu items for these categories
-    const results = await this.db.query.menuItems.findMany({
-      where: (items, { inArray, and, eq }) => {
-        const conditions = [inArray(items.categoryId, categoryIds)];
-        if (options?.availableOnly) {
-          conditions.push(eq(items.isAvailable, true));
-        }
-        return and(...conditions);
-      },
-    });
-
-    return Promise.all(
-      results.map(async (item) => {
-        const itemOptions = await this.fetchItemOptions(item.id);
-        return this.mapToEntity(item, itemOptions);
-      })
-    );
+    // Get all menu items for these categories using raw SQL to handle both image_url and image_urls
+    const client = (this.db as any).client;
+    
+    // Build the query with conditional available filter
+    if (options?.availableOnly) {
+      const rawResults = await client`
+        SELECT 
+          id, 
+          category_id as "categoryId", 
+          name, 
+          description, 
+          price, 
+          COALESCE(
+            image_urls,
+            CASE 
+              WHEN image_url IS NOT NULL AND image_url != '' 
+              THEN jsonb_build_array(image_url)
+              ELSE '[]'::jsonb
+            END
+          ) as image_urls,
+          is_available as "isAvailable",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM menu_items
+        WHERE category_id = ANY(${categoryIds})
+        AND is_available = true
+      `;
+      
+      return Promise.all(
+        rawResults.map(async (item: any) => {
+          const itemOptions = await this.fetchItemOptions(item.id);
+          const imageUrls = Array.isArray(item.image_urls) 
+            ? item.image_urls 
+            : (typeof item.image_urls === 'string' ? [item.image_urls] : []);
+          return this.mapToEntity({ ...item, imageUrls }, itemOptions);
+        })
+      );
+    } else {
+      const rawResults = await client`
+        SELECT 
+          id, 
+          category_id as "categoryId", 
+          name, 
+          description, 
+          price, 
+          COALESCE(
+            image_urls,
+            CASE 
+              WHEN image_url IS NOT NULL AND image_url != '' 
+              THEN jsonb_build_array(image_url)
+              ELSE '[]'::jsonb
+            END
+          ) as image_urls,
+          is_available as "isAvailable",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM menu_items
+        WHERE category_id = ANY(${categoryIds})
+      `;
+      
+      return Promise.all(
+        rawResults.map(async (item: any) => {
+          const itemOptions = await this.fetchItemOptions(item.id);
+          const imageUrls = Array.isArray(item.image_urls) 
+            ? item.image_urls 
+            : (typeof item.image_urls === 'string' ? [item.image_urls] : []);
+          return this.mapToEntity({ ...item, imageUrls }, itemOptions);
+        })
+      );
+    }
   }
 
   async delete(id: string): Promise<void> {

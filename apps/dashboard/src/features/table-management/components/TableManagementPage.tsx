@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { QrCodeIcon, PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { toast } from "sonner";
 import { QRCodeDisplay } from "./QRCodeDisplay";
 import { TableForm, type TableFormData } from "./TableForm";
 import { generateQRData } from "../hooks/helpers/qrHelpers";
@@ -10,6 +11,22 @@ import { useUpdateTable } from "../hooks/useUpdateTable";
 import { useDeleteTable } from "../hooks/useDeleteTable";
 import { venuesApi } from "../../venue-management/api/venuesApi";
 import type { Table } from "../types/table.types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface TableManagementPageProps {
   venueId: string;
@@ -20,6 +37,7 @@ export const TableManagementPage: React.FC<TableManagementPageProps> = ({ venueI
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTable, setEditingTable] = useState<Table | null>(null);
   const [deletingTableId, setDeletingTableId] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   const { data: tables, isLoading, error } = useTablesQuery(venueId);
   const { data: venueInfo, isLoading: isLoadingVenueInfo } = useQuery({
@@ -48,8 +66,8 @@ export const TableManagementPage: React.FC<TableManagementPageProps> = ({ venueI
         ...data,
       });
       setIsFormOpen(false);
-    } catch (error) {
-      console.error("Failed to create table:", error);
+    } catch {
+      toast.error("Failed to create table. Please try again.");
     }
   };
 
@@ -63,27 +81,31 @@ export const TableManagementPage: React.FC<TableManagementPageProps> = ({ venueI
       });
       setEditingTable(null);
       setIsFormOpen(false);
-    } catch (error) {
-      console.error("Failed to update table:", error);
+    } catch {
+      toast.error("Failed to update table. Please try again.");
     }
   };
 
-  const handleDeleteTable = async (tableId: string) => {
-    if (!confirm("Are you sure you want to delete this table? This action cannot be undone.")) {
-      return;
-    }
+  const handleDeleteTable = (tableId: string) => {
+    setDeletingTableId(tableId);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteTable = async () => {
+    if (!deletingTableId) return;
 
     try {
-      await deleteTable.mutateAsync(tableId);
-      setDeletingTableId(null);
+      await deleteTable.mutateAsync(deletingTableId);
       // Remove from generated QR codes if present
       setGeneratedTables(prev => {
         const newSet = new Set(prev);
-        newSet.delete(tableId);
+        newSet.delete(deletingTableId);
         return newSet;
       });
-    } catch (error) {
-      console.error("Failed to delete table:", error);
+      setShowDeleteDialog(false);
+      setDeletingTableId(null);
+    } catch {
+      toast.error("Failed to delete table. Please try again.");
     }
   };
 
@@ -148,23 +170,23 @@ export const TableManagementPage: React.FC<TableManagementPageProps> = ({ venueI
 
       {/* Content */}
       <div className="p-6">
-        {/* Create/Edit Form Modal */}
-        {isFormOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
+        {/* Create/Edit Form Dialog */}
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
                 {editingTable ? "Edit Table" : "Create New Table"}
-              </h2>
-              <TableForm
-                table={editingTable || undefined}
-                venueId={venueId}
-                onSubmit={editingTable ? handleUpdateTable : handleCreateTable}
-                onCancel={handleCancelForm}
-                isLoading={createTable.isPending || updateTable.isPending}
-              />
-            </div>
-          </div>
-        )}
+              </DialogTitle>
+            </DialogHeader>
+            <TableForm
+              table={editingTable ?? undefined}
+              venueId={venueId}
+              onSubmit={editingTable ? handleUpdateTable : handleCreateTable}
+              onCancel={handleCancelForm}
+              isLoading={createTable.isPending || updateTable.isPending}
+            />
+          </DialogContent>
+        </Dialog>
 
         {!tables || tables.length === 0 ? (
           <div className="text-center py-12">
@@ -275,6 +297,26 @@ export const TableManagementPage: React.FC<TableManagementPageProps> = ({ venueI
           </div>
         )}
       </div>
+
+      {/* Delete Table Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Table</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this table? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeletingTableId(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteTable}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

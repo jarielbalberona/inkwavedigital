@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import { CategoryForm } from "./CategoryForm";
 import { MenuItemForm } from "./MenuItemForm";
 import { CategoryCard } from "./CategoryCard";
@@ -9,6 +9,16 @@ import { menuItemsApi } from "../api/menuItemsApi";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { MenuCategory, MenuItem } from "../types/menuManagement.types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface MenuManagementPageProps {
   venueId: string;
@@ -20,6 +30,10 @@ export const MenuManagementPage: React.FC<MenuManagementPageProps> = ({ venueId 
   const [showMenuItemForm, setShowMenuItemForm] = useState(false);
   const [editingCategory, setEditingCategory] = useState<MenuCategory | null>(null);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [showDeleteCategoryDialog, setShowDeleteCategoryDialog] = useState(false);
+  const [showDeleteMenuItemDialog, setShowDeleteMenuItemDialog] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
+  const [menuItemToDelete, setMenuItemToDelete] = useState<{ itemId: string; categoryId: string } | null>(null);
 
   const { data: categoriesData, isLoading } = useCategoriesQuery(venueId);
   const deleteCategoryMutation = useDeleteCategory(venueId);
@@ -38,9 +52,16 @@ export const MenuManagementPage: React.FC<MenuManagementPageProps> = ({ venueId 
     setShowCategoryForm(true);
   };
 
-  const handleDeleteCategory = async (categoryId: string) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
-      await deleteCategoryMutation.mutateAsync(categoryId);
+  const handleDeleteCategory = (categoryId: string) => {
+    setCategoryToDelete(categoryId);
+    setShowDeleteCategoryDialog(true);
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (categoryToDelete) {
+      await deleteCategoryMutation.mutateAsync(categoryToDelete);
+      setShowDeleteCategoryDialog(false);
+      setCategoryToDelete(null);
     }
   };
 
@@ -56,14 +77,20 @@ export const MenuManagementPage: React.FC<MenuManagementPageProps> = ({ venueId 
     setShowMenuItemForm(true);
   };
 
-  const handleDeleteMenuItem = async (itemId: string, categoryId: string) => {
-    if (window.confirm("Are you sure you want to delete this menu item?")) {
+  const handleDeleteMenuItem = (itemId: string, categoryId: string) => {
+    setMenuItemToDelete({ itemId, categoryId });
+    setShowDeleteMenuItemDialog(true);
+  };
+
+  const confirmDeleteMenuItem = async () => {
+    if (menuItemToDelete) {
       try {
-        await menuItemsApi.deleteMenuItem(itemId);
+        await menuItemsApi.deleteMenuItem(menuItemToDelete.itemId);
         // Invalidate the query to refresh the menu items list
-        queryClient.invalidateQueries({ queryKey: ["menuItems", categoryId] });
-      } catch (error) {
-        console.error("Failed to delete menu item:", error);
+        queryClient.invalidateQueries({ queryKey: ["menuItems", menuItemToDelete.categoryId] });
+        setShowDeleteMenuItemDialog(false);
+        setMenuItemToDelete(null);
+      } catch {
         toast.error("Failed to delete menu item. Please try again.");
       }
     }
@@ -135,7 +162,7 @@ export const MenuManagementPage: React.FC<MenuManagementPageProps> = ({ venueId 
           setShowCategoryForm(false);
           setEditingCategory(null);
         }}
-        category={editingCategory}
+        category={editingCategory ?? undefined}
         venueId={venueId}
       />
 
@@ -146,9 +173,45 @@ export const MenuManagementPage: React.FC<MenuManagementPageProps> = ({ venueId 
           setEditingItem(null);
           setSelectedCategory(null);
         }}
-        item={editingItem}
+        item={editingItem ?? undefined}
         categoryId={selectedCategory?.id || ""}
       />
+
+      {/* Delete Category Confirmation Dialog */}
+      <AlertDialog open={showDeleteCategoryDialog} onOpenChange={setShowDeleteCategoryDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Category</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this category? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteCategory}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Menu Item Confirmation Dialog */}
+      <AlertDialog open={showDeleteMenuItemDialog} onOpenChange={setShowDeleteMenuItemDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Menu Item</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this menu item? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteMenuItem}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

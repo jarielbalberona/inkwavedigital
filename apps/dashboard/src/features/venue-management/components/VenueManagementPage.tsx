@@ -1,9 +1,19 @@
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { venuesApi } from "../api/venuesApi";
 import { useTenantId } from "../../../hooks/useTenantId";
-import { useState, useMemo } from "react";
 import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { slugify } from "../../../lib/slugify";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface VenueManagementPageProps {
   role: "owner" | "manager" | null;
@@ -14,6 +24,8 @@ export function VenueManagementPage({ role, assignedVenueIds }: VenueManagementP
   const { tenantId, isLoading: isLoadingTenant } = useTenantId();
   const [showForm, setShowForm] = useState(false);
   const [editingVenue, setEditingVenue] = useState<venuesApi.Venue | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [venueToDelete, setVenueToDelete] = useState<venuesApi.Venue | null>(null);
   const queryClient = useQueryClient();
 
   const { data: venuesData, isLoading } = useQuery({
@@ -159,9 +171,8 @@ export function VenueManagementPage({ role, assignedVenueIds }: VenueManagementP
                 {role === "owner" && (
                   <button
                     onClick={() => {
-                      if (confirm(`Delete venue "${venue.name}"?`)) {
-                        deleteMutation.mutate(venue.id);
-                      }
+                      setVenueToDelete(venue);
+                      setShowDeleteDialog(true);
                     }}
                     className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded transition"
                   >
@@ -174,6 +185,34 @@ export function VenueManagementPage({ role, assignedVenueIds }: VenueManagementP
           ))}
         </div>
       )}
+
+      {/* Delete Venue Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Venue</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete venue "{venueToDelete?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setVenueToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (venueToDelete) {
+                  deleteMutation.mutate(venueToDelete.id);
+                  setShowDeleteDialog(false);
+                  setVenueToDelete(null);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -4,10 +4,22 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { tenantsApi } from "../api/tenantsApi";
 import type { Tenant } from "../types/admin.types";
 import { TenantForm } from "./TenantForm";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const TenantManagementPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [tenantToDelete, setTenantToDelete] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: tenants, isLoading, error } = useQuery({
@@ -32,9 +44,16 @@ export const TenantManagementPage: React.FC = () => {
     setShowForm(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm("Are you sure you want to delete this tenant?")) {
-      await deleteMutation.mutateAsync(id);
+  const handleDelete = (id: string) => {
+    setTenantToDelete(id);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (tenantToDelete) {
+      await deleteMutation.mutateAsync(tenantToDelete);
+      setShowDeleteDialog(false);
+      setTenantToDelete(null);
     }
   };
 
@@ -152,6 +171,24 @@ export const TenantManagementPage: React.FC = () => {
           queryClient.invalidateQueries({ queryKey: ["tenants"] });
         }}
       />
+
+      {/* Delete Tenant Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Tenant</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this tenant? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

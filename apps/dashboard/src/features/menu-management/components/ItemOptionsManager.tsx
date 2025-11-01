@@ -3,6 +3,16 @@ import { PlusIcon, PencilIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from 
 import { useItemOptionsQuery, useDeleteItemOption } from "../hooks";
 import { ItemOptionForm } from "./ItemOptionForm";
 import type { MenuItemOption } from "../types/menuManagement.types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ItemOptionsManagerProps {
   itemId: string;
@@ -12,6 +22,8 @@ export const ItemOptionsManager: React.FC<ItemOptionsManagerProps> = ({ itemId }
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingOption, setEditingOption] = useState<MenuItemOption | undefined>();
   const [expandedOptions, setExpandedOptions] = useState<Set<string>>(new Set());
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [optionToDelete, setOptionToDelete] = useState<string | null>(null);
 
   const { data, isLoading } = useItemOptionsQuery(itemId);
   const deleteOptionMutation = useDeleteItemOption();
@@ -36,9 +48,16 @@ export const ItemOptionsManager: React.FC<ItemOptionsManagerProps> = ({ itemId }
     setIsFormOpen(true);
   };
 
-  const handleDeleteOption = async (optionId: string) => {
-    if (confirm("Are you sure you want to delete this option? This will also delete all its values.")) {
-      await deleteOptionMutation.mutateAsync(optionId);
+  const handleDeleteOption = (optionId: string) => {
+    setOptionToDelete(optionId);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteOption = async () => {
+    if (optionToDelete) {
+      await deleteOptionMutation.mutateAsync(optionToDelete);
+      setShowDeleteDialog(false);
+      setOptionToDelete(null);
     }
   };
 
@@ -165,6 +184,26 @@ export const ItemOptionsManager: React.FC<ItemOptionsManagerProps> = ({ itemId }
         itemId={itemId}
         option={editingOption}
       />
+
+      {/* Delete Option Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Option</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this option? This will also delete all its values. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setOptionToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteOption}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -10,6 +10,16 @@ import {
   DialogFooter,
 } from "../../../components/ui/dialog";
 import { Button } from "../../../components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../components/ui/alert-dialog";
 
 interface ImageLibraryModalProps {
   images: ImageLibraryItem[];
@@ -23,12 +33,21 @@ export const ImageLibraryModal: React.FC<ImageLibraryModalProps> = ({
   onClose,
 }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [imageToDelete, setImageToDelete] = useState<string | null>(null);
   const deleteImageMutation = useDeleteImage();
 
-  const handleDelete = async (e: React.MouseEvent, imageId: string) => {
+  const handleDelete = (e: React.MouseEvent, imageId: string) => {
     e.stopPropagation();
-    if (window.confirm("Are you sure you want to delete this image?")) {
-      await deleteImageMutation.mutateAsync(imageId);
+    setImageToDelete(imageId);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (imageToDelete) {
+      await deleteImageMutation.mutateAsync(imageToDelete);
+      setShowDeleteDialog(false);
+      setImageToDelete(null);
     }
   };
 
@@ -107,6 +126,24 @@ export const ImageLibraryModal: React.FC<ImageLibraryModalProps> = ({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Delete Image Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Image</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this image? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };
